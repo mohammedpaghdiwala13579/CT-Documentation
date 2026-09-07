@@ -1416,7 +1416,7 @@ export default function QuotationBuilder() {
       }
     }
     if (fmt.align) style.textAlign = fmt.align;
-    if (fmt.valign) style.verticalAlign = fmt.valign;
+    style.verticalAlign = fmt.valign || "middle";
     if (fmt.color) style.color = fmt.color;
     if (fmt.bgColor) style.backgroundColor = fmt.bgColor;
     if (fmt.indent) {
@@ -2463,7 +2463,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, -1)}
                                   onClick={() => handleCellClick(idx, -1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, -1)}
-                                  className={getCellClassName(idx, -1, `border border-black text-center font-mono text-[8pt] align-top py-0.5 px-0.5 whitespace-nowrap transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
+                                  className={getCellClassName(idx, -1, `border border-black text-center font-mono text-[8pt] align-middle py-1 px-0.5 whitespace-nowrap transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
                                 >
                                   {idx + 1}
                                 </td>
@@ -2483,7 +2483,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 0)}
                                   onClick={() => handleCellClick(idx, 0)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 0)}
-                                  className={getCellClassName(idx, 0, `border border-black text-left px-2 text-[8.5pt] align-top py-0.5 whitespace-normal transition-all cursor-text ${region ? "bg-amber-50/10" : ""}`)}
+                                  className={getCellClassName(idx, 0, `border border-black text-left px-2 text-[8.5pt] align-middle py-1 whitespace-normal transition-all cursor-text ${region ? "bg-amber-50/10" : ""}`)}
                                 >
                                   <RichTextCell
                                     value={row.desc}
@@ -2531,7 +2531,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 1)}
                                   onClick={() => handleCellClick(idx, 1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 1)}
-                                  className={getCellClassName(idx, 1, "border border-black text-center font-mono text-[8.5pt] align-top py-0.5 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 1, "border border-black text-center font-mono text-[8.5pt] align-middle py-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.qty}
@@ -2546,7 +2546,7 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={1}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-qty-${idx}`}
@@ -2571,7 +2571,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 2)}
                                   onClick={() => handleCellClick(idx, 2)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 2)}
-                                  className={getCellClassName(idx, 2, "border border-black text-center text-[8.5pt] align-top py-0.5 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 2, "border border-black text-center text-[8.5pt] align-middle py-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.unit}
@@ -2586,7 +2586,7 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={2}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-unit-${idx}`}
@@ -2611,7 +2611,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 3)}
                                   onClick={() => handleCellClick(idx, 3)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 3)}
-                                  className={getCellClassName(idx, 3, "border border-black text-center font-mono text-[8.5pt] align-top py-0.5 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 3, "border border-black text-center font-mono text-[8.5pt] align-middle py-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.price}
@@ -2626,7 +2626,7 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={3}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-price-${idx}`}
@@ -2650,7 +2650,7 @@ export default function QuotationBuilder() {
                                 onMouseUp={(e) => handleCellMouseUp(e, idx, 4)}
                                 onClick={() => handleCellClick(idx, 4)}
                                 onContextMenu={(e) => handleCellContextMenu(e, idx, 4)}
-                                className={getCellClassName(idx, 4, "border border-black text-right pr-2 font-mono text-[8.5pt] font-semibold text-slate-800 align-top py-0.5 transition-all cursor-pointer")}
+                                className={getCellClassName(idx, 4, "border border-black text-right pr-2 font-mono text-[8.5pt] font-semibold text-slate-800 align-middle py-1 transition-all cursor-pointer")}
                               >
                                 <div style={cellStyle} className="whitespace-normal break-all leading-tight text-[8.5pt]">
                                   {row.amount !== 0 ? row.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "0.00"}

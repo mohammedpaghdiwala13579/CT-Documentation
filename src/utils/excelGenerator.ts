@@ -515,8 +515,7 @@ const getBase64Image = async (url: string): Promise<{ base64: string; ext: strin
 
 /**
  * Calculates the optimal Description column width dynamically according to the longest sentence across the rows.
- * This makes the sheet compact when sentences are concise, while expanding appropriately so longer sentences
- * stay on 1 line or wrap cleanly without bloated heights.
+ * Sizing accommodates uppercase characters and cell padding so sentences fit on 1 line or wrap cleanly without clipping.
  */
 export const getOptimalDescColWidth = (
   rows: QuotationRow[],
@@ -535,20 +534,19 @@ export const getOptimalDescColWidth = (
 
   // If no items or very short descriptions
   if (maxChars <= 20) {
-    return isChallan ? 54 : 48;
+    return isChallan ? 56 : 50;
   }
 
   // Sizing according to sentence length:
-  // Each column width unit in Excel fits ~1.12 to 1.15 chars of 8.5pt Arial.
-  // Add a small 2-char buffer for cell padding.
-  const neededWidth = Math.ceil((maxChars + 2) / 1.12);
+  // Uppercase characters take ~1.0 column width unit in Arial, plus ~3 units for cell padding.
+  const neededWidth = Math.ceil(maxChars * 1.05 + 3);
 
   if (isChallan) {
-    // Challan has only 4 columns (SL, Desc, Qty, Unit), allowing Description to comfortably range from 52 to 68
-    return Math.min(68, Math.max(52, neededWidth));
+    // Challan has 4 columns (SL, Desc, Qty, Unit), allowing Description to comfortably range from 56 to 72
+    return Math.min(72, Math.max(56, neededWidth));
   } else {
-    // Quotation/Invoice has 6 columns, allowing Description to range from 46 to 62
-    return Math.min(62, Math.max(46, neededWidth));
+    // Quotation/Invoice has 6 columns, allowing Description to comfortably range from 50 to 65
+    return Math.min(65, Math.max(50, neededWidth));
   }
 };
 
@@ -569,10 +567,9 @@ export const calculateItemVisualLines = (
     ? (colWidthOrIsChallan ? 60 : 52)
     : colWidthOrIsChallan;
 
-  // In Excel, for font size 8.5pt Arial, each character is ~0.8 to 0.85 of a column width unit.
-  // That means a column width of W can hold approximately W * 1.12 characters of 8.5pt font before wrapping.
+  // In Excel with Arial 8.5pt font, accounting for uppercase letters and cell padding (~2.5 units):
   const scale = fontSize > 0 ? 8.5 / fontSize : 1;
-  const maxChars = Math.max(15, Math.floor(colWidth * 1.12 * scale));
+  const maxChars = Math.max(12, Math.floor((colWidth - 2.5) * 0.94 * scale));
 
   const paragraphs = plain.split(/\r?\n/);
   let totalLines = 0;
@@ -617,15 +614,19 @@ export const calculateItemVisualLines = (
 };
 
 /**
- * Computes tight, compact Excel row height (in points) strictly proportional to sentence lines and font size.
- * Ensures rows take minimal space (15.0-15.5pt for 1 line) while expanding dynamically if the sentence wraps.
+ * Calculates dynamic row height in points for item rows.
+ * Provides comfortable vertical centering clearance (at least 19.5pt) so upper ascenders
+ * and lower descenders of text never get cut off or hidden behind cell borders.
  */
 export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
-  const lineRate = Math.max(11.0, fontSize * 1.35);
+  const lineRate = Math.max(13.5, fontSize * 1.45 + 1.5);
   if (visualLines <= 1) {
-    return Math.max(15.0, Math.round(fontSize * 1.45 + 2.5));
+    // Single line: 19.5pt ensures the sentence sits cleanly in the center of the box with ample padding,
+    // so no upper ascenders or lower descenders get hidden or cut off by the border line.
+    return Math.max(19.5, Math.round(fontSize * 1.5 + 6.0));
   }
-  return Math.max(15.0, Math.round(visualLines * lineRate + 2.0));
+  // Multi-line: calculates comfortable height for all wrapped lines with vertical centering padding
+  return Math.max(19.5, Math.round(visualLines * lineRate + 6.0));
 };
 
 export interface ExcelPageChunk {
@@ -933,7 +934,7 @@ const buildDocumentWorksheet = (
       fgColor: { argb: addrParsed.highlightColor },
     };
   }
-  addrCell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
+  addrCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
   addrCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
   // Left Box outer borders (Rows 12 to 16)
@@ -1226,8 +1227,9 @@ const buildDocumentWorksheet = (
     }
 
     // 4. Alignments (horizontal, vertical, wrapText, indent, orientation)
+    // Always vertically center text in the box so no upper or lower part of the sentence gets hidden
     const alignObj: Partial<ExcelJS.Alignment> = {
-      vertical: fmt?.valign === "top" ? "top" : fmt?.valign === "middle" ? "middle" : fmt?.valign === "bottom" ? "bottom" : "middle",
+      vertical: "middle",
       horizontal: fmt?.align || defaultAlign,
       wrapText: true,
     };
@@ -1391,6 +1393,12 @@ const buildDocumentWorksheet = (
       ) {
         try {
           worksheet.mergeCells(excelStartRow, excelStartCol, excelEndRow, excelEndCol);
+          const masterCell = worksheet.getCell(excelStartRow, excelStartCol);
+          masterCell.alignment = {
+            ...masterCell.alignment,
+            vertical: "middle",
+            wrapText: true,
+          };
         } catch (err) {
           console.warn("Could not merge cells in Excel workbook:", region, err);
         }

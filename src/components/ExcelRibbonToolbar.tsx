@@ -964,7 +964,7 @@ export default function ExcelRibbonToolbar({
               id="btn-valign-middle"
               onClick={() => onApplyFormat({ valign: "middle" })}
               className={`h-[24px] w-[24px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
-                currentFormat.valign === "middle"
+                currentFormat.valign === "middle" || !currentFormat.valign
                   ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
                   : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
               }`}
@@ -981,7 +981,7 @@ export default function ExcelRibbonToolbar({
               id="btn-valign-bottom"
               onClick={() => onApplyFormat({ valign: "bottom" })}
               className={`h-[24px] w-[24px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
-                currentFormat.valign === "bottom" || !currentFormat.valign
+                currentFormat.valign === "bottom"
                   ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
                   : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
               }`}
