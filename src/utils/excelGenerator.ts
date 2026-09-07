@@ -514,24 +514,65 @@ const getBase64Image = async (url: string): Promise<{ base64: string; ext: strin
 };
 
 /**
+ * Calculates the optimal Description column width dynamically according to the longest sentence across the rows.
+ * This makes the sheet compact when sentences are concise, while expanding appropriately so longer sentences
+ * stay on 1 line or wrap cleanly without bloated heights.
+ */
+export const getOptimalDescColWidth = (
+  rows: QuotationRow[],
+  isChallan: boolean
+): number => {
+  let maxChars = 0;
+  for (const r of rows) {
+    if (!r.desc) continue;
+    const plain = htmlToPlainText(r.desc);
+    const lines = plain.split(/\r?\n/);
+    for (const l of lines) {
+      const len = l.trim().length;
+      if (len > maxChars) maxChars = len;
+    }
+  }
+
+  // If no items or very short descriptions
+  if (maxChars <= 20) {
+    return isChallan ? 54 : 48;
+  }
+
+  // Sizing according to sentence length:
+  // Each column width unit in Excel fits ~1.12 to 1.15 chars of 8.5pt Arial.
+  // Add a small 2-char buffer for cell padding.
+  const neededWidth = Math.ceil((maxChars + 2) / 1.12);
+
+  if (isChallan) {
+    // Challan has only 4 columns (SL, Desc, Qty, Unit), allowing Description to comfortably range from 52 to 68
+    return Math.min(68, Math.max(52, neededWidth));
+  } else {
+    // Quotation/Invoice has 6 columns, allowing Description to range from 46 to 62
+    return Math.min(62, Math.max(46, neededWidth));
+  }
+};
+
+/**
  * Calculates visual text lines in an item's cell based on column width, line breaks, and font size.
- * Accurately models word-wrapping so no lines of text are clipped in Excel.
+ * Accurately models word-wrapping so no lines of text are clipped, while preventing false line wrapping.
  */
 export const calculateItemVisualLines = (
   text: string,
-  isChallan: boolean,
+  colWidthOrIsChallan: number | boolean = 52,
   fontSize: number = 8.5
 ): number => {
   if (!text) return 1;
   const plain = htmlToPlainText(text).trim();
   if (!plain) return 1;
 
-  // Description column width in Excel:
-  // Challan: width 56 (~50 chars for 8.5pt font)
-  // Quotation/Invoice: width 50 (~44 chars for 8.5pt font)
-  const baseChars = isChallan ? 50 : 44;
+  const colWidth = typeof colWidthOrIsChallan === "boolean"
+    ? (colWidthOrIsChallan ? 60 : 52)
+    : colWidthOrIsChallan;
+
+  // In Excel, for font size 8.5pt Arial, each character is ~0.8 to 0.85 of a column width unit.
+  // That means a column width of W can hold approximately W * 1.12 characters of 8.5pt font before wrapping.
   const scale = fontSize > 0 ? 8.5 / fontSize : 1;
-  const maxChars = Math.max(15, Math.floor(baseChars * scale));
+  const maxChars = Math.max(15, Math.floor(colWidth * 1.12 * scale));
 
   const paragraphs = plain.split(/\r?\n/);
   let totalLines = 0;
@@ -576,15 +617,15 @@ export const calculateItemVisualLines = (
 };
 
 /**
- * Computes tight, compact Excel row height (in points) strictly proportional to text content and font size.
- * Ensures the cell size increases dynamically according to the text, so no text is ever clipped.
+ * Computes tight, compact Excel row height (in points) strictly proportional to sentence lines and font size.
+ * Ensures rows take minimal space (15.0-15.5pt for 1 line) while expanding dynamically if the sentence wraps.
  */
 export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
-  const lineHeight = Math.max(15.5, fontSize * 1.45 + 2.5);
+  const lineRate = Math.max(11.0, fontSize * 1.35);
   if (visualLines <= 1) {
-    return Math.max(18.0, lineHeight + 3.0);
+    return Math.max(15.0, Math.round(fontSize * 1.45 + 2.5));
   }
-  return Math.max(18.0, visualLines * lineHeight + 4.0);
+  return Math.max(15.0, Math.round(visualLines * lineRate + 2.0));
 };
 
 export interface ExcelPageChunk {
@@ -609,14 +650,15 @@ export const paginateRowsForExcel = (
 
   const isChallan = docType === "challan";
   const isInvoice = docType === "invoice";
+  const descColWidth = getOptimalDescColWidth(allRows, isChallan);
   
   // Maximum usable vertical height budget for items on A4 page (in points)
   // A4 = 842pt. Margins (36pt) -> 806pt usable.
-  // Header: Row 1 (22pt) + 10-row gap (140pt) + Metadata (80pt) + Table Header (20pt) = 262pt.
-  // Footer: Signatures + Notice = 90-100pt.
-  // Last page totals block: Invoice ~68pt, Quotation ~22pt, Challan 0pt.
-  const REGULAR_PAGE_BUDGET = isChallan ? 455 : 440;
-  const LAST_PAGE_BUDGET = isChallan ? 455 : isInvoice ? 370 : 415;
+  // Header: Row 1 (18pt) + 10-row gap (95pt) + Metadata (75pt) + Table Header (18pt) = 206pt.
+  // Footer: Signatures + Notice = 75-80pt.
+  // Last page totals block: Invoice ~66pt, Quotation ~20pt, Challan 0pt.
+  const REGULAR_PAGE_BUDGET = isChallan ? 520 : 500;
+  const LAST_PAGE_BUDGET = isChallan ? 520 : isInvoice ? 455 : 490;
 
   const chunks: ExcelPageChunk[] = [];
   let currentChunk: QuotationRow[] = [];
@@ -627,7 +669,7 @@ export const paginateRowsForExcel = (
     const row = allRows[i];
     const descFmt = cellFormats ? cellFormats[`${i}_0`] : undefined;
     const fontSize = descFmt?.fontSize || 8.5;
-    const lines = calculateItemVisualLines(row.desc, isChallan, fontSize);
+    const lines = calculateItemVisualLines(row.desc, descColWidth, fontSize);
     const rowHeight = getItemRowHeight(lines, fontSize);
 
     const isPotentialLastItem = i === allRows.length - 1;
@@ -659,7 +701,7 @@ export const paginateRowsForExcel = (
         const itemIdx = currentSl - 1 + splitIdx;
         const fmt = cellFormats ? cellFormats[`${itemIdx}_0`] : undefined;
         const fs = fmt?.fontSize || 8.5;
-        const lines = calculateItemVisualLines(currentChunk[splitIdx].desc, isChallan, fs);
+        const lines = calculateItemVisualLines(currentChunk[splitIdx].desc, descColWidth, fs);
         remHeight -= getItemRowHeight(lines, fs);
         splitIdx--;
       }
@@ -756,22 +798,25 @@ const buildDocumentWorksheet = (
   const totalCols = isChallan ? 4 : 6;
   const lastColLetter = isChallan ? "D" : "F";
 
-  // Set tight, well-proportioned column widths matching print document layout
+  const allRowsToMeasure = allDocumentRows.length > 0 ? allDocumentRows : pageRows;
+  const descColWidth = getOptimalDescColWidth(allRowsToMeasure, isChallan);
+
+  // Set compact, well-proportioned column widths matching print document layout and sentence lengths
   if (isChallan) {
     worksheet.columns = [
-      { key: "A", width: 7.0 },  // SL
-      { key: "B", width: 56.0 }, // Description
-      { key: "C", width: 16.0 }, // Qty / Right Box Label
-      { key: "D", width: 22.0 }, // Unit / Right Box Value
+      { key: "A", width: 5.5 },          // SL
+      { key: "B", width: descColWidth }, // Description - dynamically sized to sentence length!
+      { key: "C", width: 12.0 },         // Qty
+      { key: "D", width: 14.0 },         // Unit
     ];
   } else {
     worksheet.columns = [
-      { key: "A", width: 6.5 },  // SL
-      { key: "B", width: 50.0 }, // Description
-      { key: "C", width: 9.5 },  // Qty / Right Box Label
-      { key: "D", width: 10.5 }, // Unit / Right Box Label
-      { key: "E", width: 12.5 }, // Price / Right Box Value
-      { key: "F", width: 15.0 }, // Amount / Right Box Value
+      { key: "A", width: 5.5 },          // SL
+      { key: "B", width: descColWidth }, // Description - dynamically sized to sentence length!
+      { key: "C", width: 8.0 },          // Qty
+      { key: "D", width: 8.0 },          // Unit
+      { key: "E", width: 11.5 },         // Price
+      { key: "F", width: 13.5 },         // Amount
     ];
   }
 
@@ -783,7 +828,7 @@ const buildDocumentWorksheet = (
   // Replaces the business header to allow pre-printed letterhead pads.
   // Starting 11 cells/rows: Row 1 has the page format, Rows 2 to 11 are left blank.
   // =========================================================================
-  worksheet.getRow(1).height = 22;
+  worksheet.getRow(1).height = 18;
   worksheet.mergeCells(`A1:${lastColLetter}1`);
   const titleCell = worksheet.getCell("A1");
   const baseTitle = isChallan
@@ -797,12 +842,12 @@ const buildDocumentWorksheet = (
     : baseTitle;
 
   titleCell.value = pageFormatTitle;
-  titleCell.font = { name: "Arial", size: 12.5, bold: true, color: { argb: "000000" } };
+  titleCell.font = { name: "Arial", size: 11.0, bold: true, color: { argb: "000000" } };
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
 
-  // 10 Blank Rows Gap (Rows 2 to 11) for pre-printed letterhead business header
+  // 10 Blank Rows Gap (Rows 2 to 11) for pre-printed letterhead business header (compact 9.5pt each)
   for (let r = 2; r <= 11; r++) {
-    worksheet.getRow(r).height = 14;
+    worksheet.getRow(r).height = 9.5;
   }
 
   // =========================================================================
@@ -810,13 +855,13 @@ const buildDocumentWorksheet = (
   // =========================================================================
   
   // Dynamic height calculation for Messers and Address so cell size expands to fit content
-  const messersLines = calculateItemVisualLines(messers || "", isChallan, 8.5);
-  worksheet.getRow(12).height = 14.5;
-  worksheet.getRow(13).height = Math.max(16.5, messersLines * 15.5 + 3);
-  worksheet.getRow(14).height = 14.5;
+  const messersLines = calculateItemVisualLines(messers || "", isChallan ? 40 : 35, 8.5);
+  worksheet.getRow(12).height = 13.5;
+  worksheet.getRow(13).height = Math.max(15.5, messersLines * 13.5 + 2);
+  worksheet.getRow(14).height = 13.5;
 
-  const addrLines = calculateItemVisualLines(address || "", isChallan, 8.0);
-  const neededAddrHeight = Math.max(32, addrLines * 15.5 + 4);
+  const addrLines = calculateItemVisualLines(address || "", isChallan ? 40 : 35, 8.0);
+  const neededAddrHeight = Math.max(26, addrLines * 13 + 2);
   worksheet.getRow(15).height = Math.ceil(neededAddrHeight / 2);
   worksheet.getRow(16).height = Math.floor(neededAddrHeight / 2);
 
@@ -1078,7 +1123,7 @@ const buildDocumentWorksheet = (
   // 3. MAIN TABLE HEADER (ROW 17) - EXACT PRINT FORMAT PARITY
   // =========================================================================
   const headerRow = worksheet.getRow(17);
-  headerRow.height = 20;
+  headerRow.height = 18;
 
   const colHeaders = isChallan
     ? ["SL", "Description of Marine Items / Spare Parts", "Qty", "Unit"]
@@ -1181,7 +1226,7 @@ const buildDocumentWorksheet = (
 
     // 4. Alignments (horizontal, vertical, wrapText, indent, orientation)
     const alignObj: Partial<ExcelJS.Alignment> = {
-      vertical: fmt?.valign === "top" ? "top" : fmt?.valign === "middle" ? "middle" : fmt?.valign === "bottom" ? "bottom" : (cell.alignment?.vertical || "top"),
+      vertical: fmt?.valign === "top" ? "top" : fmt?.valign === "middle" ? "middle" : fmt?.valign === "bottom" ? "bottom" : "middle",
       horizontal: fmt?.align || defaultAlign,
       wrapText: true,
     };
@@ -1256,14 +1301,14 @@ const buildDocumentWorksheet = (
       priceFmt?.fontSize || 8.5
     );
 
-    const descLines = calculateItemVisualLines(rawDesc, isChallan, descFontSize);
-    const qtyLines = calculateItemVisualLines(rawQty, isChallan, qtyFmt?.fontSize || 8.5);
-    const unitLines = calculateItemVisualLines(rawUnit, isChallan, unitFmt?.fontSize || 8.5);
-    const priceLines = calculateItemVisualLines(rawPrice, isChallan, priceFmt?.fontSize || 8.5);
+    const descLines = calculateItemVisualLines(rawDesc, descColWidth, descFontSize);
+    const qtyLines = calculateItemVisualLines(rawQty, isChallan ? 12.0 : 8.0, qtyFmt?.fontSize || 8.5);
+    const unitLines = calculateItemVisualLines(rawUnit, isChallan ? 14.0 : 8.0, unitFmt?.fontSize || 8.5);
+    const priceLines = calculateItemVisualLines(rawPrice, 11.5, priceFmt?.fontSize || 8.5);
 
     const maxVisualLines = Math.max(descLines, qtyLines, unitLines, priceLines, 1);
 
-    // Dynamic row height that scales proportional to text lines and font size
+    // Dynamic row height strictly proportional to sentence lines and font size
     const dynamicRowHeight = getItemRowHeight(maxVisualLines, maxFontSize);
     r.height = dynamicRowHeight;
 
@@ -1360,7 +1405,7 @@ const buildDocumentWorksheet = (
     const numTotalRows = isInvoice ? 4 : 1;
 
     for (let rOffset = 0; rOffset < numTotalRows; rOffset++) {
-      worksheet.getRow(totalRow + rOffset).height = 18;
+      worksheet.getRow(totalRow + rOffset).height = 16.5;
     }
 
     if (isInvoice) {
@@ -1388,10 +1433,12 @@ const buildDocumentWorksheet = (
       fgColor: { argb: "FFF8FAFC" },
     };
 
-    // If quotation, expand row height if words are long
+    // If quotation, adjust row height according to length of words sentence
     if (!isInvoice) {
-      const wordLines = Math.max(1, Math.ceil(wordsStr.length / 45));
-      worksheet.getRow(totalRow).height = Math.max(22, wordLines * 16 + 4);
+      const mergedWordWidth = 5.5 + descColWidth + 8.0 + 8.0;
+      const wordCharsPerLine = Math.floor(mergedWordWidth * 1.15);
+      const wordLines = Math.max(1, Math.ceil(wordsStr.length / wordCharsPerLine));
+      worksheet.getRow(totalRow).height = wordLines <= 1 ? 17 : Math.max(17, wordLines * 13.5 + 3);
     }
 
     for (let rOffset = 0; rOffset < numTotalRows; rOffset++) {
@@ -1515,12 +1562,12 @@ const buildDocumentWorksheet = (
   // For Challan: ONLY Receiver's Signature is rendered.
   // For Quotation/Invoice: Both Receiver's and Authorized Signatures + Stamp are rendered.
   // =========================================================================
-  worksheet.getRow(currentRowNum).height = 10;
+  worksheet.getRow(currentRowNum).height = 8;
   currentRowNum++;
 
   if (!isChallan) {
     // "For Comilla Traders" row on right
-    worksheet.getRow(currentRowNum).height = 15;
+    worksheet.getRow(currentRowNum).height = 14;
     worksheet.mergeCells(`E${currentRowNum}:F${currentRowNum}`);
     const authTitle = worksheet.getCell(`E${currentRowNum}`);
     authTitle.value = "For Comilla Traders";
@@ -1530,9 +1577,9 @@ const buildDocumentWorksheet = (
   }
 
   // Room for signatures and stamp
-  worksheet.getRow(currentRowNum).height = 42;
+  worksheet.getRow(currentRowNum).height = 36;
   const sigRow = currentRowNum + 1;
-  worksheet.getRow(sigRow).height = 18;
+  worksheet.getRow(sigRow).height = 16;
 
   // Receiver's Signature (rendered on every page for all formats)
   worksheet.mergeCells(`A${sigRow}:B${sigRow}`);
@@ -1554,8 +1601,8 @@ const buildDocumentWorksheet = (
     // Centered Official Stamp positioned over Authorized Signature
     if (stampId !== null) {
       worksheet.addImage(stampId, {
-        tl: { col: 4.64, row: sigRow - 2.25 },
-        ext: { width: 88, height: 88 },
+        tl: { col: 4.64, row: sigRow - 2.15 },
+        ext: { width: 84, height: 84 },
       });
     }
   }
@@ -1564,8 +1611,8 @@ const buildDocumentWorksheet = (
   // 8. FOOTER DISCLAIMER NOTICE - MATCHING PRINT TFOOT
   // =========================================================================
   const noticeRow = sigRow + 2;
-  worksheet.getRow(sigRow + 1).height = 4;
-  worksheet.getRow(noticeRow).height = 14;
+  worksheet.getRow(sigRow + 1).height = 3;
+  worksheet.getRow(noticeRow).height = 13;
   worksheet.mergeCells(`A${noticeRow}:${lastColLetter}${noticeRow}`);
   const noticeCell = worksheet.getCell(`A${noticeRow}`);
   noticeCell.value = "ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.";
