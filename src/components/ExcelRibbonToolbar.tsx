@@ -11,7 +11,6 @@ import {
   FileSpreadsheet, 
   Download, 
   Printer, 
-  FileDown,
   X 
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
@@ -434,21 +433,6 @@ export default function ExcelRibbonToolbar({
             <Printer className="h-3.5 w-3.5 text-indigo-300" />
             <span>PRINT / SAVE PDF</span>
           </button>
-
-          {/* Direct Download PDF Button */}
-          {onDownloadPDF && (
-            <button
-              type="button"
-              id="btn-download-pdf"
-              onClick={onDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="px-2.5 py-1 bg-[#2e1065]/60 hover:bg-[#3b0764] active:scale-95 text-purple-200 hover:text-white border border-purple-500/50 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1 disabled:opacity-60"
-              title="Download formatted PDF document directly"
-            >
-              <FileDown className="h-3 w-3 text-purple-300" />
-              <span>{isGeneratingPDF ? "GENERATING PDF..." : "DOWNLOAD PDF"}</span>
-            </button>
-          )}
         </div>
       </div>
 
