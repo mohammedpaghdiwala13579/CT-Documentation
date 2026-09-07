@@ -5,19 +5,29 @@ import { cleanCellText } from "./tsvParser";
 import { parseNumericInput, stripHtml } from "./textFormatter";
 
 /**
- * Converts CSS color (hex, rgb, rgba, named colors) to 8-character ARGB for ExcelJS
+ * Converts CSS color (hex, rgb, rgba, hsl, named colors) to 8-character ARGB for ExcelJS.
+ * Supports modern and legacy CSS color syntax, with DOM fallback in browser.
  */
 export function colorToArgb(color: string | null | undefined): string | null {
   if (!color) return null;
   const c = color.trim().toLowerCase();
   if (c === "transparent" || c === "none" || c === "initial" || c === "inherit" || c === "") return null;
 
-  // Hex format #RGB, #RRGGBB, #RRGGBBAA
+  // Hex format #RGB, #RGBA, #RRGGBB, #RRGGBBAA
   if (c.startsWith("#")) {
     const hex = c.slice(1);
     if (hex.length === 3) {
       return (
         "FF" +
+        hex[0] + hex[0] +
+        hex[1] + hex[1] +
+        hex[2] + hex[2]
+      ).toUpperCase();
+    }
+    if (hex.length === 4) {
+      const a = hex[3] + hex[3];
+      return (
+        a +
         hex[0] + hex[0] +
         hex[1] + hex[1] +
         hex[2] + hex[2]
@@ -31,15 +41,15 @@ export function colorToArgb(color: string | null | undefined): string | null {
     }
   }
 
-  // rgb(r, g, b) or rgba(r, g, b, a)
-  const rgbMatch = c.match(/^rgba?\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)(?:\s*,\s*([0-9.]+))?\s*\)$/);
+  // rgb(r, g, b) or rgba(r, g, b, a) - legacy and modern space/slash syntax
+  const rgbMatch = c.match(/^rgba?\(\s*([0-9]+)\s*[, ]\s*([0-9]+)\s*[, ]\s*([0-9]+)(?:\s*[,/]\s*([0-9.]+))?\s*\)$/);
   if (rgbMatch) {
     const r = parseInt(rgbMatch[1], 10);
     const g = parseInt(rgbMatch[2], 10);
     const b = parseInt(rgbMatch[3], 10);
     const a = rgbMatch[4] !== undefined ? parseFloat(rgbMatch[4]) : 1;
     if (a <= 0) return null;
-    const aHex = Math.round(a * 255).toString(16).padStart(2, "0");
+    const aHex = Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, "0");
     const rHex = Math.max(0, Math.min(255, r)).toString(16).padStart(2, "0");
     const gHex = Math.max(0, Math.min(255, g)).toString(16).padStart(2, "0");
     const bHex = Math.max(0, Math.min(255, b)).toString(16).padStart(2, "0");
@@ -56,11 +66,23 @@ export function colorToArgb(color: string | null | undefined): string | null {
     amber: "FFF59E0B",
     gray: "FF808080",
     grey: "FF808080",
+    darkgray: "FFA9A9A9",
+    darkgrey: "FFA9A9A9",
+    lightgray: "FFD3D3D3",
+    lightgrey: "FFD3D3D3",
     slate: "FF64748B",
     orange: "FFF97316",
     purple: "FFA855F7",
     teal: "FF14B8A6",
     cyan: "FF06B6D4",
+    gold: "FFFFD700",
+    navy: "FF000080",
+    maroon: "FF800000",
+    olive: "FF808000",
+    lime: "FF00FF00",
+    aqua: "FF00FFFF",
+    fuchsia: "FFFF00FF",
+    silver: "FFC0C0C0",
   };
   if (NAMED_COLORS[c]) {
     return NAMED_COLORS[c];
@@ -73,13 +95,36 @@ export function colorToArgb(color: string | null | undefined): string | null {
     return c.toUpperCase();
   }
 
+  // Browser DOM fallback for any valid CSS color string (e.g. HSL or Tailwind palette)
+  if (typeof document !== "undefined") {
+    try {
+      const dummy = document.createElement("div");
+      dummy.style.color = color;
+      const comp = dummy.style.color;
+      if (comp && comp !== color) {
+        const m = comp.match(/^rgba?\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)(?:\s*,\s*([0-9.]+))?\s*\)$/);
+        if (m) {
+          const r = parseInt(m[1], 10);
+          const g = parseInt(m[2], 10);
+          const b = parseInt(m[3], 10);
+          const a = m[4] !== undefined ? parseFloat(m[4]) : 1;
+          const aHex = Math.round(a * 255).toString(16).padStart(2, "0");
+          const rHex = Math.max(0, Math.min(255, r)).toString(16).padStart(2, "0");
+          const gHex = Math.max(0, Math.min(255, g)).toString(16).padStart(2, "0");
+          const bHex = Math.max(0, Math.min(255, b)).toString(16).padStart(2, "0");
+          return (aHex + rHex + gHex + bHex).toUpperCase();
+        }
+      }
+    } catch (e) {}
+  }
+
   return null;
 }
 
 export type ExcelBorderDef = Partial<ExcelJS.Border>;
 
 /**
- * Parses CSS border string (e.g. "1px solid black", "3px double black", "none") into ExcelJS Border
+ * Parses CSS border string (e.g. "1px solid black", "2px medium black", "none") into ExcelJS Border
  */
 export function parseBorderSide(
   borderStr?: string,
@@ -127,16 +172,21 @@ export function parseBorderSide(
 
 /**
  * Converts HTML into plain text while preserving intentional line breaks (<br>, </p>, </div>)
+ * and unescaping HTML entities cleanly.
  */
 export const htmlToPlainText = (html: string): string => {
   if (!html) return "";
-  if (!html.includes("<") && !html.includes("&")) return html;
   const replaced = html
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n")
     .replace(/<\/div>/gi, "\n")
     .replace(/<\/tr>/gi, "\n")
-    .replace(/&nbsp;/gi, " ");
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'");
 
   if (typeof DOMParser !== "undefined") {
     try {
@@ -177,8 +227,8 @@ export function parseHtmlToExcelRuns(
     return { richText: [], plainText: "", hasFormatting: false };
   }
 
-  // If no HTML tags at all, return standard plain text
-  if (!htmlOrText.includes("<")) {
+  // If no HTML tags and no entities, return single run with base font
+  if (!htmlOrText.includes("<") && !htmlOrText.includes("&")) {
     return {
       richText: [
         {
@@ -414,11 +464,11 @@ export function parseHtmlToExcelRuns(
   const richText: ExcelJS.RichText[] = consolidatedRuns.map((r) => {
     const font: Partial<ExcelJS.Font> = {
       name: r.style.fontFamily || baseFont.name || "Arial",
-      size: r.style.size !== undefined ? r.style.size : (baseFont.size || 8),
-      bold: r.style.bold !== undefined ? r.style.bold : baseFont.bold,
-      italic: r.style.italic !== undefined ? r.style.italic : baseFont.italic,
-      underline: r.style.underline !== undefined ? (r.style.underline === "double" ? "double" : !!r.style.underline) : baseFont.underline,
-      strike: r.style.strike !== undefined ? r.style.strike : baseFont.strike,
+      size: r.style.size !== undefined ? r.style.size : (baseFont.size || 8.5),
+      bold: r.style.bold !== undefined ? r.style.bold : (baseFont.bold || false),
+      italic: r.style.italic !== undefined ? r.style.italic : (baseFont.italic || false),
+      underline: r.style.underline !== undefined ? (r.style.underline === "double" ? "double" : !!r.style.underline) : (baseFont.underline || false),
+      strike: r.style.strike !== undefined ? r.style.strike : (baseFont.strike || false),
       color: r.style.color ? { argb: r.style.color } : (baseFont.color || { argb: "FF000000" }),
     };
 
@@ -464,35 +514,77 @@ const getBase64Image = async (url: string): Promise<{ base64: string; ext: strin
 };
 
 /**
- * Calculates visual text lines in an item's description based on column width & line breaks.
+ * Calculates visual text lines in an item's cell based on column width, line breaks, and font size.
+ * Accurately models word-wrapping so no lines of text are clipped in Excel.
  */
-export const calculateItemVisualLines = (desc: string, isChallan: boolean): number => {
-  if (!desc) return 1;
-  const plain = htmlToPlainText(desc).trim();
+export const calculateItemVisualLines = (
+  text: string,
+  isChallan: boolean,
+  fontSize: number = 8.5
+): number => {
+  if (!text) return 1;
+  const plain = htmlToPlainText(text).trim();
   if (!plain) return 1;
-  const maxCharsPerLine = isChallan ? 54 : 46;
-  const parts = plain.split(/\r?\n/);
-  let lines = 0;
-  for (const part of parts) {
-    const trimmed = part.trim();
-    if (trimmed.length === 0) {
-      lines += 1;
-    } else {
-      lines += Math.max(1, Math.ceil(trimmed.length / maxCharsPerLine));
+
+  // Description column width in Excel:
+  // Challan: width 56 (~50 chars for 8.5pt font)
+  // Quotation/Invoice: width 50 (~44 chars for 8.5pt font)
+  const baseChars = isChallan ? 50 : 44;
+  const scale = fontSize > 0 ? 8.5 / fontSize : 1;
+  const maxChars = Math.max(15, Math.floor(baseChars * scale));
+
+  const paragraphs = plain.split(/\r?\n/);
+  let totalLines = 0;
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    if (!trimmed) {
+      totalLines += 1;
+      continue;
     }
+
+    // Wrap words within maxChars
+    const words = trimmed.split(/\s+/);
+    let currentLineLen = 0;
+    let paraLines = 1;
+
+    for (const w of words) {
+      if (w.length > maxChars) {
+        // Break long unbreakable word across lines
+        if (currentLineLen > 0) {
+          paraLines += 1;
+          currentLineLen = 0;
+        }
+        const brokenLines = Math.ceil(w.length / maxChars);
+        paraLines += brokenLines - 1;
+        currentLineLen = w.length % maxChars;
+        if (currentLineLen === 0 && brokenLines > 1) currentLineLen = maxChars;
+      } else if (currentLineLen === 0) {
+        currentLineLen = w.length;
+      } else if (currentLineLen + 1 + w.length <= maxChars) {
+        currentLineLen += 1 + w.length;
+      } else {
+        paraLines += 1;
+        currentLineLen = w.length;
+      }
+    }
+
+    totalLines += paraLines;
   }
-  return Math.max(1, lines);
+
+  return Math.max(1, totalLines);
 };
 
 /**
- * Computes tight, compact Excel row height (in points) strictly proportional to text content.
- * Prevents overdisplaying and ensures text is fully visible with no clipping or unnecessary white space.
+ * Computes tight, compact Excel row height (in points) strictly proportional to text content and font size.
+ * Ensures the cell size increases dynamically according to the text, so no text is ever clipped.
  */
-export const getItemRowHeight = (visualLines: number): number => {
-  if (visualLines <= 1) return 16.0;
-  if (visualLines === 2) return 25.5;
-  if (visualLines === 3) return 35.0;
-  return 16.0 + (visualLines - 1) * 9.5;
+export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
+  const lineHeight = Math.max(15.5, fontSize * 1.45 + 2.5);
+  if (visualLines <= 1) {
+    return Math.max(18.0, lineHeight + 3.0);
+  }
+  return Math.max(18.0, visualLines * lineHeight + 4.0);
 };
 
 export interface ExcelPageChunk {
@@ -508,7 +600,8 @@ export interface ExcelPageChunk {
  */
 export const paginateRowsForExcel = (
   allRows: QuotationRow[],
-  docType: "quotation" | "challan" | "invoice"
+  docType: "quotation" | "challan" | "invoice",
+  cellFormats?: CellFormatMap
 ): ExcelPageChunk[] => {
   if (allRows.length === 0) {
     return [{ rows: [], startSlIndex: 1, isLastPage: true }];
@@ -518,10 +611,12 @@ export const paginateRowsForExcel = (
   const isInvoice = docType === "invoice";
   
   // Maximum usable vertical height budget for items on A4 page (in points)
-  // Header: Row 1 (22pt) + 10-row gap (140pt) + Metadata (67.5pt) + Table Header (18pt) = 247.5pt.
-  // Last page: Available accounts for Totals and Signature/Stamp blocks.
-  const REGULAR_PAGE_BUDGET = 515; 
-  const LAST_PAGE_BUDGET = isChallan ? 515 : isInvoice ? 405 : 445;
+  // A4 = 842pt. Margins (36pt) -> 806pt usable.
+  // Header: Row 1 (22pt) + 10-row gap (140pt) + Metadata (80pt) + Table Header (20pt) = 262pt.
+  // Footer: Signatures + Notice = 90-100pt.
+  // Last page totals block: Invoice ~68pt, Quotation ~22pt, Challan 0pt.
+  const REGULAR_PAGE_BUDGET = isChallan ? 455 : 440;
+  const LAST_PAGE_BUDGET = isChallan ? 455 : isInvoice ? 370 : 415;
 
   const chunks: ExcelPageChunk[] = [];
   let currentChunk: QuotationRow[] = [];
@@ -530,8 +625,10 @@ export const paginateRowsForExcel = (
 
   for (let i = 0; i < allRows.length; i++) {
     const row = allRows[i];
-    const lines = calculateItemVisualLines(row.desc, isChallan);
-    const rowHeight = getItemRowHeight(lines);
+    const descFmt = cellFormats ? cellFormats[`${i}_0`] : undefined;
+    const fontSize = descFmt?.fontSize || 8.5;
+    const lines = calculateItemVisualLines(row.desc, isChallan, fontSize);
+    const rowHeight = getItemRowHeight(lines, fontSize);
 
     const isPotentialLastItem = i === allRows.length - 1;
     const budgetForCurrentPage = isPotentialLastItem ? LAST_PAGE_BUDGET : REGULAR_PAGE_BUDGET;
@@ -559,8 +656,11 @@ export const paginateRowsForExcel = (
       let splitIdx = currentChunk.length - 1;
       let remHeight = currentHeight;
       while (splitIdx > 0 && remHeight > LAST_PAGE_BUDGET) {
-        const lines = calculateItemVisualLines(currentChunk[splitIdx].desc, isChallan);
-        remHeight -= getItemRowHeight(lines);
+        const itemIdx = currentSl - 1 + splitIdx;
+        const fmt = cellFormats ? cellFormats[`${itemIdx}_0`] : undefined;
+        const fs = fmt?.fontSize || 8.5;
+        const lines = calculateItemVisualLines(currentChunk[splitIdx].desc, isChallan, fs);
+        remHeight -= getItemRowHeight(lines, fs);
         splitIdx--;
       }
 
@@ -599,8 +699,12 @@ export const paginateRowsForExcel = (
 };
 
 /**
- * Builds a compact, space-maximized worksheet matching the exact visual document.
- * Items use space as per text only, no overdisplaying of empty rows, centered stamp, and clean unclipped documents.
+ * Builds a compact, space-maximized worksheet matching the exact print format.
+ * - Leaves the starting 11 cells/rows at the top instead of the business header for pre-printed letterhead.
+ * - Cell A1 contains the page format (e.g. "QUOTATION", "DELIVERY CHALLAN", "BILL / INVOICE").
+ * - Everything is aligned exactly with the print format.
+ * - Cell sizes increase dynamically according to text content.
+ * - Formatting such as highlight, bold, color, fonts, and borders are fully applied.
  */
 const buildDocumentWorksheet = (
   workbook: ExcelJS.Workbook,
@@ -642,7 +746,7 @@ const buildDocumentWorksheet = (
       footer: 0.1,
     },
     horizontalCentered: true,
-    showGridLines: false, // Print with clean sharp borders
+    showGridLines: false, // Clean sharp borders
   };
 
   (worksheet.properties as any).pageSetUpPr = { fitToPage: true };
@@ -652,52 +756,81 @@ const buildDocumentWorksheet = (
   const totalCols = isChallan ? 4 : 6;
   const lastColLetter = isChallan ? "D" : "F";
 
-  // Set tight, well-proportioned column widths
+  // Set tight, well-proportioned column widths matching print document layout
   if (isChallan) {
     worksheet.columns = [
-      { key: "A", width: 7.0 },  // SL / Logo
-      { key: "B", width: 56.0 }, // Description / Company info
+      { key: "A", width: 7.0 },  // SL
+      { key: "B", width: 56.0 }, // Description
       { key: "C", width: 16.0 }, // Qty / Right Box Label
       { key: "D", width: 22.0 }, // Unit / Right Box Value
     ];
   } else {
     worksheet.columns = [
-      { key: "A", width: 6.5 },  // SL / Logo
-      { key: "B", width: 49.0 }, // Description / Company info
-      { key: "C", width: 9.0 },  // Qty / Right Box Label
+      { key: "A", width: 6.5 },  // SL
+      { key: "B", width: 50.0 }, // Description
+      { key: "C", width: 9.5 },  // Qty / Right Box Label
       { key: "D", width: 10.5 }, // Unit / Right Box Label
-      { key: "E", width: 12.0 }, // Price / Right Box Value
-      { key: "F", width: 14.5 }, // Amount / Right Box Value
+      { key: "E", width: 12.5 }, // Price / Right Box Value
+      { key: "F", width: 15.0 }, // Amount / Right Box Value
     ];
   }
 
-  // Standard Excel grid lines enabled for easy editing
+  // Standard Excel grid view
   worksheet.views = [{ showGridLines: true }];
 
-  // 1. Format Title in Row 1 (Center of page)
+  // =========================================================================
+  // 1. FORMAT TITLE IN ROW 1 (FIRST CELL A1), WITH 10 BLANK ROWS GAP (ROWS 2-11)
+  // Replaces the business header to allow pre-printed letterhead pads.
+  // Starting 11 cells/rows: Row 1 has the page format, Rows 2 to 11 are left blank.
+  // =========================================================================
   worksheet.getRow(1).height = 22;
   worksheet.mergeCells(`A1:${lastColLetter}1`);
   const titleCell = worksheet.getCell("A1");
   const baseTitle = isChallan
     ? "DELIVERY CHALLAN"
     : isInvoice
-    ? "INVOICE"
+    ? "BILL / INVOICE"
     : "QUOTATION";
 
-  titleCell.value = baseTitle;
-  titleCell.font = { name: "Arial", size: 12, bold: true, color: { argb: "000000" } };
+  const pageFormatTitle = totalPages > 1
+    ? `${baseTitle} (PAGE ${pageIndex} OF ${totalPages})`
+    : baseTitle;
+
+  titleCell.value = pageFormatTitle;
+  titleCell.font = { name: "Arial", size: 12.5, bold: true, color: { argb: "000000" } };
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
 
-  // 2. 10 Blank Rows Gap (Rows 2 to 11) after format name
+  // 10 Blank Rows Gap (Rows 2 to 11) for pre-printed letterhead business header
   for (let r = 2; r <= 11; r++) {
     worksheet.getRow(r).height = 14;
   }
 
-  // 3. Metadata Boxes (Rows 12 to 16 - Compact, tightly placed)
+  // =========================================================================
+  // 2. METADATA BOXES (ROWS 12 TO 16) - EXACT PRINT FORMAT ALIGNMENT
+  // =========================================================================
+  
+  // Dynamic height calculation for Messers and Address so cell size expands to fit content
+  const messersLines = calculateItemVisualLines(messers || "", isChallan, 8.5);
+  worksheet.getRow(12).height = 14.5;
+  worksheet.getRow(13).height = Math.max(16.5, messersLines * 15.5 + 3);
+  worksheet.getRow(14).height = 14.5;
+
+  const addrLines = calculateItemVisualLines(address || "", isChallan, 8.0);
+  const neededAddrHeight = Math.max(32, addrLines * 15.5 + 4);
+  worksheet.getRow(15).height = Math.ceil(neededAddrHeight / 2);
+  worksheet.getRow(16).height = Math.floor(neededAddrHeight / 2);
+
   // Left Box: Messers & Address
   worksheet.mergeCells("A12:B12");
-  worksheet.getCell("A12").value = "MESSERS:";
-  worksheet.getCell("A12").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+  const messersLbl = worksheet.getCell("A12");
+  messersLbl.value = "MESSERS:";
+  messersLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+  messersLbl.alignment = { vertical: "middle", horizontal: "left" };
+  messersLbl.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF8FAFC" },
+  };
 
   worksheet.mergeCells("A13:B13");
   const messersCell = worksheet.getCell("A13");
@@ -720,24 +853,32 @@ const buildDocumentWorksheet = (
       fgColor: { argb: messersParsed.highlightColor },
     };
   }
+  messersCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
   messersCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
   worksheet.mergeCells("A14:B14");
-  worksheet.getCell("A14").value = "ADDRESS:";
-  worksheet.getCell("A14").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+  const addrLbl = worksheet.getCell("A14");
+  addrLbl.value = "ADDRESS:";
+  addrLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+  addrLbl.alignment = { vertical: "middle", horizontal: "left" };
+  addrLbl.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF8FAFC" },
+  };
 
   worksheet.mergeCells("A15:B16");
   const addrCell = worksheet.getCell("A15");
   const addrParsed = parseHtmlToExcelRuns(address || "", {
     name: "Arial",
-    size: 8,
+    size: 8.0,
     color: { argb: "FF000000" },
   });
   if (addrParsed.hasFormatting && addrParsed.richText.length > 0) {
     addrCell.value = { richText: addrParsed.richText };
   } else {
     addrCell.value = addrParsed.plainText;
-    addrCell.font = { name: "Arial", size: 8, color: { argb: "FF000000" } };
+    addrCell.font = { name: "Arial", size: 8.0, color: { argb: "FF000000" } };
   }
   if (addrParsed.highlightColor) {
     addrCell.fill = {
@@ -746,12 +887,11 @@ const buildDocumentWorksheet = (
       fgColor: { argb: addrParsed.highlightColor },
     };
   }
-  addrCell.alignment = { vertical: "top", wrapText: true };
+  addrCell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
   addrCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
   // Left Box outer borders (Rows 12 to 16)
   for (let r = 12; r <= 16; r++) {
-    worksheet.getRow(r).height = 13.5;
     for (let c = 1; c <= 2; c++) {
       const cell = worksheet.getCell(r, c);
       const cellBorders: any = { ...cell.border };
@@ -763,80 +903,120 @@ const buildDocumentWorksheet = (
     }
   }
 
-  // Right Box (Rows 12 to 16) - DATE is strictly placed at the TOP in every format
+  // Right Box (Rows 12 to 16) - DATE is strictly placed at the TOP
   if (isInvoice) {
     // Row 12 (TOP): DATE
     worksheet.mergeCells("C12:D12");
-    worksheet.getCell("C12").value = "DATE:";
-    worksheet.getCell("C12").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const dLbl = worksheet.getCell("C12");
+    dLbl.value = "DATE:";
+    dLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    dLbl.alignment = { vertical: "middle", horizontal: "left" };
+    dLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E12:F12");
     const dVal = worksheet.getCell("E12");
     dVal.value = dateVal || "";
-    dVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    dVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    dVal.alignment = { vertical: "middle", horizontal: "left" };
     dVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 13: INVOICE NO
     worksheet.mergeCells("C13:D13");
-    worksheet.getCell("C13").value = "INVOICE NO.:";
-    worksheet.getCell("C13").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const iLbl = worksheet.getCell("C13");
+    iLbl.value = "INVOICE NO.:";
+    iLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    iLbl.alignment = { vertical: "middle", horizontal: "left" };
+    iLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E13:F13");
     const iVal = worksheet.getCell("E13");
     iVal.value = invoiceNo || "";
-    iVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    iVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    iVal.alignment = { vertical: "middle", horizontal: "left" };
     iVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 14: CHALLAN NO
     worksheet.mergeCells("C14:D14");
-    worksheet.getCell("C14").value = "CHALLAN NO.:";
-    worksheet.getCell("C14").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const cLbl = worksheet.getCell("C14");
+    cLbl.value = "CHALLAN NO.:";
+    cLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    cLbl.alignment = { vertical: "middle", horizontal: "left" };
+    cLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E14:F14");
     const cVal = worksheet.getCell("E14");
     cVal.value = challanNo || "";
-    cVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    cVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    cVal.alignment = { vertical: "middle", horizontal: "left" };
     cVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 15: REQUISITION NO
     worksheet.mergeCells("C15:D15");
-    worksheet.getCell("C15").value = "REQUISITION NO.:";
-    worksheet.getCell("C15").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const rLbl = worksheet.getCell("C15");
+    rLbl.value = "REQUISITION NO.:";
+    rLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    rLbl.alignment = { vertical: "middle", horizontal: "left" };
+    rLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E15:F15");
     const rVal = worksheet.getCell("E15");
     rVal.value = requisitionNo || "";
-    rVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 16: P.O. NUMBER
     worksheet.mergeCells("C16:D16");
-    worksheet.getCell("C16").value = "P.O. NUMBER:";
-    worksheet.getCell("C16").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const pLbl = worksheet.getCell("C16");
+    pLbl.value = "P.O. NUMBER:";
+    pLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    pLbl.alignment = { vertical: "middle", horizontal: "left" };
+    pLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E16:F16");
     const pVal = worksheet.getCell("E16");
     pVal.value = poNumber || "";
-    pVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    pVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    pVal.alignment = { vertical: "middle", horizontal: "left" };
     pVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
   } else if (isChallan) {
     // Row 12 (TOP): DATE
-    worksheet.getCell("C12").value = "DATE:";
-    worksheet.getCell("C12").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const dLbl = worksheet.getCell("C12");
+    dLbl.value = "DATE:";
+    dLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    dLbl.alignment = { vertical: "middle", horizontal: "left" };
+    dLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     const dVal = worksheet.getCell("D12");
     dVal.value = dateVal || "";
-    dVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    dVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    dVal.alignment = { vertical: "middle", horizontal: "left" };
     dVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 13: CHALLAN NO
-    worksheet.getCell("C13").value = "CHALLAN NO.:";
-    worksheet.getCell("C13").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const cLbl = worksheet.getCell("C13");
+    cLbl.value = "CHALLAN NO.:";
+    cLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    cLbl.alignment = { vertical: "middle", horizontal: "left" };
+    cLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     const cVal = worksheet.getCell("D13");
     cVal.value = challanNo || "";
-    cVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    cVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    cVal.alignment = { vertical: "middle", horizontal: "left" };
     cVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 14: REQUISITION NO
-    worksheet.getCell("C14").value = "REQUISITION NO.:";
-    worksheet.getCell("C14").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const rLbl = worksheet.getCell("C14");
+    rLbl.value = "REQUISITION NO.:";
+    rLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    rLbl.alignment = { vertical: "middle", horizontal: "left" };
+    rLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     const rVal = worksheet.getCell("D14");
     rVal.value = requisitionNo || "";
-    rVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Rows 15, 16: blank dotted lines
@@ -846,22 +1026,32 @@ const buildDocumentWorksheet = (
   } else {
     // Quotation - Row 12 (TOP): DATE
     worksheet.mergeCells("C12:D12");
-    worksheet.getCell("C12").value = "DATE:";
-    worksheet.getCell("C12").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const dLbl = worksheet.getCell("C12");
+    dLbl.value = "DATE:";
+    dLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    dLbl.alignment = { vertical: "middle", horizontal: "left" };
+    dLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E12:F12");
     const dVal = worksheet.getCell("E12");
     dVal.value = dateVal || "";
-    dVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    dVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    dVal.alignment = { vertical: "middle", horizontal: "left" };
     dVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     // Row 13: REQUISITION NO
     worksheet.mergeCells("C13:D13");
-    worksheet.getCell("C13").value = "REQUISITION NO.:";
-    worksheet.getCell("C13").font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    const rLbl = worksheet.getCell("C13");
+    rLbl.value = "REQUISITION NO.:";
+    rLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    rLbl.alignment = { vertical: "middle", horizontal: "left" };
+    rLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
     worksheet.mergeCells("E13:F13");
     const rVal = worksheet.getCell("E13");
     rVal.value = requisitionNo || "";
-    rVal.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
     for (let r = 14; r <= 16; r++) {
@@ -884,9 +1074,11 @@ const buildDocumentWorksheet = (
     }
   }
 
-  // 4. Main Table Header (Row 17)
+  // =========================================================================
+  // 3. MAIN TABLE HEADER (ROW 17) - EXACT PRINT FORMAT PARITY
+  // =========================================================================
   const headerRow = worksheet.getRow(17);
-  headerRow.height = 18;
+  headerRow.height = 20;
 
   const colHeaders = isChallan
     ? ["SL", "Description of Marine Items / Spare Parts", "Qty", "Unit"]
@@ -896,16 +1088,16 @@ const buildDocumentWorksheet = (
     const colIdx = i + 1;
     const cell = headerRow.getCell(colIdx);
     cell.value = text;
-    cell.font = { name: "Arial", size: 8, bold: true, color: { argb: "000000" } };
+    cell.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     cell.alignment = {
       vertical: "middle",
-      horizontal: colIdx === 2 ? "left" : "center",
+      horizontal: colIdx === 2 ? "left" : colIdx === 6 ? "right" : "center",
       wrapText: true,
     };
     cell.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "F1F5F9" },
+      fgColor: { argb: "FFF1F5F9" },
     };
     cell.border = {
       top: { style: "medium", color: { argb: "000000" } },
@@ -915,7 +1107,9 @@ const buildDocumentWorksheet = (
     };
   });
 
-  // Helper to apply custom CellFormat, inline RichText, highlights, colors, adjustments & borders to ExcelJS cell
+  // =========================================================================
+  // 4. HELPER TO APPLY STYLES, HIGHLIGHTS, COLORS, FONTS, AND BORDERS
+  // =========================================================================
   const applyCellFormatToExcel = (
     cell: ExcelJS.Cell,
     rIndex: number,
@@ -932,10 +1126,10 @@ const buildDocumentWorksheet = (
     const key = `${rIndex}_${cIndex}`;
     const fmt = cellFormats ? cellFormats[key] : undefined;
 
-    // 1. Build Base Font
+    // 1. Build Base Font (incorporating toolbar settings)
     const baseFont: Partial<ExcelJS.Font> = {
       name: fmt?.fontFamily || cell.font?.name || "Arial",
-      size: fmt?.fontSize !== undefined ? fmt.fontSize : (cell.font?.size || 8),
+      size: fmt?.fontSize !== undefined ? fmt.fontSize : (cell.font?.size || 8.5),
       bold: fmt?.bold !== undefined ? fmt.bold : cell.font?.bold,
       italic: fmt?.italic !== undefined ? fmt.italic : cell.font?.italic,
       underline: fmt?.underline ? (fmt.underline === "double" ? "double" : fmt.underline === "single" ? true : false) : cell.font?.underline,
@@ -947,7 +1141,7 @@ const buildDocumentWorksheet = (
     if (options?.formula) {
       cell.value = { formula: options.formula } as any;
       cell.font = baseFont;
-    } else if (rawValue && rawValue.includes("<")) {
+    } else if (rawValue && (rawValue.includes("<") || rawValue.includes("&"))) {
       const parsed = parseHtmlToExcelRuns(rawValue, baseFont);
       if (parsed.hasFormatting && parsed.richText.length > 0) {
         cell.value = { richText: parsed.richText };
@@ -970,7 +1164,7 @@ const buildDocumentWorksheet = (
       cell.font = baseFont;
     }
 
-    // 3. Highlight / Background Fill
+    // 3. Highlight / Background Fill (respects inline word highlight or cell-level background color)
     const fillArgb = fmt?.bgColor && fmt.bgColor !== "transparent"
       ? colorToArgb(fmt.bgColor)
       : inlineHighlight;
@@ -985,9 +1179,9 @@ const buildDocumentWorksheet = (
       delete (cell as any).fill;
     }
 
-    // 4. Adjustments (Alignment, Indent, Orientation, WrapText)
+    // 4. Alignments (horizontal, vertical, wrapText, indent, orientation)
     const alignObj: Partial<ExcelJS.Alignment> = {
-      vertical: fmt?.valign === "top" ? "top" : fmt?.valign === "middle" ? "middle" : fmt?.valign === "bottom" ? "bottom" : (cell.alignment?.vertical || "middle"),
+      vertical: fmt?.valign === "top" ? "top" : fmt?.valign === "middle" ? "middle" : fmt?.valign === "bottom" ? "bottom" : (cell.alignment?.vertical || "top"),
       horizontal: fmt?.align || defaultAlign,
       wrapText: true,
     };
@@ -1022,10 +1216,11 @@ const buildDocumentWorksheet = (
     };
   };
 
-  // 5. Table rows filling - Uses space strictly as per text only
+  // =========================================================================
+  // 5. TABLE DATA ROWS - CELL SIZES INCREASE DYNAMICALLY ACCORDING TO TEXT
+  // =========================================================================
   let currentRowNum = 18;
   const numItemsOnThisPage = pageRows.length;
-  // Display only the actual items on this page (or 1 minimal row if totally empty)
   const displayRowCount = Math.max(numItemsOnThisPage, 1);
 
   for (let idx = 0; idx < displayRowCount; idx++) {
@@ -1046,35 +1241,49 @@ const buildDocumentWorksheet = (
     const priceVal = cleanPriceStr ? parseNumericInput(cleanPriceStr) : "";
     const isNumericPrice = typeof priceVal === "number" && !isNaN(priceVal) && priceVal !== 0;
 
-    // Dynamic compact row height based strictly on actual visual lines
-    const plainDesc = htmlToPlainText(rawDesc);
-    const visualLines = calculateItemVisualLines(plainDesc, isChallan);
-    let rowH = getItemRowHeight(visualLines);
+    // Calculate maximum visual lines across all cells in this row
+    const itemRowIdx = startSlIndex - 1 + idx;
+    const descFmt = cellFormats ? cellFormats[`${itemRowIdx}_0`] : undefined;
+    const qtyFmt = cellFormats ? cellFormats[`${itemRowIdx}_1`] : undefined;
+    const unitFmt = cellFormats ? cellFormats[`${itemRowIdx}_2`] : undefined;
+    const priceFmt = cellFormats ? cellFormats[`${itemRowIdx}_3`] : undefined;
 
-    // If description or any cell has large custom font size, adjust row height accordingly
-    const descFmt = cellFormats ? cellFormats[`${startSlIndex - 1 + idx}_0`] : undefined;
-    if (descFmt?.fontSize && descFmt.fontSize > 11) {
-      rowH = Math.max(rowH, visualLines * descFmt.fontSize * 1.35);
-    }
-    r.height = rowH;
+    const descFontSize = descFmt?.fontSize || 8.5;
+    const maxFontSize = Math.max(
+      descFontSize,
+      qtyFmt?.fontSize || 8.5,
+      unitFmt?.fontSize || 8.5,
+      priceFmt?.fontSize || 8.5
+    );
+
+    const descLines = calculateItemVisualLines(rawDesc, isChallan, descFontSize);
+    const qtyLines = calculateItemVisualLines(rawQty, isChallan, qtyFmt?.fontSize || 8.5);
+    const unitLines = calculateItemVisualLines(rawUnit, isChallan, unitFmt?.fontSize || 8.5);
+    const priceLines = calculateItemVisualLines(rawPrice, isChallan, priceFmt?.fontSize || 8.5);
+
+    const maxVisualLines = Math.max(descLines, qtyLines, unitLines, priceLines, 1);
+
+    // Dynamic row height that scales proportional to text lines and font size
+    const dynamicRowHeight = getItemRowHeight(maxVisualLines, maxFontSize);
+    r.height = dynamicRowHeight;
 
     const isLastItemRow = idx === displayRowCount - 1;
 
-    // Set SL (Col 1)
+    // Col 1: SL
     const cellSL = r.getCell(1);
-    applyCellFormatToExcel(cellSL, startSlIndex - 1 + idx, -1, "center", rowData ? String(slVal) : "", {
+    applyCellFormatToExcel(cellSL, itemRowIdx, -1, "center", rowData ? String(slVal) : "", {
       isLastRow: isLastItemRow,
     });
 
-    // Set Description (Col 2)
+    // Col 2: Description
     const cellDesc = r.getCell(2);
-    applyCellFormatToExcel(cellDesc, startSlIndex - 1 + idx, 0, "left", rawDesc, {
+    applyCellFormatToExcel(cellDesc, itemRowIdx, 0, "left", rawDesc, {
       isLastRow: isLastItemRow,
     });
 
-    // Set Qty (Col 3)
+    // Col 3: Qty
     const cellQty = r.getCell(3);
-    applyCellFormatToExcel(cellQty, startSlIndex - 1 + idx, 1, "center", rawQty, {
+    applyCellFormatToExcel(cellQty, itemRowIdx, 1, "center", rawQty, {
       isLastRow: isLastItemRow,
       isNumeric: isNumericQty,
       numericVal: typeof qtyVal === "number" ? qtyVal : undefined,
@@ -1083,16 +1292,16 @@ const buildDocumentWorksheet = (
       cellQty.numFmt = "#,##0.00";
     }
 
-    // Set Unit (Col 4)
+    // Col 4: Unit
     const cellUnit = r.getCell(4);
-    applyCellFormatToExcel(cellUnit, startSlIndex - 1 + idx, 2, "center", rawUnit, {
+    applyCellFormatToExcel(cellUnit, itemRowIdx, 2, "center", rawUnit, {
       isLastRow: isLastItemRow,
     });
 
-    // Set Price & Amount for Quotation / Invoice (Cols 5 & 6)
+    // Cols 5 & 6: Price & Amount for Quotation / Invoice
     if (!isChallan) {
       const cellPrice = r.getCell(5);
-      applyCellFormatToExcel(cellPrice, startSlIndex - 1 + idx, 3, "right", rawPrice, {
+      applyCellFormatToExcel(cellPrice, itemRowIdx, 3, "right", rawPrice, {
         isLastRow: isLastItemRow,
         isNumeric: isNumericPrice,
         numericVal: typeof priceVal === "number" ? priceVal : undefined,
@@ -1102,12 +1311,12 @@ const buildDocumentWorksheet = (
       }
 
       const cellAmount = r.getCell(6);
-      const hasContent = rowData && (plainDesc.trim() || cleanQtyStr || cleanPriceStr);
+      const hasContent = rowData && (htmlToPlainText(rawDesc).trim() || cleanQtyStr || cleanPriceStr);
       const amountFormula = hasContent
         ? `=IF(OR(C${currentRowNum}="", E${currentRowNum}=""), 0, C${currentRowNum}*E${currentRowNum})`
         : undefined;
 
-      applyCellFormatToExcel(cellAmount, startSlIndex - 1 + idx, 4, "right", undefined, {
+      applyCellFormatToExcel(cellAmount, itemRowIdx, 4, "right", undefined, {
         isLastRow: isLastItemRow,
         formula: amountFormula,
       });
@@ -1143,13 +1352,15 @@ const buildDocumentWorksheet = (
     }
   });
 
-  // 6. Totals & Words Block (Rendered strictly on the LAST page)
+  // =========================================================================
+  // 6. TOTALS & WORDS BLOCK (Rendered strictly on the LAST page of Invoice/Quotation)
+  // =========================================================================
   if (!isChallan && isLastPage) {
     const totalRow = currentRowNum;
     const numTotalRows = isInvoice ? 4 : 1;
 
     for (let rOffset = 0; rOffset < numTotalRows; rOffset++) {
-      worksheet.getRow(totalRow + rOffset).height = 17;
+      worksheet.getRow(totalRow + rOffset).height = 18;
     }
 
     if (isInvoice) {
@@ -1171,6 +1382,17 @@ const buildDocumentWorksheet = (
 
     wordCell.font = { name: "Arial", size: 7.5, bold: true, italic: true, color: { argb: "000000" } };
     wordCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    wordCell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFF8FAFC" },
+    };
+
+    // If quotation, expand row height if words are long
+    if (!isInvoice) {
+      const wordLines = Math.max(1, Math.ceil(wordsStr.length / 45));
+      worksheet.getRow(totalRow).height = Math.max(22, wordLines * 16 + 4);
+    }
 
     for (let rOffset = 0; rOffset < numTotalRows; rOffset++) {
       const rNum = totalRow + rOffset;
@@ -1189,9 +1411,11 @@ const buildDocumentWorksheet = (
 
     if (isInvoice) {
       // Row 1: SUBTOTAL
-      worksheet.getCell(`E${totalRow}`).value = totalPages > 1 ? "GRAND SUBTOTAL" : "SUBTOTAL";
-      worksheet.getCell(`E${totalRow}`).font = { name: "Arial", size: 8, bold: true };
-      worksheet.getCell(`E${totalRow}`).alignment = { vertical: "middle", horizontal: "right" };
+      const subtotalLbl = worksheet.getCell(`E${totalRow}`);
+      subtotalLbl.value = totalPages > 1 ? "GRAND SUBTOTAL" : "SUBTOTAL";
+      subtotalLbl.font = { name: "Arial", size: 8.0, bold: true };
+      subtotalLbl.alignment = { vertical: "middle", horizontal: "right" };
+      subtotalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
       const subtotalValCell = worksheet.getCell(`F${totalRow}`);
       if (totalPages === 1) {
@@ -1199,40 +1423,46 @@ const buildDocumentWorksheet = (
       } else {
         subtotalValCell.value = subtotalValue;
       }
-      subtotalValCell.font = { name: "Arial", size: 8, bold: true };
+      subtotalValCell.font = { name: "Arial", size: 8.5, bold: true };
       subtotalValCell.alignment = { vertical: "middle", horizontal: "right" };
       subtotalValCell.numFmt = "#,##0.00";
 
       // Row 2: VAT
-      worksheet.getCell(`E${totalRow + 1}`).value = `VAT (${vatPercent || 0}%)`;
-      worksheet.getCell(`E${totalRow + 1}`).font = { name: "Arial", size: 8, bold: true };
-      worksheet.getCell(`E${totalRow + 1}`).alignment = { vertical: "middle", horizontal: "right" };
+      const vatLbl = worksheet.getCell(`E${totalRow + 1}`);
+      vatLbl.value = `VAT (${vatPercent || 0}%)`;
+      vatLbl.font = { name: "Arial", size: 8.0, bold: true };
+      vatLbl.alignment = { vertical: "middle", horizontal: "right" };
+      vatLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
       const vatValCell = worksheet.getCell(`F${totalRow + 1}`);
       vatValCell.value = calculatedVat;
-      vatValCell.font = { name: "Arial", size: 8, bold: true };
+      vatValCell.font = { name: "Arial", size: 8.5, bold: true };
       vatValCell.alignment = { vertical: "middle", horizontal: "right" };
       vatValCell.numFmt = "#,##0.00";
 
       // Row 3: TRANSPORTATION
-      worksheet.getCell(`E${totalRow + 2}`).value = "TRANSPORTATION FEE";
-      worksheet.getCell(`E${totalRow + 2}`).font = { name: "Arial", size: 8, bold: true };
-      worksheet.getCell(`E${totalRow + 2}`).alignment = { vertical: "middle", horizontal: "right" };
+      const transLbl = worksheet.getCell(`E${totalRow + 2}`);
+      transLbl.value = "TRANSPORTATION FEE";
+      transLbl.font = { name: "Arial", size: 8.0, bold: true };
+      transLbl.alignment = { vertical: "middle", horizontal: "right" };
+      transLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
       const transValCell = worksheet.getCell(`F${totalRow + 2}`);
       transValCell.value = transportationFee || 0;
-      transValCell.font = { name: "Arial", size: 8, bold: true };
+      transValCell.font = { name: "Arial", size: 8.5, bold: true };
       transValCell.alignment = { vertical: "middle", horizontal: "right" };
       transValCell.numFmt = "#,##0.00";
 
       // Row 4: GRAND TOTAL
-      worksheet.getCell(`E${totalRow + 3}`).value = "GRAND TOTAL";
-      worksheet.getCell(`E${totalRow + 3}`).font = { name: "Arial", size: 8.5, bold: true };
-      worksheet.getCell(`E${totalRow + 3}`).alignment = { vertical: "middle", horizontal: "right" };
+      const grandLbl = worksheet.getCell(`E${totalRow + 3}`);
+      grandLbl.value = "GRAND TOTAL";
+      grandLbl.font = { name: "Arial", size: 8.5, bold: true };
+      grandLbl.alignment = { vertical: "middle", horizontal: "right" };
+      grandLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE0E7FF" } }; // Subtle Indigo
 
       const grandValCell = worksheet.getCell(`F${totalRow + 3}`);
       grandValCell.value = finalGrandTotal;
-      grandValCell.font = { name: "Arial", size: 8.5, bold: true };
+      grandValCell.font = { name: "Arial", size: 9.5, bold: true };
       grandValCell.alignment = { vertical: "middle", horizontal: "right" };
       grandValCell.numFmt = "#,##0.00";
 
@@ -1250,9 +1480,11 @@ const buildDocumentWorksheet = (
       }
     } else {
       // Quotation TOTAL
-      worksheet.getCell(`E${totalRow}`).value = totalPages > 1 ? "GRAND TOTAL" : "TOTAL";
-      worksheet.getCell(`E${totalRow}`).font = { name: "Arial", size: 8, bold: true };
-      worksheet.getCell(`E${totalRow}`).alignment = { vertical: "middle", horizontal: "right" };
+      const totalLbl = worksheet.getCell(`E${totalRow}`);
+      totalLbl.value = totalPages > 1 ? "GRAND TOTAL" : "TOTAL";
+      totalLbl.font = { name: "Arial", size: 8.5, bold: true };
+      totalLbl.alignment = { vertical: "middle", horizontal: "right" };
+      totalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
       const valCell = worksheet.getCell(`F${totalRow}`);
       if (totalPages === 1) {
@@ -1260,7 +1492,7 @@ const buildDocumentWorksheet = (
       } else {
         valCell.value = subtotalValue;
       }
-      valCell.font = { name: "Arial", size: 8, bold: true };
+      valCell.font = { name: "Arial", size: 9.0, bold: true };
       valCell.alignment = { vertical: "middle", horizontal: "right" };
       valCell.numFmt = "#,##0.00";
 
@@ -1278,28 +1510,31 @@ const buildDocumentWorksheet = (
     currentRowNum = totalRow + numTotalRows;
   }
 
-  // 6. Signatures Area - Spacious room & Enlarged Stamp
+  // =========================================================================
+  // 7. SIGNATURES & STAMPS AREA - REPEATED ON EVERY PAGE (MATCHING PRINT TFOOT)
+  // For Challan: ONLY Receiver's Signature is rendered.
+  // For Quotation/Invoice: Both Receiver's and Authorized Signatures + Stamp are rendered.
+  // =========================================================================
   worksheet.getRow(currentRowNum).height = 10;
   currentRowNum++;
 
-  // "For Comilla Traders" row
-  const authHeaderRow = currentRowNum;
   if (!isChallan) {
-    worksheet.getRow(authHeaderRow).height = 15;
-    worksheet.mergeCells(`E${authHeaderRow}:F${authHeaderRow}`);
-    const authTitle = worksheet.getCell(`E${authHeaderRow}`);
+    // "For Comilla Traders" row on right
+    worksheet.getRow(currentRowNum).height = 15;
+    worksheet.mergeCells(`E${currentRowNum}:F${currentRowNum}`);
+    const authTitle = worksheet.getCell(`E${currentRowNum}`);
     authTitle.value = "For Comilla Traders";
     authTitle.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     authTitle.alignment = { vertical: "middle", horizontal: "center" };
     currentRowNum++;
   }
 
-  // Generous room for signatures and enlarged stamp
+  // Room for signatures and stamp
   worksheet.getRow(currentRowNum).height = 42;
   const sigRow = currentRowNum + 1;
   worksheet.getRow(sigRow).height = 18;
 
-  // Receiver's Signature
+  // Receiver's Signature (rendered on every page for all formats)
   worksheet.mergeCells(`A${sigRow}:B${sigRow}`);
   const recSig = worksheet.getCell(`A${sigRow}`);
   recSig.value = "Receiver's Signature";
@@ -1307,29 +1542,30 @@ const buildDocumentWorksheet = (
   recSig.alignment = { vertical: "middle", horizontal: "center" };
   recSig.border = { top: { style: "thin", color: { argb: "000000" } } };
 
-  // Authorized Signature
-  const authColStart = isChallan ? "C" : "E";
-  const authColEnd = isChallan ? "D" : "F";
-  worksheet.mergeCells(`${authColStart}${sigRow}:${authColEnd}${sigRow}`);
-  const authSig = worksheet.getCell(`${authColStart}${sigRow}`);
-  authSig.value = "Authorized Signature";
-  authSig.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
-  authSig.alignment = { vertical: "middle", horizontal: "center" };
-  authSig.border = { top: { style: "thin", color: { argb: "000000" } } };
+  // Authorized Signature & Stamp (strictly hidden for Challan, rendered for Quotation & Invoice)
+  if (!isChallan) {
+    worksheet.mergeCells(`E${sigRow}:F${sigRow}`);
+    const authSig = worksheet.getCell(`E${sigRow}`);
+    authSig.value = "Authorized Signature";
+    authSig.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
+    authSig.alignment = { vertical: "middle", horizontal: "center" };
+    authSig.border = { top: { style: "thin", color: { argb: "000000" } } };
 
-  // Centered Official Stamp (Enlarged and positioned over Authorized Signature)
-  if (stampId !== null) {
-    const stampCol = isChallan ? 2.65 : 4.64;
-    worksheet.addImage(stampId, {
-      tl: { col: stampCol, row: sigRow - 2.25 },
-      ext: { width: 88, height: 88 },
-    });
+    // Centered Official Stamp positioned over Authorized Signature
+    if (stampId !== null) {
+      worksheet.addImage(stampId, {
+        tl: { col: 4.64, row: sigRow - 2.25 },
+        ext: { width: 88, height: 88 },
+      });
+    }
   }
 
-  // 10. Footer Disclaimer Notice
+  // =========================================================================
+  // 8. FOOTER DISCLAIMER NOTICE - MATCHING PRINT TFOOT
+  // =========================================================================
   const noticeRow = sigRow + 2;
   worksheet.getRow(sigRow + 1).height = 4;
-  worksheet.getRow(noticeRow).height = 13;
+  worksheet.getRow(noticeRow).height = 14;
   worksheet.mergeCells(`A${noticeRow}:${lastColLetter}${noticeRow}`);
   const noticeCell = worksheet.getCell(`A${noticeRow}`);
   noticeCell.value = "ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.";
@@ -1339,7 +1575,8 @@ const buildDocumentWorksheet = (
 
 /**
  * Generates complete multi-sheet Excel Workbook for the currently selected document type.
- * Maximizes A4 space utilization, uses space per text only, compact layout, centered stamp, and automatic page overflow transfer.
+ * Maximizes A4 space utilization, uses space per text only, compact layout, centered stamp,
+ * and automatic page overflow transfer matching the browser print layout exactly.
  */
 export const generateExcelWorkbook = async (
   docType: "quotation" | "challan" | "invoice",
@@ -1398,7 +1635,7 @@ export const generateExcelWorkbook = async (
   }
 
   // Dynamic capacity-aware pagination maximizing A4 page utilization
-  const pageChunks = paginateRowsForExcel(effectiveRows, docType);
+  const pageChunks = paginateRowsForExcel(effectiveRows, docType, cellFormats);
   const totalPages = pageChunks.length;
 
   const baseSheetNames: Record<string, string> = {
