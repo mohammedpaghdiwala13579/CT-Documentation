@@ -254,13 +254,20 @@ input[type="number"] {
     position: static !important;
   }
 
-  table.print-outer-layout-table > thead > tr {
+  table.print-outer-layout-table > tfoot {
+    display: table-footer-group !important;
+    position: static !important;
+  }
+
+  table.print-outer-layout-table > thead > tr,
+  table.print-outer-layout-table > tfoot > tr {
     position: static !important;
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
   }
 
-  table.print-outer-layout-table > thead > tr > td {
+  table.print-outer-layout-table > thead > tr > td,
+  table.print-outer-layout-table > tfoot > tr > td {
     position: static !important;
     border: none !important;
     padding: 0 !important;
@@ -434,6 +441,10 @@ input[type="number"] {
   width: 210mm !important;
   min-height: 297mm !important;
   background-color: #ffffff !important;
+}
+
+.is-generating-pdf table.print-outer-layout-table > tfoot {
+  display: table-footer-group !important;
 }
 
 .is-generating-pdf .quotation-container {

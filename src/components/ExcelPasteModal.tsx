@@ -45,7 +45,7 @@ export default function ExcelPasteModal({
 
   // Process raw text or HTML data
   const processRawInput = (text: string, html?: string) => {
-    const result = parseClipboardData({ text, html });
+    const result = parseClipboardData({ text, html }, { allowCsv: true });
     if (result.grid.length === 0) {
       setParsedGrid([]);
       setColumnMappings([]);
@@ -174,7 +174,7 @@ export default function ExcelPasteModal({
           setParsedGrid(stringGrid);
           const tsv = stringGrid.map((r) => r.join("\t")).join("\n");
           setRawText(tsv);
-          const result = parseClipboardData({ text: tsv });
+          const result = parseClipboardData({ text: tsv }, { allowCsv: true });
           setHasHeaderRow(result.hasHeader);
           setColumnMappings(autoMapColumns(stringGrid, result.hasHeader, docType));
           setStatusMessage(`Loaded file "${file.name}" with ${stringGrid.length} row(s).`);

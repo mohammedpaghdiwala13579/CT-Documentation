@@ -222,13 +222,20 @@ export function parseCSV(text: string, delimiter: "," | ";" = ","): string[][] {
   return result;
 }
 
+export interface ParseClipboardOptions {
+  allowCsv?: boolean;
+}
+
 /**
  * Universal clipboard parser that extracts 2D grid
  */
-export function parseClipboardData(input: {
-  text: string;
-  html?: string;
-}): ParsedClipboardResult {
+export function parseClipboardData(
+  input: {
+    text: string;
+    html?: string;
+  },
+  options?: ParseClipboardOptions
+): ParsedClipboardResult {
   const { text, html } = input;
 
   // 1. Try HTML Table parsing first (from Excel / Google Sheets)
@@ -249,7 +256,7 @@ export function parseClipboardData(input: {
     };
   }
 
-  // 2. Try TSV (Tab separated)
+  // 2. Try TSV (Tab separated from Excel / Google Sheets)
   if (rawText.includes("\t")) {
     const tsvGrid = parseTSV(rawText);
     if (tsvGrid.length > 0) {
@@ -257,9 +264,10 @@ export function parseClipboardData(input: {
     }
   }
 
-  // 3. Try CSV (Semicolon or comma separated if multi-column on lines)
+  // 3. Try CSV ONLY if explicitly enabled (e.g. from dedicated CSV import modal).
+  // Sentences and descriptions frequently contain commas; they must NEVER be split into columns during direct paste!
   const lines = rawText.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lines.length > 0) {
+  if (options?.allowCsv && lines.length > 0) {
     const commaCount = (lines[0].match(/,/g) || []).length;
     const semiCount = (lines[0].match(/;/g) || []).length;
 
@@ -276,8 +284,8 @@ export function parseClipboardData(input: {
     }
   }
 
-  // 4. Fallback: single column with multiple lines
-  const lineGrid = lines.map((l) => [l.trim()]);
+  // 4. Fallback: lines as single-column text (preserving entire sentences with commas)
+  const lineGrid = lines.map((l) => [cleanCellText(l)]);
   return analyzeGrid(lineGrid, "plain_lines");
 }
 

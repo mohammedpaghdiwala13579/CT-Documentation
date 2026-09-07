@@ -1651,36 +1651,54 @@ export default function QuotationBuilder() {
 
     if (!plainText && !htmlText) return;
 
-    const result = parseClipboardData({ text: plainText, html: htmlText });
+    // Check whether the clipboard contains authentic multi-column spreadsheet data
+    const hasTabs = plainText.includes("\t");
+    const hasHtmlTable = Boolean(htmlText && htmlText.includes("<table") && htmlText.includes("<td"));
+
+    // Explicitly disable CSV comma splitting during clipboard cell pasting (sentences contain commas)
+    const result = parseClipboardData({ text: plainText, html: htmlText }, { allowCsv: false });
     const parsedGrid = result.grid;
 
     if (!parsedGrid || parsedGrid.length === 0) return;
 
-    // 1. Single plain cell without internal newlines -> allow default inline insertion
-    if (parsedGrid.length === 1 && parsedGrid[0].length === 1 && !parsedGrid[0][0].includes("\n")) {
-      const targetEl = e.currentTarget;
-      if (targetEl instanceof HTMLInputElement || targetEl instanceof HTMLTextAreaElement) {
-        const parsedVal = cleanCellText(parsedGrid[0][0]);
-        const start = targetEl.selectionStart ?? 0;
-        const end = targetEl.selectionEnd ?? 0;
-        const currentValue = targetEl.value || "";
-        const newValue = currentValue.substring(0, start) + parsedVal + currentValue.substring(end);
+    const isMultiColumnSpreadsheet = hasTabs || (hasHtmlTable && parsedGrid.some((r) => r.length > 1));
 
+    // Case 1: Direct text pasting into an editable cell (Description, Qty, Unit, Price)
+    // When there are no spreadsheet tabs or multi-column table:
+    // The pasted content MUST remain strictly inside the active cell and NEVER spill over to unit, price, etc.
+    if (!isMultiColumnSpreadsheet && startColIndex >= 0) {
+      if (parsedGrid.length <= 1) {
+        // Single line / sentence - allow default contenteditable / input paste, inserting cleanly at cursor
+        return;
+      }
+
+      // If user pasted multi-line text or wrapped sentences (e.g. from PDF or document) into Description (col 0):
+      if (startColIndex === 0) {
+        e.preventDefault();
+        const textToInsert = cleanCellText(plainText);
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && sel.anchorNode && e.currentTarget.contains(sel.anchorNode)) {
+          document.execCommand("insertText", false, textToInsert);
+        } else {
+          handleRowChange(startRowIndex, "desc", textToInsert);
+        }
+        return;
+      }
+
+      // If pasted into a specific single field (Qty, Unit, Price), keep it strictly in that field
+      if (startColIndex > 0) {
+        e.preventDefault();
         const fieldMap = ["desc", "qty", "unit", "price"] as const;
         const field = fieldMap[startColIndex];
         if (field) {
-          e.preventDefault();
-          handleRowChange(startRowIndex, field, newValue);
-          setTimeout(() => {
-            targetEl.focus();
-            targetEl.selectionStart = targetEl.selectionEnd = start + parsedVal.length;
-          }, 0);
+          const textToInsert = cleanCellText(plainText);
+          handleRowChange(startRowIndex, field, textToInsert);
         }
+        return;
       }
-      return;
     }
 
-    // 2. Multi-cell, multi-line, or multi-column paste from Excel / Google Sheets
+    // Case 2: Multi-cell, multi-line, or multi-column paste from Excel / Google Sheets
     e.preventDefault();
 
     const dataRows = result.hasHeader ? parsedGrid.slice(1) : parsedGrid;
@@ -2858,45 +2876,53 @@ export default function QuotationBuilder() {
                       </tbody>
                     </table>
                   )}
-
-                  {/* Signatures & Stamps placing */}
-                  <div className="sig-section mt-5 flex flex-row justify-between gap-6 sm:gap-10">
-                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[72px]">
-                      <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold">
-                        Receiver's Signature
-                      </div>
-                    </div>
-                    
-                    {/* Authorized stamp hidden for Challan block */}
-                    {docType !== "challan" && (
-                      <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[72px] relative">
-                        <div className="sig-title text-[8.5pt] font-bold text-black">For Comilla Traders</div>
-                        
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-1">
-                          <img 
-                            src="https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"
-                            alt="Comilla Traders Stamp"
-                            referrerPolicy="no-referrer"
-                            className="w-[90px] h-[90px] object-contain select-none"
-                            style={{ printColorAdjust: "exact" }}
-                          />
-                        </div>
-
-                        <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold relative z-20">
-                          Authorized Signature
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Non-returnable & non-exchangeable notice */}
-                  <div className="doc-footer-notice text-center mt-3 pt-1 text-[12px] leading-[18px] font-bold text-black uppercase tracking-wider">
-                    ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
-                  </div>
                 </div>
               </td>
             </tr>
           </tbody>
+          <tfoot className="table-footer-group print:table-footer-group">
+            <tr>
+              <td className="border-none p-0 m-0">
+                {/* Signatures & Stamps section - repeated on every page while printing */}
+                <div className="sig-section mt-4 pt-1 flex flex-row justify-between gap-6 sm:gap-10">
+                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[68px]">
+                    <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold text-black">
+                      Receiver's Signature
+                    </div>
+                  </div>
+                  
+                  {/* Authorized stamp hidden for Challan block - only receiving signature to challan */}
+                  {docType !== "challan" && (
+                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[68px] relative">
+                      <div className="sig-title text-[8.5pt] font-bold text-black">For Comilla Traders</div>
+                      
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-1">
+                        <img 
+                          src="https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"
+                          alt="Comilla Traders Stamp"
+                          referrerPolicy="no-referrer"
+                          className="w-[85px] h-[85px] object-contain select-none"
+                          style={{ printColorAdjust: "exact" }}
+                        />
+                      </div>
+
+                      <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold relative z-20 text-black">
+                        Authorized Signature
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Non-returnable & non-exchangeable notice */}
+                <div className="doc-footer-notice text-center mt-2.5 pt-1 text-[11.5px] leading-[16px] font-bold text-black uppercase tracking-wider">
+                  ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
+                </div>
+
+                {/* Print bottom margin spacer */}
+                <div className="print-page-bottom-spacer hidden print:block h-[4mm] w-full" />
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
