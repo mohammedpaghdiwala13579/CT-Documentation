@@ -619,14 +619,13 @@ export const calculateItemVisualLines = (
  * and lower descenders of text never get cut off or hidden behind cell borders.
  */
 export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
-  const lineRate = Math.max(13.5, fontSize * 1.45 + 1.5);
+  const lineRate = Math.max(12, fontSize * 1.35 + 1.0);
   if (visualLines <= 1) {
-    // Single line: 19.5pt ensures the sentence sits cleanly in the center of the box with ample padding,
-    // so no upper ascenders or lower descenders get hidden or cut off by the border line.
-    return Math.max(19.5, Math.round(fontSize * 1.5 + 6.0));
+    // Sized precisely according to sentence size so maximum items fit per page cleanly and clearly
+    return Math.max(16.5, Math.round(fontSize * 1.35 + 4.0));
   }
-  // Multi-line: calculates comfortable height for all wrapped lines with vertical centering padding
-  return Math.max(19.5, Math.round(visualLines * lineRate + 6.0));
+  // Multi-line: calculates exact height for all wrapped lines to fit sentences cleanly
+  return Math.max(16.5, Math.round(visualLines * lineRate + 4.0));
 };
 
 export interface ExcelPageChunk {
@@ -654,12 +653,9 @@ export const paginateRowsForExcel = (
   const descColWidth = getOptimalDescColWidth(allRows, isChallan);
   
   // Maximum usable vertical height budget for items on A4 page (in points)
-  // A4 = 842pt. Margins (36pt) -> 806pt usable.
-  // Header: Row 1 (18pt) + 10-row gap at normal uncompressed 15pt (150pt) + Metadata (75pt) + Table Header (18pt) = 261pt.
-  // Footer: Signatures + Notice = 80pt.
-  // Last page totals block: Invoice ~66pt, Quotation ~20pt, Challan 0pt.
-  const REGULAR_PAGE_BUDGET = isChallan ? 465 : 450;
-  const LAST_PAGE_BUDGET = isChallan ? 465 : isInvoice ? 385 : 430;
+  // Sized to allow high density while keeping each cell crisp and unclipped
+  const REGULAR_PAGE_BUDGET = isChallan ? 520 : 500;
+  const LAST_PAGE_BUDGET = isChallan ? 520 : isInvoice ? 425 : 475;
 
   const chunks: ExcelPageChunk[] = [];
   let currentChunk: QuotationRow[] = [];

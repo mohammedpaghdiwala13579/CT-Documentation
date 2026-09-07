@@ -180,13 +180,13 @@ export default function QuotationBuilder() {
     }, 3500);
   };
 
-  // Grid rows: starts with saved draft rows or 20 blank rows by default
+  // Grid rows: starts with saved draft rows or 28 blank rows by default
   const [rows, setRows] = useState<QuotationRow[]>(() => {
     if (initialDraft?.rows && Array.isArray(initialDraft.rows) && initialDraft.rows.length > 0) {
       return initialDraft.rows;
     }
     const initialRows: QuotationRow[] = [];
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= 28; i++) {
       initialRows.push({
         sl: i,
         desc: "",
@@ -387,7 +387,7 @@ export default function QuotationBuilder() {
     setTransportationFee("0");
     
     const initialRows: QuotationRow[] = [];
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= 28; i++) {
       initialRows.push({
         sl: i,
         desc: "",
@@ -1999,7 +1999,7 @@ export default function QuotationBuilder() {
     const filename = `${filePrefix}_${identifier.replace(/[\/\\?%*:|"<>\s]/g, "_")}.pdf`;
     
     const opt = {
-      margin:       10,
+      margin:       [4, 4, 4, 4] as [number, number, number, number],
       filename:     filename,
       image:        { type: "jpeg" as const, quality: 0.98 },
       html2canvas:  { 
@@ -2132,7 +2132,7 @@ export default function QuotationBuilder() {
       </div>
 
       {/* A4 Standard-compliant visual grid container */}
-      <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-3 sm:p-[8mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
+      <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
         
         {/* Anti-slip Background Watermark Asset */}
         <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
@@ -2151,11 +2151,11 @@ export default function QuotationBuilder() {
             <tr>
               <td className="border-none p-0 m-0">
                 {/* Top blank margin repeating on every printed page */}
-                <div className="print-page-top-spacer hidden print:block h-[12mm] w-full" />
+                <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
                 
-                <div className="business-header border-b-2 border-black pb-1.5 mb-1.5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-black text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="logo-container h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-black flex items-center justify-center shadow-sm">
+                <div className="business-header border-b-2 border-black pb-1 mb-1 flex flex-col sm:flex-row items-center justify-between gap-2 text-black text-left">
+                  <div className="flex items-center gap-2.5">
+                    <div className="logo-container h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-black flex items-center justify-center shadow-xs">
                       <img
                         src="https://i.ibb.co.com/gFBkpt8B/Chat-GPT-Image-Apr-23-2026-01-10-13-PM.png"
                         alt="Comilla Traders Logo"
@@ -2163,19 +2163,19 @@ export default function QuotationBuilder() {
                       />
                     </div>
                     <div>
-                      <h1 className="text-[17pt] sm:text-[19pt] font-black tracking-tight leading-none text-black">
+                      <h1 className="text-[15pt] sm:text-[17pt] font-black tracking-tight leading-none text-black">
                         COMILLA TRADERS
                       </h1>
-                      <p className="text-[8pt] font-extrabold text-slate-700 tracking-wider uppercase mt-1">
+                      <p className="text-[7.5pt] font-extrabold text-slate-700 tracking-wider uppercase mt-0.5">
                         Ship Chandler, Marine Supplier & General Merchant
                       </p>
-                      <p className="text-[7pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                      <p className="text-[6.5pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
                         Mechanical & Electrical Marine Engineering Services
                       </p>
                     </div>
                   </div>
 
-                  <div className="contact-details text-right text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block">
+                  <div className="contact-details text-right text-[7pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block">
                     <p className="font-bold whitespace-nowrap">
                       Office: <span className="font-medium whitespace-nowrap">Jubilee Road, Chattogram, Bangladesh</span>
                     </p>
@@ -2185,53 +2185,53 @@ export default function QuotationBuilder() {
                     <p className="font-bold whitespace-nowrap">
                       Official Email: <span className="font-medium whitespace-nowrap">comillatraders@gmail.com</span>
                     </p>
-                    <p className="font-bold text-[7pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
+                    <p className="font-bold text-[6.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
                       CHATTOGRAM &bull; BANGLADESH
                     </p>
                   </div>
                   
                   {/* Print contact information layout */}
-                  <div className="text-center text-[8pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
+                  <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
                     <p>Jubilee Road, Chattogram &bull; Hotlines: 01819315746</p>
                     <p>comillatraders@gmail.com</p>
                   </div>
                 </div>
 
                 {/* Repeating Document Title on multi-page browser printing */}
-                <div className="doc-title text-center text-[12pt] sm:text-[13pt] font-black uppercase tracking-[8px] my-1">
+                <div className="doc-title text-center text-[11pt] sm:text-[12pt] font-black uppercase tracking-[6px] my-0.5">
                   {docType === "challan" ? "Delivery Challan" : docType === "invoice" ? "Bill / Invoice" : "Quotation"}
                 </div>
 
                 {/* Repeating Metadata Information Input Grid on multi-page browser printing */}
-                <div className="meta-grid grid grid-cols-1 sm:grid-cols-2 gap-2 text-left text-[8.5pt] mb-1.5">
-                  <div className="meta-box space-y-1 border border-black p-2 bg-slate-50/30 rounded-xs">
+                <div className="meta-grid grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-left text-[8pt] mb-1">
+                  <div className="meta-box space-y-1 border border-black p-1.5 bg-slate-50/30 rounded-xs">
                     <div>
-                      <label className="block text-[7pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Messers:</label>
+                      <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Messers:</label>
                       <RichTextCell
                         value={messers}
                         syncId="messers"
                         onChange={(val) => setMessers(val)}
                         placeholder="Enter Client/Ship details"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-black font-bold text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[22px]"
+                        className="w-full border-b border-dotted border-slate-400 focus:border-black font-bold text-[8.5pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
                       />
                       <div 
                         id="print-messers"
-                        className="hidden print:block font-bold text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words whitespace-pre-wrap leading-tight"
+                        className="hidden print:block font-bold text-[8.5pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words whitespace-pre-wrap leading-tight"
                         dangerouslySetInnerHTML={{ __html: messers || "&nbsp;" }}
                       />
                     </div>
                     <div>
-                      <label className="block text-[7pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Address:</label>
+                      <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Address:</label>
                       <RichTextCell
                         value={address}
                         syncId="address"
                         onChange={(val) => setAddress(val)}
                         placeholder="Enter delivery/billing address"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8.5pt] outline-none bg-transparent leading-tight py-0.5 no-print print:hidden min-h-[36px]"
+                        className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8pt] outline-none bg-transparent leading-tight py-0.5 no-print print:hidden min-h-[18px]"
                       />
                       <div 
                         id="print-address"
-                        className="hidden print:block text-[8.5pt] border-b border-dotted border-black min-h-[32px] py-0.5 break-words whitespace-pre-wrap leading-tight"
+                        className="hidden print:block text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words whitespace-pre-wrap leading-tight"
                         dangerouslySetInnerHTML={{ __html: address || "&nbsp;" }}
                       />
                     </div>
@@ -2420,18 +2420,18 @@ export default function QuotationBuilder() {
               <td className="border-none p-0 m-0">
 
                 {/* Main Data Sheet Table */}
-                <div className="w-full overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mt-2">
-                  <table className="main-table w-full min-w-full border-collapse border-[1.5px] border-black table-fixed text-[9pt]">
+                <div className="w-full overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mt-1">
+                  <table className="main-table w-full min-w-full border-collapse border-[1.5px] border-black table-fixed text-[8pt]">
                     <thead>
-                      <tr className="bg-slate-50 text-[8pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-black py-1 text-center font-bold`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-black py-1 text-left px-3 font-bold`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-black py-1 text-center font-bold`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-black py-1 text-center font-bold`}>Unit</th>
+                      <tr className="bg-slate-50 text-[7.5pt]">
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-black py-0.5 px-1 text-center font-bold`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-black py-0.5 px-2 text-left font-bold`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-black py-0.5 px-1 text-center font-bold`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-black py-0.5 px-1 text-center font-bold`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-black py-1 text-center font-bold">Price</th>
-                            <th className="w-[12%] border border-black py-1 text-center font-bold">Amount</th>
+                            <th className="w-[11%] border border-black py-0.5 px-1 text-center font-bold">Price</th>
+                            <th className="w-[12%] border border-black py-0.5 px-1 text-center font-bold">Amount</th>
                           </>
                         )}
                       </tr>
@@ -2463,7 +2463,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, -1)}
                                   onClick={() => handleCellClick(idx, -1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, -1)}
-                                  className={getCellClassName(idx, -1, `border border-black text-center font-mono text-[8pt] align-middle py-1 px-0.5 whitespace-nowrap transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
+                                  className={getCellClassName(idx, -1, `border border-black text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
                                 >
                                   {idx + 1}
                                 </td>
@@ -2483,7 +2483,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 0)}
                                   onClick={() => handleCellClick(idx, 0)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 0)}
-                                  className={getCellClassName(idx, 0, `border border-black text-left px-2 text-[8.5pt] align-middle py-1 whitespace-normal transition-all cursor-text ${region ? "bg-amber-50/10" : ""}`)}
+                                  className={getCellClassName(idx, 0, `border border-black text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-amber-50/10" : ""}`)}
                                 >
                                   <RichTextCell
                                     value={row.desc}
@@ -2506,12 +2506,12 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={0}
                                     style={cellStyle}
-                                    className="w-full min-w-full text-left border-none outline-none bg-transparent p-0 text-slate-800 text-[8.5pt] leading-normal block overflow-hidden py-0.5 whitespace-normal break-words no-print print:hidden font-normal"
+                                    className="w-full min-w-full text-left border-none outline-none bg-transparent p-0 text-slate-800 text-[8pt] sm:text-[8.5pt] leading-[1.25] block overflow-visible py-[1px] whitespace-pre-wrap break-words no-print print:hidden font-normal"
                                   />
                                   <div 
                                     id={`print-desc-${idx}`}
                                     style={cellStyle} 
-                                    className="hidden print:block whitespace-normal break-words text-left text-slate-900 leading-normal py-0.5 text-[8.5pt]"
+                                    className="hidden print:block whitespace-pre-wrap break-words text-left text-slate-900 leading-[1.25] py-[1px] text-[8pt]"
                                     dangerouslySetInnerHTML={{ __html: row.desc || "&nbsp;" }}
                                   />
                                 </td>
@@ -2531,7 +2531,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 1)}
                                   onClick={() => handleCellClick(idx, 1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 1)}
-                                  className={getCellClassName(idx, 1, "border border-black text-center font-mono text-[8.5pt] align-middle py-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 1, "border border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.qty}
@@ -2546,12 +2546,12 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={1}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-visible py-[1px] leading-[1.25] whitespace-nowrap break-normal no-print print:hidden text-[8pt] sm:text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-qty-${idx}`}
                                     style={cellStyle} 
-                                    className="hidden print:block whitespace-normal break-normal text-center font-mono text-slate-900 py-0.5 text-[8.5pt]"
+                                    className="hidden print:block whitespace-nowrap break-normal text-center font-mono text-slate-900 py-[1px] leading-[1.25] text-[8pt]"
                                     dangerouslySetInnerHTML={{ __html: row.qty || "&nbsp;" }}
                                   />
                                 </td>
@@ -2571,7 +2571,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 2)}
                                   onClick={() => handleCellClick(idx, 2)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 2)}
-                                  className={getCellClassName(idx, 2, "border border-black text-center text-[8.5pt] align-middle py-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 2, "border border-black text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.unit}
@@ -2586,12 +2586,12 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={2}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 text-slate-800 align-middle overflow-visible py-[1px] leading-[1.25] whitespace-nowrap break-normal no-print print:hidden text-[8pt] sm:text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-unit-${idx}`}
                                     style={cellStyle} 
-                                    className="hidden print:block whitespace-normal break-normal text-center text-slate-900 py-0.5 text-[8.5pt]"
+                                    className="hidden print:block whitespace-nowrap break-normal text-center text-slate-900 py-[1px] leading-[1.25] text-[8pt]"
                                     dangerouslySetInnerHTML={{ __html: row.unit || "&nbsp;" }}
                                   />
                                 </td>
@@ -2611,7 +2611,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 3)}
                                   onClick={() => handleCellClick(idx, 3)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 3)}
-                                  className={getCellClassName(idx, 3, "border border-black text-center font-mono text-[8.5pt] align-middle py-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 3, "border border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.price}
@@ -2626,12 +2626,12 @@ export default function QuotationBuilder() {
                                     dataRow={idx}
                                     dataCol={3}
                                     style={cellStyle}
-                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
+                                    className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-middle overflow-visible py-[1px] leading-[1.25] whitespace-nowrap break-normal no-print print:hidden text-[8pt] sm:text-[8.5pt]"
                                   />
                                   <div 
                                     id={`print-price-${idx}`}
                                     style={cellStyle} 
-                                    className="hidden print:block whitespace-normal break-normal text-center font-mono text-slate-900 py-0.5 text-[8.5pt]"
+                                    className="hidden print:block whitespace-nowrap break-normal text-center font-mono text-slate-900 py-[1px] leading-[1.25] text-[8pt]"
                                     dangerouslySetInnerHTML={{ __html: row.price || "&nbsp;" }}
                                   />
                                 </td>
@@ -2650,9 +2650,9 @@ export default function QuotationBuilder() {
                                 onMouseUp={(e) => handleCellMouseUp(e, idx, 4)}
                                 onClick={() => handleCellClick(idx, 4)}
                                 onContextMenu={(e) => handleCellContextMenu(e, idx, 4)}
-                                className={getCellClassName(idx, 4, "border border-black text-right pr-2 font-mono text-[8.5pt] font-semibold text-slate-800 align-middle py-1 transition-all cursor-pointer")}
+                                className={getCellClassName(idx, 4, "border border-black text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
                               >
-                                <div style={cellStyle} className="whitespace-normal break-all leading-tight text-[8.5pt]">
+                                <div style={cellStyle} className="whitespace-nowrap overflow-visible leading-[1.25] text-[8pt] sm:text-[8.5pt]">
                                   {row.amount !== 0 ? row.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "0.00"}
                                 </div>
                               </td>
@@ -2853,20 +2853,20 @@ export default function QuotationBuilder() {
                           </>
                         ) : (
                           <tr className="align-stretch">
-                            <td className="amount-words-container w-1/2 border-r-2 border-black p-1.5 bg-slate-50/50 text-left align-middle">
+                            <td className="amount-words-container w-1/2 border-r-2 border-black p-1 bg-slate-50/50 text-left align-middle">
                               <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                 Amount in Words:
                               </span>
-                              <span className="text-[8pt] font-mono italic text-black font-black uppercase leading-tight">
+                              <span className="text-[7.5pt] font-mono italic text-black font-black uppercase leading-tight">
                                 {numberToWords(calculatedGrandTotal)}
                               </span>
                             </td>
                             <td className="w-1/2 p-0 align-stretch">
-                              <div className="flex flex-row items-stretch h-full min-h-[52.5px] w-full">
-                                <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8.5pt] font-bold uppercase flex items-center justify-end">
+                              <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
+                                <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
                                   TOTAL
                                 </div>
-                                <div className="total-val flex-grow text-right pr-4 text-[9.5pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[52.5px]">
+                                <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
                                   {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                 </div>
                               </div>
@@ -2884,29 +2884,29 @@ export default function QuotationBuilder() {
             <tr>
               <td className="border-none p-0 m-0">
                 {/* Signatures & Stamps section - repeated on every page while printing */}
-                <div className="sig-section mt-4 pt-1 flex flex-row justify-between gap-6 sm:gap-10">
-                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[68px]">
-                    <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold text-black">
+                <div className="sig-section mt-2 pt-0.5 flex flex-row justify-between gap-6 sm:gap-10">
+                  <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-end h-[50px]">
+                    <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold text-black">
                       Receiver's Signature
                     </div>
                   </div>
                   
                   {/* Authorized stamp hidden for Challan block - only receiving signature to challan */}
                   {docType !== "challan" && (
-                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[68px] relative">
-                      <div className="sig-title text-[8.5pt] font-bold text-black">For Comilla Traders</div>
+                    <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-between h-[50px] relative">
+                      <div className="sig-title text-[8pt] font-bold text-black">For Comilla Traders</div>
                       
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-1">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
                         <img 
                           src="https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"
                           alt="Comilla Traders Stamp"
                           referrerPolicy="no-referrer"
-                          className="w-[85px] h-[85px] object-contain select-none"
+                          className="w-[72px] h-[72px] object-contain select-none"
                           style={{ printColorAdjust: "exact" }}
                         />
                       </div>
 
-                      <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold relative z-20 text-black">
+                      <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold relative z-20 text-black">
                         Authorized Signature
                       </div>
                     </div>
@@ -2914,12 +2914,12 @@ export default function QuotationBuilder() {
                 </div>
 
                 {/* Non-returnable & non-exchangeable notice */}
-                <div className="doc-footer-notice text-center mt-2.5 pt-1 text-[11.5px] leading-[16px] font-bold text-black uppercase tracking-wider">
+                <div className="doc-footer-notice text-center mt-1.5 pt-0.5 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
                   ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
                 </div>
 
                 {/* Print bottom margin spacer */}
-                <div className="print-page-bottom-spacer hidden print:block h-[4mm] w-full" />
+                <div className="print-page-bottom-spacer hidden print:block h-[2mm] w-full" />
               </td>
             </tr>
           </tfoot>

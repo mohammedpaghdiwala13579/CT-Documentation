@@ -38,13 +38,13 @@ input[type="number"] {
   /* Set standard A4 page size with consistent page margins so every page has identical bottom spacing */
   @page {
     size: A4 portrait;
-    margin-top: 8mm;
-    margin-bottom: 12mm;
-    margin-left: 8mm;
-    margin-right: 8mm;
+    margin-top: 6mm;
+    margin-bottom: 8mm;
+    margin-left: 6mm;
+    margin-right: 6mm;
     @bottom-center {
       content: "Page " counter(page) " of " counter(pages);
-      font-size: 7.5pt;
+      font-size: 7pt;
       font-family: Arial, sans-serif;
       font-weight: bold;
       color: #334155;
@@ -148,8 +148,8 @@ input[type="number"] {
     width: 100% !important;
     border-bottom-width: 1.5px !important;
     border-bottom-color: #000000 !important;
-    padding-bottom: 3px !important;
-    margin-bottom: 4px !important;
+    padding-bottom: 2px !important;
+    margin-bottom: 3px !important;
     clear: both !important;
   }
 
@@ -168,24 +168,24 @@ input[type="number"] {
   }
 
   .logo-container {
-    height: 60px !important;
-    width: 60px !important;
+    height: 46px !important;
+    width: 46px !important;
     display: inline-block !important;
     vertical-align: middle !important;
-    margin-right: 12px !important;
+    margin-right: 8px !important;
   }
 
   .logo-container + div {
     display: inline-block !important;
     vertical-align: middle !important;
-    width: calc(100% - 76px) !important;
+    width: calc(100% - 58px) !important;
   }
 
   .doc-title {
     margin-top: 1px !important;
     margin-bottom: 2px !important;
-    font-size: 11pt !important;
-    letter-spacing: 6px !important;
+    font-size: 10.5pt !important;
+    letter-spacing: 5px !important;
     text-align: center !important;
     clear: both !important;
   }
@@ -193,7 +193,7 @@ input[type="number"] {
   .meta-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 4px !important;
+    gap: 3px !important;
     width: 100% !important;
     margin-bottom: 2px !important;
     clear: both !important;
@@ -203,7 +203,7 @@ input[type="number"] {
     display: block !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    padding: 3px 4px !important;
+    padding: 2px 3.5px !important;
     border: 1px solid #000000 !important;
     margin: 0 !important;
   }
@@ -211,13 +211,13 @@ input[type="number"] {
   .meta-grid .meta-box.grid-cols-2 {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .meta-grid .meta-box.grid-cols-3 {
     display: grid !important;
     grid-template-columns: 1fr 1fr 1fr !important;
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .meta-box .meta-inner-field {
@@ -274,7 +274,7 @@ input[type="number"] {
     margin: 0 !important;
   }
 
-  /* Table styling for perfect alignments and borders */
+  /* Table styling for perfect alignments, compact sentence fit, and crisp borders */
   .main-table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -282,16 +282,33 @@ input[type="number"] {
     table-layout: fixed !important;
   }
 
-  .main-table th, 
+  .main-table th {
+    border: 1px solid #000000 !important;
+    padding: 2px 3.5px !important;
+    font-size: 7.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+    background-color: #f8fafc !important;
+  }
+
   .main-table td {
     border: 1px solid #000000 !important;
-    padding: 2.5px 5px !important; /* ultra-compact padding */
+    padding: 1.5px 3.5px !important; /* tight vertical fit directly to sentence size */
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
+    vertical-align: middle !important;
+  }
+
+  .main-table td * {
+    line-height: 1.25 !important;
+    overflow: visible !important;
   }
 
   .main-table tr {
     page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* Ensure scroll wrappers do not have negative margins or overflow when printing */
@@ -305,11 +322,13 @@ input[type="number"] {
   /* Ensure stamp and signature section don't break across pages */
   .closing-wrap {
     page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .sig-section {
     page-break-inside: avoid !important;
-    margin-top: 16px !important; /* tighter vertical gap */
+    break-inside: avoid !important;
+    margin-top: 8px !important; /* compact vertical gap to save page space */
   }
 
   /* Remove any cell outlines, focus borders, and selection highlights on print */
@@ -437,7 +456,7 @@ input[type="number"] {
   box-shadow: none !important;
   border: none !important;
   margin: 0 !important;
-  padding: 12mm !important;
+  padding: 5mm !important;
   width: 210mm !important;
   min-height: 297mm !important;
   background-color: #ffffff !important;
