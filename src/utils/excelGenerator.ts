@@ -654,11 +654,11 @@ export const paginateRowsForExcel = (
   
   // Maximum usable vertical height budget for items on A4 page (in points)
   // A4 = 842pt. Margins (36pt) -> 806pt usable.
-  // Header: Row 1 (18pt) + 10-row gap (95pt) + Metadata (75pt) + Table Header (18pt) = 206pt.
-  // Footer: Signatures + Notice = 75-80pt.
+  // Header: Row 1 (18pt) + 10-row gap at normal uncompressed 15pt (150pt) + Metadata (75pt) + Table Header (18pt) = 261pt.
+  // Footer: Signatures + Notice = 80pt.
   // Last page totals block: Invoice ~66pt, Quotation ~20pt, Challan 0pt.
-  const REGULAR_PAGE_BUDGET = isChallan ? 520 : 500;
-  const LAST_PAGE_BUDGET = isChallan ? 520 : isInvoice ? 455 : 490;
+  const REGULAR_PAGE_BUDGET = isChallan ? 465 : 450;
+  const LAST_PAGE_BUDGET = isChallan ? 465 : isInvoice ? 385 : 430;
 
   const chunks: ExcelPageChunk[] = [];
   let currentChunk: QuotationRow[] = [];
@@ -845,9 +845,10 @@ const buildDocumentWorksheet = (
   titleCell.font = { name: "Arial", size: 11.0, bold: true, color: { argb: "000000" } };
   titleCell.alignment = { vertical: "middle", horizontal: "center" };
 
-  // 10 Blank Rows Gap (Rows 2 to 11) for pre-printed letterhead business header (compact 9.5pt each)
+  // 10 Blank Rows Gap (Rows 2 to 11) for pre-printed letterhead business header:
+  // Normal standard cell size (15pt each) and not compressed
   for (let r = 2; r <= 11; r++) {
-    worksheet.getRow(r).height = 9.5;
+    worksheet.getRow(r).height = 15;
   }
 
   // =========================================================================
