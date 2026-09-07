@@ -13,6 +13,7 @@ interface RichTextCellProps {
   className?: string;
   dataRow?: number;
   dataCol?: number;
+  syncId?: string;
   placeholder?: string;
   readOnly?: boolean;
 }
@@ -29,11 +30,21 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
   className,
   dataRow,
   dataCol,
+  syncId,
   placeholder,
   readOnly = false,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const isComposingRef = useRef(false);
+
+  // Synchronize with paired print preview DOM element immediately
+  const syncToPrintElement = useCallback((html: string) => {
+    if (!syncId || typeof document === "undefined") return;
+    const printEl = document.getElementById(`print-${syncId}`);
+    if (printEl) {
+      printEl.innerHTML = html || "&nbsp;";
+    }
+  }, [syncId]);
 
   // Synchronize external value with innerHTML when element is not active or initially loaded
   useEffect(() => {
@@ -43,16 +54,38 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
       if (currentHTML !== normalizedValue && document.activeElement !== editorRef.current) {
         editorRef.current.innerHTML = normalizedValue;
       }
+      syncToPrintElement(normalizedValue);
     }
-  }, [value]);
+  }, [value, syncToPrintElement]);
 
   const handleInput = useCallback(() => {
     if (editorRef.current && !isComposingRef.current) {
       const html = editorRef.current.innerHTML;
       onChange(html);
+      syncToPrintElement(html);
       saveCurrentSelection();
     }
-  }, [onChange]);
+  }, [onChange, syncToPrintElement]);
+
+  // Native input event listener to capture programmatic and execCommand DOM mutations immediately
+  useEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+
+    const onNativeInput = () => {
+      if (!isComposingRef.current) {
+        const html = el.innerHTML;
+        onChange(html);
+        syncToPrintElement(html);
+        saveCurrentSelection();
+      }
+    };
+
+    el.addEventListener("input", onNativeInput);
+    return () => {
+      el.removeEventListener("input", onNativeInput);
+    };
+  }, [onChange, syncToPrintElement]);
 
   // Handle typing to ensure formatting resets for subsequent words in the same cell
   const handleCellKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -113,6 +146,7 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
       suppressContentEditableWarning
       data-row={dataRow}
       data-col={dataCol}
+      data-sync-id={syncId}
       onInput={handleInput}
       onFocus={(e) => {
         saveCurrentSelection();

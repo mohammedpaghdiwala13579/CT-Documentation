@@ -322,6 +322,73 @@ input[type="number"] {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Highlighting (Background Colors) must strictly print with exact colors */
+  mark,
+  span[style*="background"],
+  span[style*="background-color"],
+  [style*="background-color"],
+  [style*="background"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    -webkit-box-decoration-break: clone !important;
+    box-decoration-break: clone !important;
+    display: inline !important;
+  }
+
+  /* Text Colors must strictly print with exact colors */
+  font[color],
+  span[style*="color"],
+  [style*="color"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Bold elements in print */
+  b,
+  strong,
+  span[style*="font-weight: bold"],
+  span[style*="font-weight:bold"],
+  span[style*="font-weight: 700"],
+  span[style*="font-weight:700"],
+  [style*="font-weight: bold"],
+  [style*="font-weight:bold"],
+  [style*="font-weight: 700"],
+  [style*="font-weight:700"] {
+    font-weight: 700 !important;
+  }
+
+  /* Italic elements in print */
+  i,
+  em,
+  span[style*="font-style: italic"],
+  span[style*="font-style:italic"],
+  [style*="font-style: italic"],
+  [style*="font-style:italic"] {
+    font-style: italic !important;
+  }
+
+  /* Underline elements in print */
+  u,
+  span[style*="text-decoration: underline"],
+  span[style*="text-decoration:underline"],
+  [style*="text-decoration: underline"],
+  [style*="text-decoration:underline"] {
+    text-decoration: underline !important;
+    -webkit-text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+  }
+
+  span[style*="text-decoration-style: double"],
+  [style*="text-decoration-style: double"],
+  [style*="text-decoration-style:double"] {
+    text-decoration: underline !important;
+    text-decoration-style: double !important;
+    -webkit-text-decoration-style: double !important;
   }
 }
 
@@ -373,4 +440,66 @@ input[type="number"] {
   background-color: #ffffff !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+/* Ensure highlights, colors, bold, italic, underline, and font sizes apply in generated PDF */
+.is-generating-pdf mark,
+.is-generating-pdf span[style*="background"],
+.is-generating-pdf span[style*="background-color"],
+.is-generating-pdf [style*="background-color"],
+.is-generating-pdf [style*="background"] {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  -webkit-box-decoration-break: clone !important;
+  box-decoration-break: clone !important;
+  display: inline !important;
+}
+
+.is-generating-pdf font[color],
+.is-generating-pdf span[style*="color"],
+.is-generating-pdf [style*="color"] {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  color-adjust: exact !important;
+}
+
+.is-generating-pdf b,
+.is-generating-pdf strong,
+.is-generating-pdf span[style*="font-weight: bold"],
+.is-generating-pdf span[style*="font-weight:bold"],
+.is-generating-pdf span[style*="font-weight: 700"],
+.is-generating-pdf span[style*="font-weight:700"],
+.is-generating-pdf [style*="font-weight: bold"],
+.is-generating-pdf [style*="font-weight:bold"],
+.is-generating-pdf [style*="font-weight: 700"],
+.is-generating-pdf [style*="font-weight:700"] {
+  font-weight: 700 !important;
+}
+
+.is-generating-pdf i,
+.is-generating-pdf em,
+.is-generating-pdf span[style*="font-style: italic"],
+.is-generating-pdf span[style*="font-style:italic"],
+.is-generating-pdf [style*="font-style: italic"],
+.is-generating-pdf [style*="font-style:italic"] {
+  font-style: italic !important;
+}
+
+.is-generating-pdf u,
+.is-generating-pdf span[style*="text-decoration: underline"],
+.is-generating-pdf span[style*="text-decoration:underline"],
+.is-generating-pdf [style*="text-decoration: underline"],
+.is-generating-pdf [style*="text-decoration:underline"] {
+  text-decoration: underline !important;
+  -webkit-text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+.is-generating-pdf span[style*="text-decoration-style: double"],
+.is-generating-pdf [style*="text-decoration-style: double"],
+.is-generating-pdf [style*="text-decoration-style:double"] {
+  text-decoration: underline !important;
+  text-decoration-style: double !important;
+  -webkit-text-decoration-style: double !important;
 }

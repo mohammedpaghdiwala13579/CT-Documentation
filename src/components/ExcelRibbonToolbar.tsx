@@ -11,6 +11,7 @@ import {
   FileSpreadsheet, 
   Download, 
   Printer, 
+  FileDown,
   X 
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
@@ -98,6 +99,8 @@ export interface ExcelRibbonToolbarProps {
   onExportExcel: () => void;
   isGeneratingExcel: boolean;
   onPrint: () => void;
+  onDownloadPDF?: () => void;
+  isGeneratingPDF?: boolean;
 }
 
 export default function ExcelRibbonToolbar({
@@ -126,7 +129,9 @@ export default function ExcelRibbonToolbar({
   onOpenExcelModal,
   onExportExcel,
   isGeneratingExcel,
-  onPrint
+  onPrint,
+  onDownloadPDF,
+  isGeneratingPDF,
 }: ExcelRibbonToolbarProps) {
   const currentFormat = activeFormat || propCurrentFormat || {};
   const hasSelection = propHasSelection !== undefined ? propHasSelection : true;
@@ -418,17 +423,32 @@ export default function ExcelRibbonToolbar({
             <span>{isGeneratingExcel ? "GENERATING..." : "EXPORT EXCEL"}</span>
           </button>
 
-          {/* Print A4 Button */}
+          {/* Print A4 / Save PDF Button */}
           <button
             type="button"
             id="btn-print-doc"
             onClick={onPrint}
-            className="px-2.5 py-1 bg-[#253252] hover:bg-[#32436e] text-indigo-200 hover:text-white border border-indigo-600/50 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1"
-            title="Print or Save as PDF"
+            className="px-3 py-1 bg-[#253252] hover:bg-[#32436e] active:scale-95 text-indigo-100 hover:text-white border border-indigo-500/60 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+            title="Print or Save as PDF (Ctrl+P) - Highlighting, font sizes, colors, bold, italic & underline are preserved"
           >
-            <Printer className="h-3 w-3 text-indigo-300" />
-            <span>PRINT A4</span>
+            <Printer className="h-3.5 w-3.5 text-indigo-300" />
+            <span>PRINT / SAVE PDF</span>
           </button>
+
+          {/* Direct Download PDF Button */}
+          {onDownloadPDF && (
+            <button
+              type="button"
+              id="btn-download-pdf"
+              onClick={onDownloadPDF}
+              disabled={isGeneratingPDF}
+              className="px-2.5 py-1 bg-[#2e1065]/60 hover:bg-[#3b0764] active:scale-95 text-purple-200 hover:text-white border border-purple-500/50 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1 disabled:opacity-60"
+              title="Download formatted PDF document directly"
+            >
+              <FileDown className="h-3 w-3 text-purple-300" />
+              <span>{isGeneratingPDF ? "GENERATING PDF..." : "DOWNLOAD PDF"}</span>
+            </button>
+          )}
         </div>
       </div>
 

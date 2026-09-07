@@ -1868,16 +1868,32 @@ export default function QuotationBuilder() {
     }
   };
 
+  const syncAllEditableFields = () => {
+    if (typeof document === "undefined") return;
+    const editables = document.querySelectorAll<HTMLElement>("[data-sync-id]");
+    editables.forEach((el) => {
+      const syncId = el.getAttribute("data-sync-id");
+      if (syncId) {
+        const printEl = document.getElementById(`print-${syncId}`);
+        if (printEl) {
+          printEl.innerHTML = el.innerHTML || "&nbsp;";
+        }
+      }
+    });
+  };
+
   const handlePrint = () => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    syncAllEditableFields();
     setSelectedCell(null);
     setSelectionStart(null);
     setSelectionEnd(null);
     setTimeout(() => {
+      syncAllEditableFields();
       window.print();
-    }, 50);
+    }, 120);
   };
 
   const handleDownloadPDF = () => {
@@ -1886,6 +1902,11 @@ export default function QuotationBuilder() {
     
     const element = document.querySelector(".sheet") as HTMLElement | null;
     if (!element) return;
+    
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    syncAllEditableFields();
     
     setIsGeneratingPDF(true);
     container.classList.add("is-generating-pdf");
@@ -2087,6 +2108,8 @@ export default function QuotationBuilder() {
           onExportExcel={handleDownloadExcel}
           isGeneratingExcel={isGeneratingExcel}
           onPrint={handlePrint}
+          onDownloadPDF={handleDownloadPDF}
+          isGeneratingPDF={isGeneratingPDF}
         />
       </div>
 
@@ -2168,11 +2191,13 @@ export default function QuotationBuilder() {
                       <label className="block text-[7pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Messers:</label>
                       <RichTextCell
                         value={messers}
+                        syncId="messers"
                         onChange={(val) => setMessers(val)}
                         placeholder="Enter Client/Ship details"
                         className="w-full border-b border-dotted border-slate-400 focus:border-black font-bold text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[22px]"
                       />
                       <div 
+                        id="print-messers"
                         className="hidden print:block font-bold text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words whitespace-pre-wrap leading-tight"
                         dangerouslySetInnerHTML={{ __html: messers || "&nbsp;" }}
                       />
@@ -2181,11 +2206,13 @@ export default function QuotationBuilder() {
                       <label className="block text-[7pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Address:</label>
                       <RichTextCell
                         value={address}
+                        syncId="address"
                         onChange={(val) => setAddress(val)}
                         placeholder="Enter delivery/billing address"
                         className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8.5pt] outline-none bg-transparent leading-tight py-0.5 no-print print:hidden min-h-[36px]"
                       />
                       <div 
+                        id="print-address"
                         className="hidden print:block text-[8.5pt] border-b border-dotted border-black min-h-[32px] py-0.5 break-words whitespace-pre-wrap leading-tight"
                         dangerouslySetInnerHTML={{ __html: address || "&nbsp;" }}
                       />
@@ -2442,6 +2469,7 @@ export default function QuotationBuilder() {
                                 >
                                   <RichTextCell
                                     value={row.desc}
+                                    syncId={`desc-${idx}`}
                                     onFocus={() => {
                                       setSelectedRowIndex(idx);
                                       setSelectedCell({ rowIndex: idx, colIndex: 0 });
@@ -2463,8 +2491,9 @@ export default function QuotationBuilder() {
                                     className="w-full min-w-full text-left border-none outline-none bg-transparent p-0 text-slate-800 text-[8.5pt] leading-normal block overflow-hidden py-0.5 whitespace-normal break-words no-print print:hidden font-normal"
                                   />
                                   <div 
+                                    id={`print-desc-${idx}`}
                                     style={cellStyle} 
-                                    className="hidden print:block whitespace-normal break-words text-left text-slate-900 leading-normal py-0.5 text-[8.5pt] font-normal"
+                                    className="hidden print:block whitespace-normal break-words text-left text-slate-900 leading-normal py-0.5 text-[8.5pt]"
                                     dangerouslySetInnerHTML={{ __html: row.desc || "&nbsp;" }}
                                   />
                                 </td>
@@ -2488,6 +2517,7 @@ export default function QuotationBuilder() {
                                 >
                                   <RichTextCell
                                     value={row.qty}
+                                    syncId={`qty-${idx}`}
                                     onFocus={() => {
                                       setSelectedRowIndex(idx);
                                       setSelectedCell({ rowIndex: idx, colIndex: 1 });
@@ -2501,6 +2531,7 @@ export default function QuotationBuilder() {
                                     className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
+                                    id={`print-qty-${idx}`}
                                     style={cellStyle} 
                                     className="hidden print:block whitespace-normal break-normal text-center font-mono text-slate-900 py-0.5 text-[8.5pt]"
                                     dangerouslySetInnerHTML={{ __html: row.qty || "&nbsp;" }}
@@ -2526,6 +2557,7 @@ export default function QuotationBuilder() {
                                 >
                                   <RichTextCell
                                     value={row.unit}
+                                    syncId={`unit-${idx}`}
                                     onFocus={() => {
                                       setSelectedRowIndex(idx);
                                       setSelectedCell({ rowIndex: idx, colIndex: 2 });
@@ -2539,6 +2571,7 @@ export default function QuotationBuilder() {
                                     className="w-full text-center border-none outline-none bg-transparent px-0 text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
+                                    id={`print-unit-${idx}`}
                                     style={cellStyle} 
                                     className="hidden print:block whitespace-normal break-normal text-center text-slate-900 py-0.5 text-[8.5pt]"
                                     dangerouslySetInnerHTML={{ __html: row.unit || "&nbsp;" }}
@@ -2564,6 +2597,7 @@ export default function QuotationBuilder() {
                                 >
                                   <RichTextCell
                                     value={row.price}
+                                    syncId={`price-${idx}`}
                                     onFocus={() => {
                                       setSelectedRowIndex(idx);
                                       setSelectedCell({ rowIndex: idx, colIndex: 3 });
@@ -2577,6 +2611,7 @@ export default function QuotationBuilder() {
                                     className="w-full text-center border-none outline-none bg-transparent px-0 font-mono text-slate-800 align-top overflow-hidden py-0.5 whitespace-normal break-normal no-print print:hidden text-[8.5pt]"
                                   />
                                   <div 
+                                    id={`print-price-${idx}`}
                                     style={cellStyle} 
                                     className="hidden print:block whitespace-normal break-normal text-center font-mono text-slate-900 py-0.5 text-[8.5pt]"
                                     dangerouslySetInnerHTML={{ __html: row.price || "&nbsp;" }}

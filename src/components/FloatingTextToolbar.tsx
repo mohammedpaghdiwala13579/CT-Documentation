@@ -11,7 +11,7 @@ import {
   X,
   Check,
 } from "lucide-react";
-import { applyInlineFormatting, InlineFormatType } from "../utils/textFormatter";
+import { applyInlineFormatting, InlineFormatType, syncToPrintElement } from "../utils/textFormatter";
 
 interface FloatingTextToolbarProps {
   onFormatted?: () => void;
@@ -244,6 +244,7 @@ export const FloatingTextToolbar: React.FC<FloatingTextToolbarProps> = ({ onForm
     // If target editable element is available, ensure input event fires and notify callback
     if (targetEditableRef.current) {
       targetEditableRef.current.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+      syncToPrintElement(targetEditableRef.current);
     }
 
     if (onFormatted) {

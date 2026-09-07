@@ -229,129 +229,147 @@ export function applyInlineFormatting(
 
   const normalizedType = type === "hiliteColor" ? "highlight" : type === "foreColor" ? "fontColor" : type;
 
-  // 1. HIGHLIGHT / BACKGROUND COLOR (strictly using document.execCommand)
+  // 1. HIGHLIGHT / BACKGROUND COLOR
   if (normalizedType === "highlight") {
     const isTransparent = !value || value === "transparent" || value === "none" || value === "inherit" || value === "";
 
-    try {
-      document.execCommand("styleWithCSS", false, "true");
-    } catch (e) {}
-
     if (isTransparent) {
       try {
+        document.execCommand("styleWithCSS", false, "true");
         document.execCommand("hiliteColor", false, "transparent");
-      } catch (e) {}
-      try {
         document.execCommand("backColor", false, "transparent");
       } catch (e) {}
       removeStyleFromRange(range, editableElement, "backgroundColor");
     } else {
       const colorVal = String(value);
-      let ok = false;
-      try {
-        ok = document.execCommand("hiliteColor", false, colorVal);
-      } catch (e) {}
-      if (!ok) {
-        try {
-          ok = document.execCommand("backColor", false, colorVal);
-        } catch (e) {}
-      }
+      removeStyleFromRange(range, editableElement, "backgroundColor");
+      wrapRangeWithStyle(range, {
+        backgroundColor: colorVal,
+        display: "inline",
+        padding: "1px 2px",
+        borderRadius: "2px",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+      });
     }
   }
 
-  // 2. FONT / TEXT COLOR (strictly using document.execCommand)
+  // 2. FONT / TEXT COLOR
   else if (normalizedType === "fontColor") {
     const isDefault = !value || value === "inherit" || value === "automatic" || value === "auto" || value === "#000000";
-    try {
-      document.execCommand("styleWithCSS", false, "true");
-    } catch (e) {}
-
     if (isDefault) {
       try {
+        document.execCommand("styleWithCSS", false, "true");
         document.execCommand("foreColor", false, "#000000");
       } catch (e) {}
       removeStyleFromRange(range, editableElement, "color");
     } else {
       const colorVal = String(value);
-      try {
-        document.execCommand("foreColor", false, colorVal);
-      } catch (e) {}
+      removeStyleFromRange(range, editableElement, "color");
+      wrapRangeWithStyle(range, {
+        color: colorVal,
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+      });
     }
   }
 
-  // 3. BOLD (strictly using document.execCommand)
+  // 3. BOLD
   else if (normalizedType === "bold") {
-    document.execCommand("bold", false, undefined);
+    let isCurrentlyBold = false;
+    try {
+      isCurrentlyBold = document.queryCommandState("bold");
+    } catch (e) {}
+
+    if (isCurrentlyBold) {
+      removeStyleFromRange(range, editableElement, "fontWeight");
+      try {
+        document.execCommand("bold", false, undefined);
+      } catch (e) {}
+    } else {
+      wrapRangeWithStyle(range, { fontWeight: "bold" });
+    }
   }
 
-  // 4. ITALIC (strictly using document.execCommand)
+  // 4. ITALIC
   else if (normalizedType === "italic") {
-    document.execCommand("italic", false, undefined);
+    let isCurrentlyItalic = false;
+    try {
+      isCurrentlyItalic = document.queryCommandState("italic");
+    } catch (e) {}
+
+    if (isCurrentlyItalic) {
+      removeStyleFromRange(range, editableElement, "fontStyle");
+      try {
+        document.execCommand("italic", false, undefined);
+      } catch (e) {}
+    } else {
+      wrapRangeWithStyle(range, { fontStyle: "italic" });
+    }
   }
 
-  // 5. UNDERLINE (strictly using document.execCommand)
+  // 5. UNDERLINE
   else if (normalizedType === "underline") {
     if (value === "none") {
       removeStyleFromRange(range, editableElement, "textDecoration");
+    } else if (value === "double") {
+      removeStyleFromRange(range, editableElement, "textDecoration");
+      wrapRangeWithStyle(range, {
+        textDecoration: "underline",
+        textDecorationStyle: "double",
+      });
     } else {
-      document.execCommand("underline", false, undefined);
+      let isCurrentlyUnderline = false;
+      try {
+        isCurrentlyUnderline = document.queryCommandState("underline");
+      } catch (e) {}
+
+      if (isCurrentlyUnderline) {
+        removeStyleFromRange(range, editableElement, "textDecoration");
+        try {
+          document.execCommand("underline", false, undefined);
+        } catch (e) {}
+      } else {
+        wrapRangeWithStyle(range, { textDecoration: "underline" });
+      }
     }
   }
 
-  // 6. FONT SIZE (strictly using document.execCommand)
+  // 6. FONT SIZE (Reliable pt size)
   else if (normalizedType === "fontSize") {
     const ptVal = typeof value === "number" ? value : parseFloat(String(value)) || 11;
     const sizeStr = `${ptVal}pt`;
-
-    // Ensure styleWithCSS is false so fontSize generates <font size="7"> with distinct marker
-    try {
-      document.execCommand("styleWithCSS", false, "false");
-    } catch (e) {}
-
-    // Use placeholder marker size "7"
-    const success = document.execCommand("fontSize", false, "7");
-    if (success) {
-      // Find all generated <font size="7"> strictly within this editableElement and apply exact pt size
-      const fontNodes = editableElement.querySelectorAll('font[size="7"]');
-      fontNodes.forEach((node) => {
-        node.removeAttribute("size");
-        (node as HTMLElement).style.fontSize = sizeStr;
-      });
-    } else {
-      // Fallback with styleWithCSS true
-      try {
-        document.execCommand("styleWithCSS", false, "true");
-        document.execCommand("fontSize", false, "7");
-        const spans = editableElement.querySelectorAll('span[style*="font-size"]');
-        spans.forEach((span) => {
-          (span as HTMLElement).style.fontSize = sizeStr;
-        });
-      } catch (e) {}
-    }
+    removeStyleFromRange(range, editableElement, "fontSize");
+    wrapRangeWithStyle(range, {
+      fontSize: sizeStr,
+      lineHeight: "1.25",
+    });
   }
 
-  // 7. FONT FAMILY (strictly using document.execCommand)
+  // 7. FONT FAMILY
   else if (normalizedType === "fontFamily") {
     const familyStr = String(value || "Arial, sans-serif");
-    try {
-      document.execCommand("fontName", false, familyStr);
-    } catch (e) {}
+    removeStyleFromRange(range, editableElement, "fontFamily");
+    wrapRangeWithStyle(range, { fontFamily: familyStr });
   }
 
-  // 8. CLEAR FORMATTING / RESET SPECIFIC WORD (strictly using document.execCommand)
+  // 8. CLEAR FORMATTING / RESET SPECIFIC WORD
   else if (normalizedType === "clearFormat" || normalizedType === "resetWord") {
     try {
       document.execCommand("removeFormat", false, undefined);
     } catch (e) {}
     try {
       document.execCommand("hiliteColor", false, "transparent");
-    } catch (e) {}
-    try {
       document.execCommand("backColor", false, "transparent");
     } catch (e) {}
     removeStyleFromRange(range, editableElement, "backgroundColor");
     removeStyleFromRange(range, editableElement, "color");
+    removeStyleFromRange(range, editableElement, "fontSize");
+    removeStyleFromRange(range, editableElement, "fontWeight");
+    removeStyleFromRange(range, editableElement, "fontStyle");
     removeStyleFromRange(range, editableElement, "textDecoration");
+    removeStyleFromRange(range, editableElement, "fontFamily");
+    resetFormattingInRange(range, editableElement);
   }
 
   // Update saved selection after formatting
@@ -360,7 +378,24 @@ export function applyInlineFormatting(
   // Dispatch an input event so React immediately captures the innerHTML state update
   editableElement.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
+  // Synchronize to paired print DOM element immediately if data-sync-id exists
+  syncToPrintElement(editableElement);
+
   return true;
+}
+
+/**
+ * Synchronizes an editable element's innerHTML to its paired print-only element
+ */
+export function syncToPrintElement(editableElement: HTMLElement | null) {
+  if (!editableElement || typeof document === "undefined") return;
+  const syncId = editableElement.getAttribute("data-sync-id");
+  if (syncId) {
+    const printEl = document.getElementById(`print-${syncId}`);
+    if (printEl) {
+      printEl.innerHTML = editableElement.innerHTML || "&nbsp;";
+    }
+  }
 }
 
 /**
@@ -395,9 +430,13 @@ function wrapRangeWithStyle(range: Range, styles: Record<string, string>) {
 }
 
 /**
- * Removes a specific CSS style property (like backgroundColor or color) from within a range
+ * Removes a specific CSS style property from within a range
  */
-function removeStyleFromRange(range: Range, container: HTMLElement, styleProp: "backgroundColor" | "color" | "textDecoration") {
+function removeStyleFromRange(
+  range: Range,
+  container: HTMLElement,
+  styleProp: "backgroundColor" | "color" | "textDecoration" | "fontSize" | "fontWeight" | "fontStyle" | "fontFamily"
+) {
   try {
     // Find any styled spans intersecting or containing the range
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, null);
@@ -406,7 +445,7 @@ function removeStyleFromRange(range: Range, container: HTMLElement, styleProp: "
     let curr = walker.nextNode();
     while (curr) {
       if (curr instanceof HTMLElement && range.intersectsNode(curr)) {
-        if (curr.style[styleProp]) {
+        if ((curr.style as any)[styleProp]) {
           nodesToClean.push(curr);
         }
       }
@@ -414,7 +453,7 @@ function removeStyleFromRange(range: Range, container: HTMLElement, styleProp: "
     }
 
     nodesToClean.forEach((el) => {
-      el.style[styleProp] = "";
+      (el.style as any)[styleProp] = "";
       // If element has no styles and is a span, unwrap it
       if (!el.getAttribute("style") && el.tagName.toLowerCase() === "span") {
         el.replaceWith(...Array.from(el.childNodes));
