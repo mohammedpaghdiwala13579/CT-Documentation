@@ -1464,7 +1464,7 @@ const buildDocumentWorksheet = (
     if (isInvoice) {
       // Row 1: SUBTOTAL
       const subtotalLbl = worksheet.getCell(`E${totalRow}`);
-      subtotalLbl.value = totalPages > 1 ? "GRAND SUBTOTAL" : "SUBTOTAL";
+      subtotalLbl.value = "SUBTOTAL";
       subtotalLbl.font = { name: "Arial", size: 8.0, bold: true };
       subtotalLbl.alignment = { vertical: "middle", horizontal: "right" };
       subtotalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1492,9 +1492,9 @@ const buildDocumentWorksheet = (
       vatValCell.alignment = { vertical: "middle", horizontal: "right" };
       vatValCell.numFmt = "#,##0.00";
 
-      // Row 3: TRANSPORTATION
+      // Row 3: TRANS.
       const transLbl = worksheet.getCell(`E${totalRow + 2}`);
-      transLbl.value = "TRANSPORTATION FEE";
+      transLbl.value = "TRANS.";
       transLbl.font = { name: "Arial", size: 8.0, bold: true };
       transLbl.alignment = { vertical: "middle", horizontal: "right" };
       transLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1505,16 +1505,16 @@ const buildDocumentWorksheet = (
       transValCell.alignment = { vertical: "middle", horizontal: "right" };
       transValCell.numFmt = "#,##0.00";
 
-      // Row 4: GRAND TOTAL
+      // Row 4: GRAND TOTAL (decreased font size by 1)
       const grandLbl = worksheet.getCell(`E${totalRow + 3}`);
       grandLbl.value = "GRAND TOTAL";
-      grandLbl.font = { name: "Arial", size: 8.5, bold: true };
+      grandLbl.font = { name: "Arial", size: 7.5, bold: true };
       grandLbl.alignment = { vertical: "middle", horizontal: "right" };
       grandLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE0E7FF" } }; // Subtle Indigo
 
       const grandValCell = worksheet.getCell(`F${totalRow + 3}`);
       grandValCell.value = finalGrandTotal;
-      grandValCell.font = { name: "Arial", size: 9.5, bold: true };
+      grandValCell.font = { name: "Arial", size: 8.5, bold: true };
       grandValCell.alignment = { vertical: "middle", horizontal: "right" };
       grandValCell.numFmt = "#,##0.00";
 
@@ -1534,7 +1534,7 @@ const buildDocumentWorksheet = (
       // Quotation TOTAL
       const totalLbl = worksheet.getCell(`E${totalRow}`);
       totalLbl.value = totalPages > 1 ? "GRAND TOTAL" : "TOTAL";
-      totalLbl.font = { name: "Arial", size: 8.5, bold: true };
+      totalLbl.font = { name: "Arial", size: 7.5, bold: true };
       totalLbl.alignment = { vertical: "middle", horizontal: "right" };
       totalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
@@ -1544,7 +1544,7 @@ const buildDocumentWorksheet = (
       } else {
         valCell.value = subtotalValue;
       }
-      valCell.font = { name: "Arial", size: 9.0, bold: true };
+      valCell.font = { name: "Arial", size: 8.0, bold: true };
       valCell.alignment = { vertical: "middle", horizontal: "right" };
       valCell.numFmt = "#,##0.00";
 
