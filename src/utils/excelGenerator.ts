@@ -188,18 +188,13 @@ export const htmlToPlainText = (html: string): string => {
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'");
 
-  let result = "";
   if (typeof DOMParser !== "undefined") {
     try {
       const doc = new DOMParser().parseFromString(replaced, "text/html");
-      result = (doc.body.textContent || "").replace(/\u00A0/g, " ");
-    } catch (e) {
-      result = replaced.replace(/<[^>]*>/g, "").replace(/\u00A0/g, " ");
-    }
-  } else {
-    result = replaced.replace(/<[^>]*>/g, "").replace(/\u00A0/g, " ");
+      return (doc.body.textContent || "").replace(/\u00A0/g, " ");
+    } catch (e) {}
   }
-  return result.replace(/^[\r\n]+/, "").replace(/[\r\n]+$/, "").trim();
+  return replaced.replace(/<[^>]*>/g, "").replace(/\u00A0/g, " ");
 };
 
 interface TextRunStyle {
@@ -234,18 +229,22 @@ export function parseHtmlToExcelRuns(
 
   // If no HTML tags and no entities, return single run with base font
   if (!htmlOrText.includes("<") && !htmlOrText.includes("&")) {
-    const cleanText = htmlOrText.replace(/^[\r\n]+/, "").replace(/[\r\n]+$/, "").trim();
     return {
-      richText: cleanText ? [{ text: cleanText, font: { ...baseFont } }] : [],
-      plainText: cleanText,
+      richText: [
+        {
+          text: htmlOrText,
+          font: { ...baseFont },
+        },
+      ],
+      plainText: htmlOrText,
       hasFormatting: false,
     };
   }
 
   if (typeof DOMParser === "undefined") {
-    const clean = stripHtml(htmlOrText).trim();
+    const clean = stripHtml(htmlOrText);
     return {
-      richText: clean ? [{ text: clean, font: { ...baseFont } }] : [],
+      richText: [{ text: clean, font: { ...baseFont } }],
       plainText: clean,
       hasFormatting: false,
     };
@@ -411,13 +410,17 @@ export function parseHtmlToExcelRuns(
         }
       }
 
-      const isBlock = (tag === "DIV" || tag === "P" || tag === "TR" || tag === "LI") && node !== root;
+      const isBlock = tag === "DIV" || tag === "P" || tag === "TR";
       if (isBlock && rawRuns.length > 0 && !rawRuns[rawRuns.length - 1].text.endsWith("\n")) {
         rawRuns.push({ text: "\n", style: { ...currentStyle } });
       }
 
       for (let i = 0; i < node.childNodes.length; i++) {
         traverse(node.childNodes[i], nextStyle);
+      }
+
+      if (isBlock && rawRuns.length > 0 && !rawRuns[rawRuns.length - 1].text.endsWith("\n")) {
+        rawRuns.push({ text: "\n", style: { ...currentStyle } });
       }
     }
   };
@@ -457,23 +460,6 @@ export function parseHtmlToExcelRuns(
     }
   }
 
-  // Trim leading whitespace & newlines from runs
-  while (consolidatedRuns.length > 0 && !consolidatedRuns[0].text.replace(/^[\r\n\s]+/, "")) {
-    consolidatedRuns.shift();
-  }
-  if (consolidatedRuns.length > 0) {
-    consolidatedRuns[0].text = consolidatedRuns[0].text.replace(/^[\r\n]+/, "");
-  }
-
-  // Trim trailing whitespace & newlines from runs to avoid extra blank lines in Excel cells
-  while (consolidatedRuns.length > 0 && !consolidatedRuns[consolidatedRuns.length - 1].text.replace(/[\r\n\s]+$/, "")) {
-    consolidatedRuns.pop();
-  }
-  if (consolidatedRuns.length > 0) {
-    const lastRun = consolidatedRuns[consolidatedRuns.length - 1];
-    lastRun.text = lastRun.text.replace(/[\r\n]+$/, "");
-  }
-
   // Convert to ExcelJS.RichText
   const richText: ExcelJS.RichText[] = consolidatedRuns.map((r) => {
     const font: Partial<ExcelJS.Font> = {
@@ -492,7 +478,7 @@ export function parseHtmlToExcelRuns(
     };
   });
 
-  const plainText = consolidatedRuns.map((r) => r.text).join("").trim();
+  const plainText = consolidatedRuns.map((r) => r.text).join("");
 
   return {
     richText,
@@ -585,15 +571,18 @@ export const calculateItemVisualLines = (
   const scale = fontSize > 0 ? 8.5 / fontSize : 1;
   const maxChars = Math.max(12, Math.floor((colWidth - 2.5) * 0.94 * scale));
 
-  const paragraphs = plain.split(/\r?\n/).map(p => p.trim()).filter(Boolean);
-  if (paragraphs.length === 0) return 1;
+  const paragraphs = plain.split(/\r?\n/);
   let totalLines = 0;
 
   for (const para of paragraphs) {
-    // Wrap words within maxChars
-    const words = para.split(/\s+/).filter(Boolean);
-    if (words.length === 0) continue;
+    const trimmed = para.trim();
+    if (!trimmed) {
+      totalLines += 1;
+      continue;
+    }
 
+    // Wrap words within maxChars
+    const words = trimmed.split(/\s+/);
     let currentLineLen = 0;
     let paraLines = 1;
 
@@ -626,17 +615,17 @@ export const calculateItemVisualLines = (
 
 /**
  * Calculates dynamic row height in points for item rows.
- * Provides comfortable vertical centering clearance (at least 17.5pt) so upper ascenders
- * and lower descenders of text never get cut off or touch cell borders.
+ * Provides comfortable vertical centering clearance (at least 19.5pt) so upper ascenders
+ * and lower descenders of text never get cut off or hidden behind cell borders.
  */
 export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
-  const lineRate = Math.max(12.5, fontSize * 1.35 + 1.2);
+  const lineRate = Math.max(12, fontSize * 1.35 + 1.0);
   if (visualLines <= 1) {
-    // Single line: 17.5pt ensures the sentence sits cleanly in the exact center of the box with ample padding
-    return Math.max(17.5, Math.round(fontSize * 1.35 + 5.0));
+    // Sized precisely according to sentence size so maximum items fit per page cleanly and clearly
+    return Math.max(16.5, Math.round(fontSize * 1.35 + 4.0));
   }
-  // Multi-line: calculates comfortable height for all wrapped lines with vertical centering padding
-  return Math.max(17.5, Math.round(visualLines * lineRate + 5.0));
+  // Multi-line: calculates exact height for all wrapped lines to fit sentences cleanly
+  return Math.max(16.5, Math.round(visualLines * lineRate + 4.0));
 };
 
 export interface ExcelPageChunk {
@@ -1204,7 +1193,7 @@ const buildDocumentWorksheet = (
         if (options?.isNumeric && options.numericVal !== undefined && !isNaN(options.numericVal)) {
           cell.value = options.numericVal;
         } else {
-          cell.value = parsed.plainText.trim();
+          cell.value = parsed.plainText;
         }
         cell.font = baseFont;
       }
@@ -1212,8 +1201,7 @@ const buildDocumentWorksheet = (
       cell.value = options.numericVal;
       cell.font = baseFont;
     } else if (rawValue !== undefined) {
-      const cleanRaw = typeof rawValue === "string" ? rawValue.replace(/^[\r\n]+/, "").replace(/[\r\n]+$/, "").trim() : rawValue;
-      cell.value = cleanRaw;
+      cell.value = rawValue;
       cell.font = baseFont;
     } else {
       cell.font = baseFont;
@@ -1235,11 +1223,11 @@ const buildDocumentWorksheet = (
     }
 
     // 4. Alignments (horizontal, vertical, wrapText, indent, orientation)
-    // Always vertically center text in the cell so text is never cut off, pushed against borders, or misaligned
+    // Always vertically center text in the box so no upper or lower part of the sentence gets hidden
     const alignObj: Partial<ExcelJS.Alignment> = {
       vertical: "middle",
       horizontal: fmt?.align || defaultAlign,
-      wrapText: cIndex === 0,
+      wrapText: true,
     };
 
     if (fmt?.indent) {
