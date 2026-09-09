@@ -446,6 +446,11 @@ input[type="number"] {
   display: block !important;
 }
 
+.is-generating-pdf .hidden.print\:inline,
+.is-generating-pdf .hidden.print\:inline-block {
+  display: inline !important;
+}
+
 .is-generating-pdf textarea.no-print,
 .is-generating-pdf input.no-print {
   display: none !important;

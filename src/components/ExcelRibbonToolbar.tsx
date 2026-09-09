@@ -85,6 +85,8 @@ export interface ExcelRibbonToolbarProps {
   onToggleVesselName?: (val: boolean) => void;
   includePortBerth?: boolean;
   onTogglePortBerth?: (val: boolean) => void;
+  includeDiscount?: boolean;
+  onToggleDiscount?: (val: boolean) => void;
   autoSaveEnabled: boolean;
   onToggleAutoSave: (val: boolean) => void;
   lastSavedTime: string | null;
@@ -106,7 +108,6 @@ export interface ExcelRibbonToolbarProps {
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
-  onOpenGeminiChat?: () => void;
 }
 
 export default function ExcelRibbonToolbar({
@@ -125,6 +126,8 @@ export default function ExcelRibbonToolbar({
   onToggleVesselName,
   includePortBerth = true,
   onTogglePortBerth,
+  includeDiscount = false,
+  onToggleDiscount,
   autoSaveEnabled,
   onToggleAutoSave,
   lastSavedTime,
@@ -142,7 +145,6 @@ export default function ExcelRibbonToolbar({
   onPrint,
   onDownloadPDF,
   isGeneratingPDF,
-  onOpenGeminiChat,
 }: ExcelRibbonToolbarProps) {
   const currentFormat = activeFormat || propCurrentFormat || {};
   const hasSelection = propHasSelection !== undefined ? propHasSelection : true;
@@ -374,6 +376,21 @@ export default function ExcelRibbonToolbar({
             >
               <span>{includePortBerth ? "✓" : "+"} Port / Berth</span>
             </button>
+            {docType === "invoice" && (
+              <button
+                type="button"
+                id="ribbon-btn-discount"
+                onClick={() => onToggleDiscount?.(!includeDiscount)}
+                className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
+                  includeDiscount
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
+                }`}
+                title="Add or remove Discount option in Invoice"
+              >
+                <span>{includeDiscount ? "✓" : "+"} Discount</span>
+              </button>
+            )}
           </div>
         </div>
 

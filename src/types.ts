@@ -58,6 +58,9 @@ export interface SavedDocument {
   vatPercent?: number;
   transportationFee?: number;
   discountPercent?: number;
+  includeDiscount?: boolean;
+  discountType?: "percentage" | "fixed";
+  discountValue?: number;
   currency?: string;
   currencySymbol?: string;
   vesselName?: string;
@@ -76,14 +79,4 @@ export interface ExtractedItem {
   qty?: string;
   unit?: string;
   price?: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  role: "user" | "model";
-  content: string;
-  timestamp: string;
-  modelUsed?: GeminiModelChoice;
-  roleUsed?: AssistantRole;
-  extractedItems?: ExtractedItem[];
 }

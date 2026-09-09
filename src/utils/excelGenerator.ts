@@ -767,7 +767,11 @@ const buildDocumentWorksheet = (
   totalPages: number = 1,
   isLastPage: boolean = true,
   allDocumentRows: QuotationRow[] = [],
-  cellFormats?: CellFormatMap
+  cellFormats?: CellFormatMap,
+  includeDiscount: boolean = false,
+  discountType: "percentage" | "fixed" = "percentage",
+  discountValue: number = 0,
+  discountAmount: number = 0
 ) => {
   // Page Setup: Fit to 1 Page Wide and 1 Page Tall on standard A4 portrait
   worksheet.pageSetup = {
@@ -1407,25 +1411,40 @@ const buildDocumentWorksheet = (
   // =========================================================================
   if (!isChallan && isLastPage) {
     const totalRow = currentRowNum;
-    const numTotalRows = isInvoice ? 4 : 1;
+    const effectiveRowsForTotal = allDocumentRows.length > 0 ? allDocumentRows : pageRows;
+    const subtotalValue = effectiveRowsForTotal.reduce((sum, r) => sum + r.amount, 0);
+
+    // Calculate effective discount amount
+    let effectiveDiscountAmount = 0;
+    if (includeDiscount && (discountAmount > 0 || discountValue > 0)) {
+      if (discountAmount > 0) {
+        effectiveDiscountAmount = discountAmount;
+      } else if (discountType === "percentage") {
+        effectiveDiscountAmount = (subtotalValue * discountValue) / 100;
+      } else {
+        effectiveDiscountAmount = discountValue;
+      }
+      effectiveDiscountAmount = Math.min(subtotalValue, Math.max(0, effectiveDiscountAmount));
+    }
+
+    const hasDiscountRow = isInvoice && includeDiscount && effectiveDiscountAmount > 0;
+    const netAfterDiscount = Math.max(0, subtotalValue - effectiveDiscountAmount);
+    const calculatedVat = isInvoice ? (netAfterDiscount * (vatPercent || 0)) / 100 : 0;
+    const finalGrandTotal = isInvoice ? netAfterDiscount + calculatedVat + (transportationFee || 0) : subtotalValue;
+
+    const numTotalRows = isInvoice ? (hasDiscountRow ? 5 : 4) : 1;
 
     for (let rOffset = 0; rOffset < numTotalRows; rOffset++) {
       worksheet.getRow(totalRow + rOffset).height = 16.5;
     }
 
     if (isInvoice) {
-      worksheet.mergeCells(`A${totalRow}:D${totalRow + 3}`);
+      worksheet.mergeCells(`A${totalRow}:D${totalRow + numTotalRows - 1}`);
     } else {
       worksheet.mergeCells(`A${totalRow}:D${totalRow}`);
     }
 
     const wordCell = worksheet.getCell(`A${totalRow}`);
-
-    const effectiveRowsForTotal = allDocumentRows.length > 0 ? allDocumentRows : pageRows;
-    const subtotalValue = effectiveRowsForTotal.reduce((sum, r) => sum + r.amount, 0);
-    const calculatedVat = isInvoice ? (subtotalValue * (vatPercent || 0)) / 100 : 0;
-    const finalGrandTotal = isInvoice ? subtotalValue + calculatedVat + (transportationFee || 0) : subtotalValue;
-
     const words = numberToWords(Math.round(finalGrandTotal));
     const wordsStr = words ? words.toUpperCase() : "ZERO ONLY";
     wordCell.value = `AMOUNT IN WORDS: ${wordsStr}`;
@@ -1462,14 +1481,16 @@ const buildDocumentWorksheet = (
     const sumRange = `F18:F${totalRow - 1}`;
 
     if (isInvoice) {
+      let currentOffset = 0;
+
       // Row 1: SUBTOTAL
-      const subtotalLbl = worksheet.getCell(`E${totalRow}`);
+      const subtotalLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
       subtotalLbl.value = "SUBTOTAL";
       subtotalLbl.font = { name: "Arial", size: 8.0, bold: true };
       subtotalLbl.alignment = { vertical: "middle", horizontal: "right" };
       subtotalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
-      const subtotalValCell = worksheet.getCell(`F${totalRow}`);
+      const subtotalValCell = worksheet.getCell(`F${totalRow + currentOffset}`);
       if (totalPages === 1) {
         subtotalValCell.value = { formula: `=SUM(${sumRange})` } as any;
       } else {
@@ -1478,41 +1499,60 @@ const buildDocumentWorksheet = (
       subtotalValCell.font = { name: "Arial", size: 8.5, bold: true };
       subtotalValCell.alignment = { vertical: "middle", horizontal: "right" };
       subtotalValCell.numFmt = "#,##0.00";
+      currentOffset++;
 
-      // Row 2: VAT
-      const vatLbl = worksheet.getCell(`E${totalRow + 1}`);
+      // Optional Row: DISCOUNT
+      if (hasDiscountRow) {
+        const discountLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
+        discountLbl.value = discountType === "percentage" && discountValue > 0 ? `DISCOUNT (${discountValue}%)` : "DISCOUNT";
+        discountLbl.font = { name: "Arial", size: 8.0, bold: true };
+        discountLbl.alignment = { vertical: "middle", horizontal: "right" };
+        discountLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+
+        const discountValCell = worksheet.getCell(`F${totalRow + currentOffset}`);
+        discountValCell.value = -effectiveDiscountAmount;
+        discountValCell.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "FFBE123C" } };
+        discountValCell.alignment = { vertical: "middle", horizontal: "right" };
+        discountValCell.numFmt = "-#,##0.00;[Red]-#,##0.00;0.00";
+        currentOffset++;
+      }
+
+      // Row: VAT
+      const vatLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
       vatLbl.value = `VAT (${vatPercent || 0}%)`;
       vatLbl.font = { name: "Arial", size: 8.0, bold: true };
       vatLbl.alignment = { vertical: "middle", horizontal: "right" };
       vatLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
-      const vatValCell = worksheet.getCell(`F${totalRow + 1}`);
+      const vatValCell = worksheet.getCell(`F${totalRow + currentOffset}`);
       vatValCell.value = calculatedVat;
       vatValCell.font = { name: "Arial", size: 8.5, bold: true };
       vatValCell.alignment = { vertical: "middle", horizontal: "right" };
       vatValCell.numFmt = "#,##0.00";
+      currentOffset++;
 
-      // Row 3: TRANS.
-      const transLbl = worksheet.getCell(`E${totalRow + 2}`);
+      // Row: TRANS.
+      const transLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
       transLbl.value = "TRANS.";
       transLbl.font = { name: "Arial", size: 8.0, bold: true };
       transLbl.alignment = { vertical: "middle", horizontal: "right" };
       transLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
-      const transValCell = worksheet.getCell(`F${totalRow + 2}`);
+      const transValCell = worksheet.getCell(`F${totalRow + currentOffset}`);
       transValCell.value = transportationFee || 0;
       transValCell.font = { name: "Arial", size: 8.5, bold: true };
       transValCell.alignment = { vertical: "middle", horizontal: "right" };
       transValCell.numFmt = "#,##0.00";
+      currentOffset++;
 
-      // Row 4: GRAND TOTAL (decreased font size by 1)
-      const grandLbl = worksheet.getCell(`E${totalRow + 3}`);
+      // Row: GRAND TOTAL
+      const grandLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
       grandLbl.value = "GRAND TOTAL";
       grandLbl.font = { name: "Arial", size: 7.5, bold: true };
       grandLbl.alignment = { vertical: "middle", horizontal: "right" };
       grandLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE0E7FF" } }; // Subtle Indigo
 
-      const grandValCell = worksheet.getCell(`F${totalRow + 3}`);
+      const grandValCell = worksheet.getCell(`F${totalRow + currentOffset}`);
       grandValCell.value = finalGrandTotal;
       grandValCell.font = { name: "Arial", size: 8.5, bold: true };
       grandValCell.alignment = { vertical: "middle", horizontal: "right" };
@@ -1643,7 +1683,11 @@ export const generateExcelWorkbook = async (
   poNumber?: string,
   vatPercent?: number,
   transportationFee?: number,
-  cellFormats?: CellFormatMap
+  cellFormats?: CellFormatMap,
+  includeDiscount?: boolean,
+  discountType?: "percentage" | "fixed",
+  discountValue?: number,
+  discountAmount?: number
 ): Promise<ExcelJS.Workbook> => {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Comilla Traders";
@@ -1726,7 +1770,11 @@ export const generateExcelWorkbook = async (
       totalPages,
       chunk.isLastPage,
       effectiveRows,
-      cellFormats
+      cellFormats,
+      includeDiscount || false,
+      discountType || "percentage",
+      discountValue || 0,
+      discountAmount || 0
     );
   });
 

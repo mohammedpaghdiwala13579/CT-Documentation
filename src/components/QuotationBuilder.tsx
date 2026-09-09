@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Bot, Sparkles, Ship, DollarSign } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, DollarSign, Percent } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
 import { parseClipboardData, parseTSV, cleanCellText } from "../utils/tsvParser";
-import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, CellBorders, ExtractedItem } from "../types";
+import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, CellBorders } from "../types";
 import ExcelRibbonToolbar from "./ExcelRibbonToolbar";
 import RichTextCell from "./RichTextCell";
 import FloatingTextToolbar from "./FloatingTextToolbar";
@@ -13,7 +13,6 @@ import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelection
 // Lazy-loaded secondary components for instant initial app startup
 const SavedDocumentsPanel = React.lazy(() => import("./SavedDocumentsPanel"));
 const ExcelPasteModal = React.lazy(() => import("./ExcelPasteModal"));
-const GeminiChatDrawer = React.lazy(() => import("./GeminiChatDrawer"));
 
 enum OperationType {
   CREATE = 'create',
@@ -160,10 +159,25 @@ export default function QuotationBuilder() {
   const [poNumber, setPoNumber] = useState(() => initialDraft?.poNumber || "");
   const [vatPercent, setVatPercent] = useState<string>(() => initialDraft?.vatPercent !== undefined ? String(initialDraft.vatPercent) : "0");
   const [transportationFee, setTransportationFee] = useState<string>(() => initialDraft?.transportationFee !== undefined ? String(initialDraft.transportationFee) : "0");
-  const [discountPercent, setDiscountPercent] = useState<string>(() => initialDraft?.discountPercent !== undefined ? String(initialDraft.discountPercent) : "0");
+  const [includeDiscount, setIncludeDiscount] = useState<boolean>(() => {
+    if (initialDraft?.includeDiscount !== undefined) return Boolean(initialDraft.includeDiscount);
+    if (initialDraft?.discountValue !== undefined && Number(initialDraft.discountValue) > 0) return true;
+    if (initialDraft?.discountPercent !== undefined && Number(initialDraft.discountPercent) > 0) return true;
+    return false;
+  });
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">(() => {
+    if (initialDraft?.discountType === "fixed" || initialDraft?.discountType === "percentage") {
+      return initialDraft.discountType;
+    }
+    return "percentage";
+  });
+  const [discountValue, setDiscountValue] = useState<string>(() => {
+    if (initialDraft?.discountValue !== undefined) return String(initialDraft.discountValue);
+    if (initialDraft?.discountPercent !== undefined) return String(initialDraft.discountPercent);
+    return "0";
+  });
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [isGeminiChatOpen, setIsGeminiChatOpen] = useState(false);
 
   // In-app storage & Auto-Save states
   const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
@@ -289,6 +303,9 @@ export default function QuotationBuilder() {
           portBerth: data.portBerth || "",
           currency: data.currency || "USD",
           discountPercent: data.discountPercent || 0,
+          includeDiscount: data.includeDiscount !== undefined ? Boolean(data.includeDiscount) : ((data.discountValue && data.discountValue > 0) || (data.discountPercent && data.discountPercent > 0)),
+          discountType: data.discountType || "percentage",
+          discountValue: data.discountValue !== undefined ? data.discountValue : (data.discountPercent || 0),
           challanNo: data.challanNo || "",
           requisitionNo: data.requisitionNo || "",
           invoiceNo: data.invoiceNo || "",
@@ -307,48 +324,6 @@ export default function QuotationBuilder() {
 
     return () => unsubscribe();
   }, []);
-
-  // Handler to import structured maritime items parsed by Gemini AI Copilot
-  const handleImportItemsFromGemini = (extractedItems: ExtractedItem[]) => {
-    if (!extractedItems || extractedItems.length === 0) return;
-
-    setRows((prev) => {
-      const updated = [...prev];
-      // Find first empty row or append to end
-      let targetIndex = updated.findIndex((r) => !r.desc.trim() && !r.qty.trim() && !r.price.trim());
-      if (targetIndex === -1) {
-        targetIndex = updated.length;
-      }
-
-      extractedItems.forEach((item, i) => {
-        const destIndex = targetIndex + i;
-        const cleanPrice = String(item.price || "").replace(/[^0-9.]/g, "");
-        const cleanQty = String(item.qty || "1").trim();
-        const parsedQty = parseFloat(cleanQty) || 0;
-        const parsedPrice = parseFloat(cleanPrice) || 0;
-        const rowAmount = docType === "challan" ? 0 : parsedQty * parsedPrice;
-
-        const newRow: QuotationRow = {
-          sl: destIndex + 1,
-          desc: item.desc || "",
-          qty: cleanQty,
-          unit: item.unit || "PCS",
-          price: cleanPrice,
-          amount: isNaN(rowAmount) ? 0 : rowAmount,
-        };
-
-        if (destIndex < updated.length) {
-          updated[destIndex] = newRow;
-        } else {
-          updated.push(newRow);
-        }
-      });
-
-      return updated;
-    });
-
-    showToast(`Successfully added ${extractedItems.length} items from Comilla Traders Copilot!`);
-  };
 
   const generateUUID = () => {
     return 'doc-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now();
@@ -405,7 +380,10 @@ export default function QuotationBuilder() {
       includeVesselName: Boolean(includeVesselName),
       includePortBerth: Boolean(includePortBerth),
       currency: String(currency || ""),
-      discountPercent: parseFloat(discountPercent) || 0,
+      discountPercent: discountType === "percentage" ? (parseFloat(discountValue) || 0) : 0,
+      includeDiscount: Boolean(includeDiscount),
+      discountType,
+      discountValue: parseFloat(discountValue) || 0,
       challanNo: String(challanNo || ""),
       requisitionNo: String(requisitionNo || ""),
       invoiceNo: String(invoiceNo || ""),
@@ -449,7 +427,9 @@ export default function QuotationBuilder() {
     setIncludeVesselName(true);
     setIncludePortBerth(true);
     setCurrency("");
-    setDiscountPercent("0");
+    setIncludeDiscount(false);
+    setDiscountType("percentage");
+    setDiscountValue("0");
     setChallanNo("");
     setRequisitionNo("");
     setInvoiceNo("");
@@ -488,7 +468,14 @@ export default function QuotationBuilder() {
     setIncludeVesselName(doc.includeVesselName !== undefined ? Boolean(doc.includeVesselName) : (doc.vesselName !== undefined && doc.vesselName.trim() !== "" ? true : true));
     setIncludePortBerth(doc.includePortBerth !== undefined ? Boolean(doc.includePortBerth) : (doc.portBerth !== undefined && doc.portBerth.trim() !== "" ? true : true));
     setCurrency(doc.currency || "");
-    setDiscountPercent(doc.discountPercent !== undefined ? String(doc.discountPercent) : "0");
+    
+    const docHasDiscount = doc.includeDiscount !== undefined 
+      ? Boolean(doc.includeDiscount) 
+      : ((doc.discountValue !== undefined && Number(doc.discountValue) > 0) || (doc.discountPercent !== undefined && Number(doc.discountPercent) > 0));
+    setIncludeDiscount(docHasDiscount);
+    setDiscountType(doc.discountType === "fixed" ? "fixed" : "percentage");
+    setDiscountValue(doc.discountValue !== undefined ? String(doc.discountValue) : (doc.discountPercent !== undefined ? String(doc.discountPercent) : "0"));
+
     setChallanNo(doc.challanNo || "");
     setRequisitionNo(doc.requisitionNo || "");
     setInvoiceNo(doc.invoiceNo || "");
@@ -567,7 +554,10 @@ export default function QuotationBuilder() {
         includeVesselName: Boolean(includeVesselName),
         includePortBerth: Boolean(includePortBerth),
         currency: currency || "",
-        discountPercent: parseFloat(discountPercent) || 0,
+        discountPercent: discountType === "percentage" ? (parseFloat(discountValue) || 0) : 0,
+        includeDiscount: Boolean(includeDiscount),
+        discountType,
+        discountValue: parseFloat(discountValue) || 0,
         challanNo: challanNo || "",
         requisitionNo: requisitionNo || "",
         invoiceNo: invoiceNo || "",
@@ -660,7 +650,10 @@ export default function QuotationBuilder() {
         includeVesselName: Boolean(includeVesselName),
         includePortBerth: Boolean(includePortBerth),
         currency: String(currency || ""),
-        discountPercent: parseFloat(discountPercent) || 0,
+        discountPercent: discountType === "percentage" ? (parseFloat(discountValue) || 0) : 0,
+        includeDiscount: Boolean(includeDiscount),
+        discountType,
+        discountValue: parseFloat(discountValue) || 0,
         challanNo: String(challanNo || ""),
         requisitionNo: String(requisitionNo || ""),
         invoiceNo: String(invoiceNo || ""),
@@ -702,7 +695,9 @@ export default function QuotationBuilder() {
     includeVesselName,
     includePortBerth,
     currency,
-    discountPercent,
+    includeDiscount,
+    discountType,
+    discountValue,
     challanNo,
     requisitionNo,
     invoiceNo,
@@ -730,7 +725,10 @@ export default function QuotationBuilder() {
         includeVesselName,
         includePortBerth,
         currency,
-        discountPercent,
+        includeDiscount,
+        discountType,
+        discountValue,
+        discountPercent: discountType === "percentage" ? (parseFloat(discountValue) || 0) : 0,
         challanNo,
         requisitionNo,
         invoiceNo,
@@ -756,7 +754,9 @@ export default function QuotationBuilder() {
     includeVesselName,
     includePortBerth,
     currency,
-    discountPercent,
+    includeDiscount,
+    discountType,
+    discountValue,
     challanNo,
     requisitionNo,
     invoiceNo,
@@ -1680,13 +1680,22 @@ export default function QuotationBuilder() {
   const rowsTotal = rows.reduce((sum, r) => sum + r.amount, 0);
   const parsedVatPercent = parseNumericInput(vatPercent);
   const parsedTransportationFee = parseNumericInput(transportationFee);
-  const parsedDiscountPercent = parseNumericInput(discountPercent);
-  const discountAmount = (rowsTotal * parsedDiscountPercent) / 100;
+  const parsedDiscountValue = parseNumericInput(discountValue);
+
+  let discountAmount = 0;
+  if (docType === "invoice" && includeDiscount && parsedDiscountValue > 0) {
+    if (discountType === "percentage") {
+      discountAmount = (rowsTotal * parsedDiscountValue) / 100;
+    } else {
+      discountAmount = parsedDiscountValue;
+    }
+  }
+  discountAmount = Math.min(rowsTotal, Math.max(0, discountAmount));
   const netAfterDiscount = Math.max(0, rowsTotal - discountAmount);
   const vatAmount = docType === "invoice" ? (netAfterDiscount * parsedVatPercent) / 100 : 0;
   const grandTotal = docType === "invoice" 
     ? (netAfterDiscount + vatAmount + parsedTransportationFee) 
-    : netAfterDiscount;
+    : rowsTotal;
   const calculatedGrandTotal = docType === "challan" ? 0 : grandTotal;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, rowIndex: number, colIndex: number) => {
@@ -1937,7 +1946,11 @@ export default function QuotationBuilder() {
         poNumber,
         parseNumericInput(vatPercent),
         parseNumericInput(transportationFee),
-        cellFormats
+        cellFormats,
+        includeDiscount,
+        discountType,
+        parsedDiscountValue,
+        discountAmount
       );
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -2252,7 +2265,8 @@ export default function QuotationBuilder() {
           onPrint={handlePrint}
           onDownloadPDF={handleDownloadPDF}
           isGeneratingPDF={isGeneratingPDF}
-          onOpenGeminiChat={() => setIsGeminiChatOpen(true)}
+          includeDiscount={includeDiscount}
+          onToggleDiscount={(val) => setIncludeDiscount(val)}
         />
       </div>
 
@@ -2999,7 +3013,7 @@ export default function QuotationBuilder() {
                         {docType === "invoice" ? (
                           <>
                             <tr className="align-stretch">
-                              <td rowSpan={5} className="amount-words-container w-1/2 border-r-2 border-black p-1.5 bg-slate-50/50 text-left align-middle">
+                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r-2 border-black p-1.5 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
@@ -3010,7 +3024,26 @@ export default function QuotationBuilder() {
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                    SUBTOTAL
+                                    <div className="flex items-center justify-end gap-1.5 w-full pl-2">
+                                      <span>SUBTOTAL</span>
+                                      {!includeDiscount && (
+                                        <button
+                                          type="button"
+                                          id="btn-add-invoice-discount"
+                                          onClick={() => {
+                                            setIncludeDiscount(true);
+                                            if (!discountValue || discountValue === "0") {
+                                              setDiscountValue("");
+                                            }
+                                          }}
+                                          className="no-print print:hidden px-1 py-0.5 text-[6.5pt] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded cursor-pointer transition-colors flex items-center gap-0.5 shrink-0"
+                                          title="Add discount option to invoice"
+                                        >
+                                          <Plus className="w-2 h-2" />
+                                          <span>DISC.</span>
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight">
                                     {rowsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -3018,36 +3051,64 @@ export default function QuotationBuilder() {
                                 </div>
                               </td>
                             </tr>
-                            <tr className="align-stretch">
-                              <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                    <div className="flex items-center justify-end gap-1.5 w-full pl-2">
-                                      <span>DISCOUNT</span>
-                                      <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
-                                        <input
-                                          type="text"
-                                          value={discountPercent}
-                                          onChange={(e) => {
-                                            const val = e.target.value;
-                                            if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
-                                              setDiscountPercent(val);
-                                            }
-                                          }}
-                                          placeholder="0"
-                                          className="w-10 text-center border border-slate-300 rounded font-mono text-[8pt] bg-white text-slate-800 py-0.5"
-                                        />
-                                        <span>%</span>
+                            {includeDiscount && (
+                              <tr className="align-stretch">
+                                <td className="w-1/2 p-0 border-b border-black align-stretch">
+                                  <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
+                                    <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                      <div className="flex items-center justify-end gap-1 w-full pl-1.5 overflow-hidden">
+                                        {/* Screen: Minimal short form */}
+                                        <span className="no-print print:hidden text-[7.5pt] font-bold text-slate-700 shrink-0">DISC.</span>
+                                        <div className="flex items-center gap-1 no-print print:hidden shrink-0">
+                                          <select
+                                            id="invoice-discount-type-select"
+                                            value={discountType}
+                                            onChange={(e) => setDiscountType(e.target.value as "percentage" | "fixed")}
+                                            className="h-[20px] text-[7pt] font-bold border border-slate-300 rounded bg-white text-slate-800 px-0.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
+                                            title="Discount type: % (Percentage) or 123 (Fixed Amount)"
+                                          >
+                                            <option value="percentage">%</option>
+                                            <option value="fixed">123</option>
+                                          </select>
+                                          <div className="flex items-center gap-0.5 shrink-0">
+                                            <input
+                                              type="text"
+                                              id="invoice-discount-value-input"
+                                              value={discountValue}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
+                                                  setDiscountValue(val);
+                                                }
+                                              }}
+                                              placeholder="0"
+                                              className="h-[20px] w-10 text-center border border-slate-300 rounded font-mono text-[7.5pt] bg-white text-slate-800 px-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
+                                            />
+                                            {discountType === "percentage" && <span className="text-[7pt] font-bold text-slate-600 font-mono">%</span>}
+                                          </div>
+                                          <button
+                                            type="button"
+                                            id="btn-remove-invoice-discount"
+                                            onClick={() => setIncludeDiscount(false)}
+                                            title="Remove discount from invoice"
+                                            className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-0.5 rounded transition-colors cursor-pointer shrink-0"
+                                          >
+                                            <X className="w-2.5 h-2.5" />
+                                          </button>
+                                        </div>
+                                        {/* Print: Whole word "DISCOUNT" */}
+                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[8pt]">
+                                          DISCOUNT{discountType === "percentage" && parsedDiscountValue > 0 ? ` (${parsedDiscountValue}%)` : ""}
+                                        </span>
                                       </div>
-                                      <span className="hidden print:inline">({parsedDiscountPercent}%)</span>
+                                    </div>
+                                    <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight text-rose-700">
+                                      {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
                                     </div>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight text-rose-700">
-                                    {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
+                                </td>
+                              </tr>
+                            )}
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
@@ -3121,7 +3182,7 @@ export default function QuotationBuilder() {
                         ) : (
                           <>
                             <tr className="align-stretch">
-                              <td rowSpan={parsedDiscountPercent > 0 ? 2 : 1} className="amount-words-container w-1/2 border-r-2 border-black p-1 bg-slate-50/50 text-left align-middle">
+                              <td className="amount-words-container w-1/2 border-r-2 border-black p-1 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
@@ -3129,62 +3190,17 @@ export default function QuotationBuilder() {
                                   {numberToWords(calculatedGrandTotal)}
                                 </span>
                               </td>
-                              {parsedDiscountPercent > 0 ? (
-                                <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                  <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                    <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                      <div className="flex items-center justify-end gap-1.5 w-full pl-2">
-                                        <span>DISCOUNT</span>
-                                        <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
-                                          <input
-                                            type="text"
-                                            value={discountPercent}
-                                            onChange={(e) => {
-                                              const val = e.target.value;
-                                              if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
-                                                setDiscountPercent(val);
-                                              }
-                                            }}
-                                            placeholder="0"
-                                            className="w-10 text-center border border-slate-300 rounded font-mono text-[8pt] bg-white text-slate-800 py-0.5"
-                                          />
-                                          <span>%</span>
-                                        </div>
-                                        <span className="hidden print:inline">({parsedDiscountPercent}%)</span>
-                                      </div>
-                                    </div>
-                                    <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight text-rose-700">
-                                      -{discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                    </div>
+                              <td className="w-1/2 p-0 align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
+                                    TOTAL
                                   </div>
-                                </td>
-                              ) : (
-                                <td className="w-1/2 p-0 align-stretch">
-                                  <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
-                                    <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                      TOTAL
-                                    </div>
-                                    <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
-                                      {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                    </div>
+                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
+                                    {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
-                                </td>
-                              )}
+                                </div>
+                              </td>
                             </tr>
-                            {parsedDiscountPercent > 0 && (
-                              <tr className="align-stretch">
-                                <td className="w-1/2 p-0 align-stretch">
-                                  <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
-                                    <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                      TOTAL
-                                    </div>
-                                    <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
-                                      {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
                           </>
                         )}
                       </tbody>
@@ -3408,54 +3424,6 @@ export default function QuotationBuilder() {
 
       {/* Floating Selection Formatting Toolbar */}
       <FloatingTextToolbar />
-
-      {/* Floating Gemini Maritime AI Copilot Trigger Button */}
-      <div className="no-print fixed bottom-6 left-6 z-40">
-        <button
-          type="button"
-          id="floating-gemini-copilot-btn"
-          onClick={() => setIsGeminiChatOpen(true)}
-          className="group flex items-center gap-2.5 bg-slate-950/95 hover:bg-slate-900 active:scale-95 text-white pl-3.5 pr-4 py-2.5 rounded-full shadow-2xl border border-indigo-500/40 hover:border-indigo-400 transition-all cursor-pointer select-none backdrop-blur-md"
-        >
-          <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-xs shrink-0">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300 animate-pulse" />
-          </div>
-          <div className="flex flex-col text-left leading-none">
-            <span className="text-[11px] font-bold text-slate-100 group-hover:text-white flex items-center gap-1.5">
-              Comilla Traders Copilot
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            </span>
-            <span className="text-[9px] text-slate-400 mt-0.5">Audit RFQs & Extract Items</span>
-          </div>
-        </button>
-      </div>
-
-      {/* Gemini AI Copilot Drawer */}
-      {isGeminiChatOpen && (
-        <React.Suspense fallback={null}>
-          <GeminiChatDrawer
-            isOpen={isGeminiChatOpen}
-            onClose={() => setIsGeminiChatOpen(false)}
-            activeDoc={{
-              id: currentDocId || undefined,
-              docType,
-              messers,
-              vesselName,
-              portBerth,
-              currency,
-              dateVal,
-              requisitionNo,
-              challanNo,
-              invoiceNo,
-              poNumber,
-              address,
-              rows: rows.filter((r) => r.desc.trim() || r.qty.trim() || r.price.trim()),
-              grandTotal: calculatedGrandTotal,
-            }}
-            onImportItemsToQuotation={handleImportItemsFromGemini}
-          />
-        </React.Suspense>
-      )}
 
       {/* Floating Status Toast */}
       {toastMessage && (
