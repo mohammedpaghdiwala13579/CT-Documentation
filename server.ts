@@ -19,7 +19,12 @@ app.use(express.json({ limit: "10mb" }));
 let aiClient: GoogleGenAI | null = null;
 function getGenAI(): GoogleGenAI {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY || "";
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        "GEMINI_API_KEY is not configured. Please set the GEMINI_API_KEY environment variable in your project settings."
+      );
+    }
     aiClient = new GoogleGenAI({
       apiKey,
       httpOptions: {
