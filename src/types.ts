@@ -62,6 +62,8 @@ export interface SavedDocument {
   currencySymbol?: string;
   vesselName?: string;
   portBerth?: string;
+  includeVesselName?: boolean;
+  includePortBerth?: boolean;
   notes?: string;
 }
 

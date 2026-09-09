@@ -1,6 +1,6 @@
 // Helper to convert number to words with dynamic international & local currency support
-export function numberToWords(num: number, currency = "USD"): string {
-  const curr = (currency || "USD").toUpperCase();
+export function numberToWords(num: number, currency = ""): string {
+  const curr = (currency || "").toUpperCase().trim();
   const currencyLabels: Record<string, { major: string; minor: string }> = {
     USD: { major: "US Dollars", minor: "Cents" },
     BDT: { major: "Taka", minor: "Paisa" },
@@ -9,9 +9,9 @@ export function numberToWords(num: number, currency = "USD"): string {
     SGD: { major: "Singapore Dollars", minor: "Cents" },
     AED: { major: "UAE Dirhams", minor: "Fils" },
   };
-  const { major, minor } = currencyLabels[curr] || { major: `${curr}`, minor: "Cents" };
+  const { major, minor } = currencyLabels[curr] || { major: curr ? `${curr}` : "", minor: curr ? "Cents" : "" };
 
-  if (isNaN(num) || num === 0) return `Zero ${major} Only`;
+  if (isNaN(num) || num === 0) return major ? `Zero ${major} Only` : "Zero Only";
   if (num < 0) {
     const positiveWords = numberToWords(Math.abs(num), currency);
     return "Minus " + positiveWords;
@@ -94,8 +94,9 @@ export function numberToWords(num: number, currency = "USD"): string {
   }
 
   if (decimalPart > 0) {
-    result += " and " + convertTwoDigits(decimalPart) + ` ${minor}`;
+    result += " and " + convertTwoDigits(decimalPart) + (minor ? ` ${minor}` : "/100");
   }
 
-  return result.trim() + ` ${major} Only`;
+  const suffix = major ? ` ${major} Only` : " Only";
+  return (result.trim() + suffix).trim();
 }

@@ -145,7 +145,15 @@ export default function QuotationBuilder() {
   const [address, setAddress] = useState(() => initialDraft?.address || "");
   const [vesselName, setVesselName] = useState(() => initialDraft?.vesselName || "");
   const [portBerth, setPortBerth] = useState(() => initialDraft?.portBerth || "");
-  const [currency, setCurrency] = useState<string>(() => initialDraft?.currency || "USD");
+  const [includeVesselName, setIncludeVesselName] = useState<boolean>(() => {
+    if (initialDraft?.includeVesselName !== undefined) return Boolean(initialDraft.includeVesselName);
+    return true;
+  });
+  const [includePortBerth, setIncludePortBerth] = useState<boolean>(() => {
+    if (initialDraft?.includePortBerth !== undefined) return Boolean(initialDraft.includePortBerth);
+    return true;
+  });
+  const [currency, setCurrency] = useState<string>(() => initialDraft?.currency || "");
   const [challanNo, setChallanNo] = useState(() => initialDraft?.challanNo || "");
   const [requisitionNo, setRequisitionNo] = useState(() => initialDraft?.requisitionNo || "");
   const [invoiceNo, setInvoiceNo] = useState(() => initialDraft?.invoiceNo || "");
@@ -394,7 +402,9 @@ export default function QuotationBuilder() {
       address: String(address || ""),
       vesselName: String(vesselName || ""),
       portBerth: String(portBerth || ""),
-      currency: String(currency || "USD"),
+      includeVesselName: Boolean(includeVesselName),
+      includePortBerth: Boolean(includePortBerth),
+      currency: String(currency || ""),
       discountPercent: parseFloat(discountPercent) || 0,
       challanNo: String(challanNo || ""),
       requisitionNo: String(requisitionNo || ""),
@@ -436,7 +446,9 @@ export default function QuotationBuilder() {
     setAddress("");
     setVesselName("");
     setPortBerth("");
-    setCurrency("USD");
+    setIncludeVesselName(true);
+    setIncludePortBerth(true);
+    setCurrency("");
     setDiscountPercent("0");
     setChallanNo("");
     setRequisitionNo("");
@@ -473,7 +485,9 @@ export default function QuotationBuilder() {
     setAddress(doc.address);
     setVesselName(doc.vesselName || "");
     setPortBerth(doc.portBerth || "");
-    setCurrency(doc.currency || "USD");
+    setIncludeVesselName(doc.includeVesselName !== undefined ? Boolean(doc.includeVesselName) : (doc.vesselName !== undefined && doc.vesselName.trim() !== "" ? true : true));
+    setIncludePortBerth(doc.includePortBerth !== undefined ? Boolean(doc.includePortBerth) : (doc.portBerth !== undefined && doc.portBerth.trim() !== "" ? true : true));
+    setCurrency(doc.currency || "");
     setDiscountPercent(doc.discountPercent !== undefined ? String(doc.discountPercent) : "0");
     setChallanNo(doc.challanNo || "");
     setRequisitionNo(doc.requisitionNo || "");
@@ -550,7 +564,9 @@ export default function QuotationBuilder() {
         address,
         vesselName: vesselName || "",
         portBerth: portBerth || "",
-        currency: currency || "USD",
+        includeVesselName: Boolean(includeVesselName),
+        includePortBerth: Boolean(includePortBerth),
+        currency: currency || "",
         discountPercent: parseFloat(discountPercent) || 0,
         challanNo: challanNo || "",
         requisitionNo: requisitionNo || "",
@@ -641,7 +657,9 @@ export default function QuotationBuilder() {
         address: String(address || ""),
         vesselName: String(vesselName || ""),
         portBerth: String(portBerth || ""),
-        currency: String(currency || "USD"),
+        includeVesselName: Boolean(includeVesselName),
+        includePortBerth: Boolean(includePortBerth),
+        currency: String(currency || ""),
         discountPercent: parseFloat(discountPercent) || 0,
         challanNo: String(challanNo || ""),
         requisitionNo: String(requisitionNo || ""),
@@ -681,6 +699,8 @@ export default function QuotationBuilder() {
     address,
     vesselName,
     portBerth,
+    includeVesselName,
+    includePortBerth,
     currency,
     discountPercent,
     challanNo,
@@ -707,6 +727,8 @@ export default function QuotationBuilder() {
         address,
         vesselName,
         portBerth,
+        includeVesselName,
+        includePortBerth,
         currency,
         discountPercent,
         challanNo,
@@ -731,6 +753,8 @@ export default function QuotationBuilder() {
     address,
     vesselName,
     portBerth,
+    includeVesselName,
+    includePortBerth,
     currency,
     discountPercent,
     challanNo,
@@ -2204,6 +2228,10 @@ export default function QuotationBuilder() {
               })
             );
           }}
+          includeVesselName={includeVesselName}
+          onToggleVesselName={setIncludeVesselName}
+          includePortBerth={includePortBerth}
+          onTogglePortBerth={setIncludePortBerth}
           autoSaveEnabled={autoSaveEnabled}
           onToggleAutoSave={(val) => {
             setAutoSaveEnabled(val);
@@ -2317,8 +2345,71 @@ export default function QuotationBuilder() {
                         dangerouslySetInnerHTML={{ __html: messers || "&nbsp;" }}
                       />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
-                      <div>
+                    {/* In-place toggles for Vessel Name and Port / Berth */}
+                    <div className="no-print flex items-center justify-between pb-1 pt-0.5 border-b border-slate-200/80 text-[6.5pt] text-slate-500">
+                      <span className="font-extrabold uppercase tracking-wider text-slate-400">Format Fields:</span>
+                      <div className="flex items-center gap-2.5">
+                        <label className="inline-flex items-center gap-1 cursor-pointer font-bold text-slate-700 hover:text-indigo-600 select-none transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={includeVesselName}
+                            onChange={(e) => setIncludeVesselName(e.target.checked)}
+                            className="rounded text-indigo-600 focus:ring-0 cursor-pointer h-3 w-3"
+                          />
+                          <span>Vessel Name</span>
+                        </label>
+                        <label className="inline-flex items-center gap-1 cursor-pointer font-bold text-slate-700 hover:text-indigo-600 select-none transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={includePortBerth}
+                            onChange={(e) => setIncludePortBerth(e.target.checked)}
+                            className="rounded text-indigo-600 focus:ring-0 cursor-pointer h-3 w-3"
+                          />
+                          <span>Port / Berth</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Both Vessel Name and Port / Berth enabled */}
+                    {includeVesselName && includePortBerth && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                        <div>
+                          <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                            <Ship className="h-2.5 w-2.5 text-slate-500 no-print" />
+                            <span>Vessel Name:</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={vesselName}
+                            onChange={(e) => setVesselName(e.target.value)}
+                            placeholder="M/V or M/T Vessel Name"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-semibold text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
+                          />
+                          <div className="hidden print:block font-semibold text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
+                            {vesselName || " "}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Port / Berth:
+                          </label>
+                          <input
+                            type="text"
+                            value={portBerth}
+                            onChange={(e) => setPortBerth(e.target.value)}
+                            placeholder="Jetty / Anchorage"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
+                          />
+                          <div className="hidden print:block text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
+                            {portBerth || " "}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Only Vessel Name enabled */}
+                    {includeVesselName && !includePortBerth && (
+                      <div className="pt-0.5">
                         <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
                           <Ship className="h-2.5 w-2.5 text-slate-500 no-print" />
                           <span>Vessel Name:</span>
@@ -2334,7 +2425,11 @@ export default function QuotationBuilder() {
                           {vesselName || " "}
                         </div>
                       </div>
-                      <div>
+                    )}
+
+                    {/* Only Port / Berth enabled */}
+                    {!includeVesselName && includePortBerth && (
+                      <div className="pt-0.5">
                         <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                           Port / Berth:
                         </label>
@@ -2349,7 +2444,7 @@ export default function QuotationBuilder() {
                           {portBerth || " "}
                         </div>
                       </div>
-                    </div>
+                    )}
                     <div>
                       <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Address:</label>
                       <RichTextCell
@@ -2494,74 +2589,64 @@ export default function QuotationBuilder() {
                             className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
                         </div>
-                      </>
-                    ) : (
-                      <div className="meta-inner-field col-span-2 relative">
-                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Date:</label>
-                        <div className="flex items-center gap-1 no-print print:hidden">
+                        <div className="meta-inner-field col-span-2">
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
                           <input 
                             type="text" 
-                            value={dateVal}
-                            onChange={(e) => setDateVal(e.target.value)}
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition number"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
                           />
-                          <button
-                            type="button"
-                            onClick={triggerDatePicker}
-                            className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                          >
-                            <Calendar className="h-3.5 w-3.5" />
-                          </button>
+                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
+                            {requisitionNo || " "}
+                          </div>
                         </div>
-                        <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
-                          {dateVal || " "}
+                      </>
+                    ) : (
+                      <>
+                        <div className="meta-inner-field col-span-1 relative">
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Date:</label>
+                          <div className="flex items-center gap-1 no-print print:hidden">
+                            <input 
+                              type="text" 
+                              value={dateVal}
+                              onChange={(e) => setDateVal(e.target.value)}
+                              className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
+                            />
+                            <button
+                              type="button"
+                              onClick={triggerDatePicker}
+                              className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                            >
+                              <Calendar className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
+                            {dateVal || " "}
+                          </div>
+                          <input
+                            ref={dateRef}
+                            type="date"
+                            onChange={handleDatePickerChange}
+                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
+                          />
                         </div>
-                        <input
-                          ref={dateRef}
-                          type="date"
-                          onChange={handleDatePickerChange}
-                          className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
-                        />
-                      </div>
+                        <div className="meta-inner-field col-span-1">
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
+                          <input 
+                            type="text" 
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition number"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
+                          />
+                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
+                            {requisitionNo || " "}
+                          </div>
+                        </div>
+                      </>
                     )}
-                    
-                    {docType !== "invoice" && (
-                      <div className="meta-inner-field col-span-2">
-                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
-                        <input 
-                          type="text" 
-                          value={requisitionNo}
-                          onChange={(e) => setRequisitionNo(e.target.value)}
-                          placeholder="Requisition number"
-                          className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                        />
-                        <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                          {requisitionNo || " "}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Currency Selector for International Trade & Marine Supply */}
-                    <div className="meta-inner-field col-span-2 sm:col-span-1">
-                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                        Currency:
-                      </label>
-                      <select 
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                        className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono font-bold text-[8.5pt] outline-none bg-transparent py-0.5 no-print print:hidden cursor-pointer"
-                      >
-                        <option value="USD">USD ($)</option>
-                        <option value="BDT">BDT (৳)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                        <option value="SGD">SGD (S$)</option>
-                        <option value="AED">AED</option>
-                      </select>
-                      <div className="hidden print:block font-mono font-bold text-[8.5pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                        {currency}
-                      </div>
-                    </div>
                   </div>
                 </div>
               </td>
@@ -2916,10 +3001,10 @@ export default function QuotationBuilder() {
                             <tr className="align-stretch">
                               <td rowSpan={5} className="amount-words-container w-1/2 border-r-2 border-black p-1.5 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
-                                  Amount in Words ({currency}):
+                                  Amount in Words:
                                 </span>
                                 <span className="text-[8pt] font-mono italic text-black font-black uppercase leading-tight">
-                                  {numberToWords(calculatedGrandTotal, currency)}
+                                  {numberToWords(calculatedGrandTotal)}
                                 </span>
                               </td>
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
@@ -3024,7 +3109,7 @@ export default function QuotationBuilder() {
                               <td className="w-1/2 p-0 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
                                   <div className="total-lbl bg-indigo-50/40 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8.5pt] font-black uppercase flex items-center justify-end tracking-wider text-indigo-950">
-                                    GRAND TOTAL ({currency})
+                                    GRAND TOTAL
                                   </div>
                                   <div className="total-val flex-grow text-right pr-4 text-[10pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight text-indigo-950">
                                     {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -3038,10 +3123,10 @@ export default function QuotationBuilder() {
                             <tr className="align-stretch">
                               <td rowSpan={parsedDiscountPercent > 0 ? 2 : 1} className="amount-words-container w-1/2 border-r-2 border-black p-1 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
-                                  Amount in Words ({currency}):
+                                  Amount in Words:
                                 </span>
                                 <span className="text-[7.5pt] font-mono italic text-black font-black uppercase leading-tight">
-                                  {numberToWords(calculatedGrandTotal, currency)}
+                                  {numberToWords(calculatedGrandTotal)}
                                 </span>
                               </td>
                               {parsedDiscountPercent > 0 ? (
@@ -3077,7 +3162,7 @@ export default function QuotationBuilder() {
                                 <td className="w-1/2 p-0 align-stretch">
                                   <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
                                     <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                      TOTAL ({currency})
+                                      TOTAL
                                     </div>
                                     <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
                                       {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -3091,7 +3176,7 @@ export default function QuotationBuilder() {
                                 <td className="w-1/2 p-0 align-stretch">
                                   <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
                                     <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                      TOTAL ({currency})
+                                      TOTAL
                                     </div>
                                     <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
                                       {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}

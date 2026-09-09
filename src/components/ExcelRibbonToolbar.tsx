@@ -81,6 +81,10 @@ export interface ExcelRibbonToolbarProps {
   // Document Management
   docType: "quotation" | "challan" | "invoice";
   onSelectDocType: (type: "quotation" | "challan" | "invoice") => void;
+  includeVesselName?: boolean;
+  onToggleVesselName?: (val: boolean) => void;
+  includePortBerth?: boolean;
+  onTogglePortBerth?: (val: boolean) => void;
   autoSaveEnabled: boolean;
   onToggleAutoSave: (val: boolean) => void;
   lastSavedTime: string | null;
@@ -117,6 +121,10 @@ export default function ExcelRibbonToolbar({
   onClearFormatting,
   docType,
   onSelectDocType,
+  includeVesselName = true,
+  onToggleVesselName,
+  includePortBerth = true,
+  onTogglePortBerth,
   autoSaveEnabled,
   onToggleAutoSave,
   lastSavedTime,
@@ -335,6 +343,37 @@ export default function ExcelRibbonToolbar({
                 <span className="hidden sm:inline">{lastSavedTime}</span>
               </span>
             )}
+          </div>
+
+          {/* Format Fields Options: Vessel Name & Port / Berth (Birth) */}
+          <div className="flex items-center gap-1 bg-[#191919] p-0.5 rounded border border-[#383838] shadow-xs">
+            <span className="text-[8.5px] font-bold text-[#888888] px-1 uppercase tracking-wider hidden sm:inline">Format:</span>
+            <button
+              type="button"
+              id="ribbon-btn-vessel-name"
+              onClick={() => onToggleVesselName?.(!includeVesselName)}
+              className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
+                includeVesselName
+                  ? "bg-indigo-600 text-white shadow-xs"
+                  : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
+              }`}
+              title="Add or remove Vessel Name from format"
+            >
+              <span>{includeVesselName ? "✓" : "+"} Vessel Name</span>
+            </button>
+            <button
+              type="button"
+              id="ribbon-btn-port-berth"
+              onClick={() => onTogglePortBerth?.(!includePortBerth)}
+              className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
+                includePortBerth
+                  ? "bg-indigo-600 text-white shadow-xs"
+                  : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
+              }`}
+              title="Add or remove Port / Berth (Birth) from format"
+            >
+              <span>{includePortBerth ? "✓" : "+"} Port / Berth</span>
+            </button>
           </div>
         </div>
 

@@ -1427,7 +1427,7 @@ const buildDocumentWorksheet = (
     const finalGrandTotal = isInvoice ? subtotalValue + calculatedVat + (transportationFee || 0) : subtotalValue;
 
     const words = numberToWords(Math.round(finalGrandTotal));
-    const wordsStr = words ? words.toUpperCase() : "ZERO TAKA ONLY";
+    const wordsStr = words ? words.toUpperCase() : "ZERO ONLY";
     wordCell.value = `AMOUNT IN WORDS: ${wordsStr}`;
 
     wordCell.font = { name: "Arial", size: 7.5, bold: true, italic: true, color: { argb: "000000" } };
