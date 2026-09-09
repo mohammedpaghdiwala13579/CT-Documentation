@@ -187,7 +187,7 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
         ...style,
       }}
       className={className}
-      placeholder={placeholder}
+      data-placeholder={placeholder}
     />
   );
 };

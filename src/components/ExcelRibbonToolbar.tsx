@@ -11,7 +11,9 @@ import {
   FileSpreadsheet, 
   Download, 
   Printer, 
-  X 
+  X,
+  Sparkles,
+  Bot
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
@@ -100,6 +102,7 @@ export interface ExcelRibbonToolbarProps {
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
+  onOpenGeminiChat?: () => void;
 }
 
 export default function ExcelRibbonToolbar({
@@ -131,6 +134,7 @@ export default function ExcelRibbonToolbar({
   onPrint,
   onDownloadPDF,
   isGeneratingPDF,
+  onOpenGeminiChat,
 }: ExcelRibbonToolbarProps) {
   const currentFormat = activeFormat || propCurrentFormat || {};
   const hasSelection = propHasSelection !== undefined ? propHasSelection : true;

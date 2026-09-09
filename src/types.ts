@@ -57,4 +57,31 @@ export interface SavedDocument {
   cellFormats?: CellFormatMap;
   vatPercent?: number;
   transportationFee?: number;
+  discountPercent?: number;
+  currency?: string;
+  currencySymbol?: string;
+  vesselName?: string;
+  portBerth?: string;
+  notes?: string;
+}
+
+export type GeminiModelChoice = "gemini-3.8-flash" | "gemini-3.1-flash-lite" | "gemini-3.1-pro-preview";
+
+export type AssistantRole = "maritime_analyst" | "pricing_negotiator" | "vessel_auditor";
+
+export interface ExtractedItem {
+  desc: string;
+  qty?: string;
+  unit?: string;
+  price?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "model";
+  content: string;
+  timestamp: string;
+  modelUsed?: GeminiModelChoice;
+  roleUsed?: AssistantRole;
+  extractedItems?: ExtractedItem[];
 }

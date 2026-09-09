@@ -1,8 +1,19 @@
-// Helper to convert number to words in Indian numbering system (Lakhs, Crores) with "Taka Only" appended at the end
-export function numberToWords(num: number): string {
-  if (isNaN(num) || num === 0) return "Zero Taka Only";
+// Helper to convert number to words with dynamic international & local currency support
+export function numberToWords(num: number, currency = "USD"): string {
+  const curr = (currency || "USD").toUpperCase();
+  const currencyLabels: Record<string, { major: string; minor: string }> = {
+    USD: { major: "US Dollars", minor: "Cents" },
+    BDT: { major: "Taka", minor: "Paisa" },
+    EUR: { major: "Euros", minor: "Cents" },
+    GBP: { major: "Pounds Sterling", minor: "Pence" },
+    SGD: { major: "Singapore Dollars", minor: "Cents" },
+    AED: { major: "UAE Dirhams", minor: "Fils" },
+  };
+  const { major, minor } = currencyLabels[curr] || { major: `${curr}`, minor: "Cents" };
+
+  if (isNaN(num) || num === 0) return `Zero ${major} Only`;
   if (num < 0) {
-    const positiveWords = numberToWords(Math.abs(num));
+    const positiveWords = numberToWords(Math.abs(num), currency);
     return "Minus " + positiveWords;
   }
 
@@ -83,8 +94,8 @@ export function numberToWords(num: number): string {
   }
 
   if (decimalPart > 0) {
-    result += " and " + convertTwoDigits(decimalPart) + " Paisa";
+    result += " and " + convertTwoDigits(decimalPart) + ` ${minor}`;
   }
 
-  return result.trim() + " Taka Only";
+  return result.trim() + ` ${major} Only`;
 }
