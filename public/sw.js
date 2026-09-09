@@ -1,4 +1,4 @@
-const CACHE_NAME = 'comilla-traders-cache-v1';
+const CACHE_NAME = 'comilla-traders-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -36,6 +36,27 @@ self.addEventListener('fetch', (event) => {
     url.origin.includes('identitytoolkit.googleapis.com') ||
     url.origin.includes('firebase')
   ) {
+    return;
+  }
+
+  // Cache-first strategy for hashed /assets/ (instant loading from local cache)
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        });
+      })
+    );
     return;
   }
 

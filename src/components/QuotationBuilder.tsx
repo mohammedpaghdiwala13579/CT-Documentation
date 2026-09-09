@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-// @ts-ignore
-import html2pdf from "html2pdf.js";
 import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
 import { parseClipboardData, parseTSV, cleanCellText } from "../utils/tsvParser";
-import { generateExcelWorkbook } from "../utils/excelGenerator";
 import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, CellBorders } from "../types";
-import SavedDocumentsPanel from "./SavedDocumentsPanel";
-import ExcelPasteModal from "./ExcelPasteModal";
 import ExcelRibbonToolbar from "./ExcelRibbonToolbar";
 import RichTextCell from "./RichTextCell";
 import FloatingTextToolbar from "./FloatingTextToolbar";
 import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelectionInEditable } from "../utils/textFormatter";
+
+// Lazy-loaded secondary components for instant initial app startup
+const SavedDocumentsPanel = React.lazy(() => import("./SavedDocumentsPanel"));
+const ExcelPasteModal = React.lazy(() => import("./ExcelPasteModal"));
 
 enum OperationType {
   CREATE = 'create',
@@ -1811,6 +1810,7 @@ export default function QuotationBuilder() {
   const handleDownloadExcel = async () => {
     try {
       setIsGeneratingExcel(true);
+      const { generateExcelWorkbook } = await import("../utils/excelGenerator");
       const workbook = await generateExcelWorkbook(
         docType,
         messers,
@@ -1914,7 +1914,7 @@ export default function QuotationBuilder() {
     }, 120);
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     const container = document.querySelector(".quotation-container");
     if (!container) return;
     
@@ -2033,18 +2033,25 @@ export default function QuotationBuilder() {
       setIsGeneratingPDF(false);
     };
 
-    // @ts-ignore
-    html2pdf()
-      .from(element)
-      .set(opt)
-      .save()
-      .then(() => {
-        cleanUpAfterPdf();
-      })
-      .catch((err: any) => {
-        console.error("PDF generation error:", err);
-        cleanUpAfterPdf();
-      });
+    try {
+      // @ts-ignore
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf: any = (html2pdfModule as any).default || html2pdfModule;
+      html2pdf()
+        .from(element)
+        .set(opt)
+        .save()
+        .then(() => {
+          cleanUpAfterPdf();
+        })
+        .catch((err: any) => {
+          console.error("PDF generation error:", err);
+          cleanUpAfterPdf();
+        });
+    } catch (err: any) {
+      console.error("PDF module loading error:", err);
+      cleanUpAfterPdf();
+    }
   };
 
   const safeSelectedRowIndex = Math.max(0, Math.min(selectedRowIndex, rows.length - 1));
@@ -2927,17 +2934,19 @@ export default function QuotationBuilder() {
       </div>
 
       {/* Online Document Search, Lists, and Documentation Panel */}
-      <SavedDocumentsPanel
-        savedDocs={savedDocs}
-        currentDocId={currentDocId}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedTypeFilter={selectedTypeFilter}
-        setSelectedTypeFilter={setSelectedTypeFilter}
-        loadSavedDoc={loadSavedDoc}
-        deleteSavedDoc={deleteSavedDoc}
-        renameSavedDoc={renameSavedDoc}
-      />
+      <React.Suspense fallback={<div className="w-full bg-white rounded-2xl border border-slate-200 p-6 mt-6 animate-pulse h-28" />}>
+        <SavedDocumentsPanel
+          savedDocs={savedDocs}
+          currentDocId={currentDocId}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedTypeFilter={selectedTypeFilter}
+          setSelectedTypeFilter={setSelectedTypeFilter}
+          loadSavedDoc={loadSavedDoc}
+          deleteSavedDoc={deleteSavedDoc}
+          renameSavedDoc={renameSavedDoc}
+        />
+      </React.Suspense>
 
       {/* Cell right-click Menu context */}
       {contextMenu && contextMenu.visible && (
@@ -3077,14 +3086,18 @@ export default function QuotationBuilder() {
       )}
 
       {/* Excel Smart Importer Modal */}
-      <ExcelPasteModal
-        isOpen={isExcelModalOpen}
-        onClose={() => setIsExcelModalOpen(false)}
-        onImportRows={handleImportFromExcel}
-        selectedRowIndex={safeSelectedRowIndex}
-        totalCurrentRows={rows.length}
-        docType={docType}
-      />
+      {isExcelModalOpen && (
+        <React.Suspense fallback={null}>
+          <ExcelPasteModal
+            isOpen={isExcelModalOpen}
+            onClose={() => setIsExcelModalOpen(false)}
+            onImportRows={handleImportFromExcel}
+            selectedRowIndex={safeSelectedRowIndex}
+            totalCurrentRows={rows.length}
+            docType={docType}
+          />
+        </React.Suspense>
+      )}
 
       {/* Floating Selection Formatting Toolbar */}
       <FloatingTextToolbar />

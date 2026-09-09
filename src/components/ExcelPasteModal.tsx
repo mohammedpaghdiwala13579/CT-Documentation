@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { X, FileSpreadsheet, Check, ArrowRight, AlertCircle, Upload, Plus, Layers, HelpCircle } from "lucide-react";
-import * as XLSX from "xlsx";
 import { parseClipboardData, parseHTMLTable, parseTSV, parseCSV, cleanCellText } from "../utils/tsvParser";
 import { parseNumericInput } from "../utils/textFormatter";
 import { QuotationRow } from "../types";
@@ -157,8 +156,9 @@ export default function ExcelPasteModal({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
+        const XLSX = await import("xlsx");
         const data = new Uint8Array(evt.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheetName = workbook.SheetNames[0];
