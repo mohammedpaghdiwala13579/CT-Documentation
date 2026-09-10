@@ -184,13 +184,7 @@ export default function QuotationBuilder() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<"all" | "quotation" | "challan" | "invoice">("all");
   const [currentDocId, setCurrentDocId] = useState<string | null>(() => initialDraft?.currentDocId || null);
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const val = localStorage.getItem("comilla_autosave_enabled");
-      return val === null ? true : val === "true";
-    }
-    return true;
-  });
+  const [autoSaveEnabled] = useState<boolean>(true);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
@@ -2624,10 +2618,6 @@ export default function QuotationBuilder() {
           includePortBerth={includePortBerth}
           onTogglePortBerth={setIncludePortBerth}
           autoSaveEnabled={autoSaveEnabled}
-          onToggleAutoSave={(val) => {
-            setAutoSaveEnabled(val);
-            localStorage.setItem("comilla_autosave_enabled", String(val));
-          }}
           lastSavedTime={lastSavedTime}
           currentDocId={currentDocId}
           currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name}

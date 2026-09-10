@@ -95,8 +95,8 @@ export interface ExcelRibbonToolbarProps {
   onTogglePortBerth?: (val: boolean) => void;
   includeDiscount?: boolean;
   onToggleDiscount?: (val: boolean) => void;
-  autoSaveEnabled: boolean;
-  onToggleAutoSave: (val: boolean) => void;
+  autoSaveEnabled?: boolean;
+  onToggleAutoSave?: (val: boolean) => void;
   lastSavedTime: string | null;
   currentDocId: string | null;
   currentDocName?: string;
@@ -338,72 +338,6 @@ export default function ExcelRibbonToolbar({
               )}
             </div>
           )}
-
-          {/* Auto-Save Switch */}
-          <div className="flex items-center gap-1.5 bg-[#191919] px-2 py-1 rounded border border-[#383838] shadow-xs">
-            <label className="relative inline-flex items-center cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={autoSaveEnabled}
-                onChange={(e) => onToggleAutoSave(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-6 h-3.5 bg-[#3e3e3e] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
-              <span className="ml-1.5 text-[9px] font-bold text-[#aaaaaa] uppercase tracking-wider">Auto-Save</span>
-            </label>
-            {lastSavedTime && (
-              <span className="text-[8px] text-emerald-400 font-medium flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="hidden sm:inline">{lastSavedTime}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Format Fields Options: Vessel Name & Port / Berth (Birth) */}
-          <div className="flex items-center gap-1 bg-[#191919] p-0.5 rounded border border-[#383838] shadow-xs">
-            <span className="text-[8.5px] font-bold text-[#888888] px-1 uppercase tracking-wider hidden sm:inline">Format:</span>
-            <button
-              type="button"
-              id="ribbon-btn-vessel-name"
-              onClick={() => onToggleVesselName?.(!includeVesselName)}
-              className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
-                includeVesselName
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
-              }`}
-              title="Add or remove Vessel Name from format"
-            >
-              <span>{includeVesselName ? "✓" : "+"} Vessel Name</span>
-            </button>
-            <button
-              type="button"
-              id="ribbon-btn-port-berth"
-              onClick={() => onTogglePortBerth?.(!includePortBerth)}
-              className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
-                includePortBerth
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
-              }`}
-              title="Add or remove Port / Berth (Birth) from format"
-            >
-              <span>{includePortBerth ? "✓" : "+"} Port / Berth</span>
-            </button>
-            {docType === "invoice" && (
-              <button
-                type="button"
-                id="ribbon-btn-discount"
-                onClick={() => onToggleDiscount?.(!includeDiscount)}
-                className={`px-2 py-0.5 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
-                  includeDiscount
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-[#888888] hover:text-[#cccccc] hover:bg-[#282828]"
-                }`}
-                title="Add or remove Discount option in Invoice"
-              >
-                <span>{includeDiscount ? "✓" : "+"} Discount</span>
-              </button>
-            )}
-          </div>
         </div>
 
         {/* Right: All Document Action Buttons */}
@@ -413,11 +347,10 @@ export default function ExcelRibbonToolbar({
             type="button"
             id="btn-new-sheet"
             onClick={onNewDoc}
-            className="bg-[#333333] hover:bg-[#444444] text-[#e0e0e0] hover:text-white font-bold text-[10px] py-1 px-2.5 rounded border border-[#4a4a4a] shadow-xs transition-all cursor-pointer flex items-center gap-1"
-            title="Start a fresh blank sheet"
+            className="h-[24px] w-[24px] bg-[#333333] hover:bg-[#444444] text-[#e0e0e0] hover:text-white rounded-xs border border-[#4a4a4a] shadow-xs transition-all cursor-pointer flex items-center justify-center"
+            title="New Sheet"
           >
-            <Plus className="h-3 w-3 text-emerald-400" />
-            <span>NEW SHEET</span>
+            <Plus className="h-3.5 w-3.5 text-emerald-400" />
           </button>
 
           {/* Duplicate (If editing) */}
@@ -426,11 +359,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-duplicate-doc"
               onClick={onDuplicateDoc}
-              className="bg-[#2d2238] hover:bg-[#3d2f4d] text-indigo-200 hover:text-white font-bold text-[10px] py-1 px-2.5 rounded border border-indigo-700/50 shadow-xs transition-all cursor-pointer flex items-center gap-1"
-              title="Save a duplicated copy"
+              className="h-[24px] w-[24px] bg-[#2d2238] hover:bg-[#3d2f4d] text-indigo-200 hover:text-white rounded-xs border border-indigo-700/50 shadow-xs transition-all cursor-pointer flex items-center justify-center"
+              title="Duplicate Sheet"
             >
-              <Copy className="h-3 w-3 text-indigo-400" />
-              <span>DUPLICATE</span>
+              <Copy className="h-3.5 w-3.5 text-indigo-400" />
             </button>
           )}
 
@@ -440,11 +372,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-delete-doc"
               onClick={onDeleteDoc}
-              className="bg-[#381c1c] hover:bg-[#4d2626] text-rose-300 hover:text-white font-bold text-[10px] py-1 px-2.5 rounded border border-rose-800/50 shadow-xs transition-all cursor-pointer flex items-center gap-1"
-              title="Delete this sheet"
+              className="h-[24px] w-[24px] bg-[#381c1c] hover:bg-[#4d2626] text-rose-300 hover:text-white rounded-xs border border-rose-800/50 shadow-xs transition-all cursor-pointer flex items-center justify-center"
+              title="Delete Sheet"
             >
-              <Trash2 className="h-3 w-3 text-rose-400" />
-              <span>DELETE</span>
+              <Trash2 className="h-3.5 w-3.5 text-rose-400" />
             </button>
           )}
 
@@ -454,30 +385,21 @@ export default function ExcelRibbonToolbar({
             id="btn-save-doc"
             onClick={onSaveDoc}
             disabled={saveStatus === "saving"}
-            className={`${
+            className={`h-[24px] w-[24px] ${
               saveStatus === "saved"
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                 : saveStatus === "error"
                 ? "bg-rose-600 hover:bg-rose-700 text-white"
                 : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            } font-bold text-[10px] py-1 px-2.5 rounded shadow-xs transition-all cursor-pointer flex items-center gap-1 disabled:opacity-80`}
-            title="Save to Cloud Database"
+            } rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center disabled:opacity-80`}
+            title={lastSavedTime ? `Save (Auto-saved at ${lastSavedTime})` : "Save Sheet"}
           >
             {saveStatus === "saving" ? (
-              <>
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                <span>SAVING...</span>
-              </>
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
             ) : saveStatus === "saved" ? (
-              <>
-                <Check className="h-3 w-3" />
-                <span>SAVED</span>
-              </>
+              <Check className="h-3.5 w-3.5" />
             ) : (
-              <>
-                <Save className="h-3 w-3" />
-                <span>SAVE</span>
-              </>
+              <Save className="h-3.5 w-3.5" />
             )}
           </button>
 
@@ -487,11 +409,14 @@ export default function ExcelRibbonToolbar({
             id="btn-export-excel"
             onClick={onExportExcel}
             disabled={isGeneratingExcel}
-            className="px-2.5 py-1 bg-[#1e4438] hover:bg-[#285c4c] text-emerald-200 hover:text-white border border-emerald-700/50 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1 disabled:opacity-70"
-            title="Export Excel (.xlsx)"
+            className="h-[24px] w-[24px] bg-[#1e4438] hover:bg-[#285c4c] text-emerald-200 hover:text-white border border-emerald-700/50 rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center disabled:opacity-70"
+            title={isGeneratingExcel ? "Generating Excel..." : "Export Excel (.xlsx)"}
           >
-            <Download className="h-3 w-3 text-emerald-400" />
-            <span>{isGeneratingExcel ? "GENERATING..." : "EXPORT EXCEL"}</span>
+            {isGeneratingExcel ? (
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+            ) : (
+              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-400" />
+            )}
           </button>
 
           {/* Print A4 / Save PDF Button */}
@@ -499,11 +424,10 @@ export default function ExcelRibbonToolbar({
             type="button"
             id="btn-print-doc"
             onClick={onPrint}
-            className="px-3 py-1 bg-[#253252] hover:bg-[#32436e] active:scale-95 text-indigo-100 hover:text-white border border-indigo-500/60 rounded font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
-            title="Print or Save as PDF (Ctrl+P) - Highlighting, font sizes, colors, bold, italic & underline are preserved"
+            className="h-[24px] w-[24px] bg-[#253252] hover:bg-[#32436e] active:scale-95 text-indigo-100 hover:text-white border border-indigo-500/60 rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center"
+            title="Print / Save PDF (Ctrl+P)"
           >
             <Printer className="h-3.5 w-3.5 text-indigo-300" />
-            <span>PRINT / SAVE PDF</span>
           </button>
         </div>
       </div>
