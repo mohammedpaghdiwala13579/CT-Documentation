@@ -92,8 +92,37 @@ export default function ExcelPasteModal({
     // Second pass: fill unmapped columns based on standard conventions & sample values
     const unmappedIndices = mappings.map((m, idx) => (m === "ignore" ? idx : -1)).filter((idx) => idx !== -1);
     
-    // If standard 4-column copy without headers [Desc, Qty, Unit, Price]
+    // If 3-column copy without headers
+    if (colCount === 3 && unmappedIndices.length === 3) {
+      const col2Numeric = sampleRows.filter(r => r[2]?.trim()).some(r => /^-?\d+(\.\d+)?$/.test((r[2] || "").replace(/[$€£,\s]/g, "")));
+      const col0Serial = sampleRows.filter(r => r[0]?.trim()).every(r => /^\d+$/.test((r[0] || "").trim()) && (r[0] || "").trim().length <= 5);
+      if (col0Serial) {
+        return ["sl", "desc", "qty"];
+      }
+      if (col2Numeric && currentDocType !== "challan") {
+        return ["desc", "qty", "price"];
+      }
+      return ["desc", "qty", "unit"];
+    }
+
+    // If 4-column copy without headers
     if (colCount === 4 && unmappedIndices.length === 4) {
+      const col0Serial = sampleRows.filter(r => r[0]?.trim()).every(r => /^\d+$/.test((r[0] || "").trim()) && (r[0] || "").trim().length <= 5);
+      if (col0Serial) {
+        const col3Numeric = sampleRows.filter(r => r[3]?.trim()).some(r => /^-?\d+(\.\d+)?$/.test((r[3] || "").replace(/[$€£,\s]/g, "")));
+        if (col3Numeric && currentDocType !== "challan") {
+          return ["sl", "desc", "qty", "price"];
+        }
+        return ["sl", "desc", "qty", "unit"];
+      }
+
+      const col2Numeric = sampleRows.filter(r => r[2]?.trim()).some(r => /^-?\d+(\.\d+)?$/.test((r[2] || "").replace(/[$€£,\s]/g, "")));
+      const col3Numeric = sampleRows.filter(r => r[3]?.trim()).some(r => /^-?\d+(\.\d+)?$/.test((r[3] || "").replace(/[$€£,\s]/g, "")));
+      if (col2Numeric && col3Numeric) {
+        // [Desc, Qty, Rate, Amount]
+        return ["desc", "qty", "price", "amount"];
+      }
+
       return currentDocType === "challan" 
         ? ["desc", "qty", "unit", "ignore"] 
         : ["desc", "qty", "unit", "price"];

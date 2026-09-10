@@ -49,13 +49,16 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
 
   // Synchronize external value with innerHTML.
   // If value changed externally (e.g. from Excel paste, undo, redo, or row changes),
-  // update innerHTML immediately so stale DOM content does not persist or overwrite on blur.
+  // update innerHTML immediately so stale DOM content does not persist or overwrite.
   useEffect(() => {
     if (editorRef.current) {
       const currentHTML = editorRef.current.innerHTML;
       const normalizedValue = value || "";
-      const isExternalChange = normalizedValue !== lastEmittedValueRef.current;
-      if (currentHTML !== normalizedValue && (document.activeElement !== editorRef.current || isExternalChange)) {
+      const isTypingInThisElement =
+        document.activeElement === editorRef.current &&
+        normalizedValue === lastEmittedValueRef.current;
+
+      if (currentHTML !== normalizedValue && !isTypingInThisElement) {
         editorRef.current.innerHTML = normalizedValue;
         lastEmittedValueRef.current = normalizedValue;
       }
@@ -159,9 +162,6 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
         onFocus?.();
       }}
       onBlur={() => {
-        if (editorRef.current) {
-          onChange(editorRef.current.innerHTML);
-        }
         onBlur?.();
       }}
       onClick={(e) => {

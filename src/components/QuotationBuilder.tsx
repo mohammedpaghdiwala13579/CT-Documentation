@@ -2030,47 +2030,65 @@ export default function QuotationBuilder() {
       }
     }
 
-    // Multi-cell or multi-line paste (e.g. 50 lines copied from Excel)
+    // Multi-cell or multi-line paste (e.g. copied from Excel)
     if (eventToPrevent) {
       eventToPrevent.preventDefault();
-    }
-
-    // Blur active contenteditable/input element so it does not retain stale DOM state or overwrite on blur
-    const activeEl = document.activeElement as HTMLElement | null;
-    if (activeEl && (activeEl.isContentEditable || activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
-      activeEl.blur();
     }
 
     recordChange();
 
     // Never drop the first row of user data!
-    // Only skip row 0 if it is strictly a column header matching keywords across columns
+    // Only skip row 0 if it is strictly a column header with NO numeric data in Qty/Price
     let dataRows = parsedGrid;
     if (result.hasHeader && parsedGrid.length > 1 && parsedGrid[0].length >= 2) {
-      const headerNames = ["description", "desc", "qty", "quantity", "unit", "price", "rate", "amount", "total", "sl", "s.no", "item #", "#"];
-      const matches = parsedGrid[0].filter((c) => headerNames.includes(c.toLowerCase().trim()));
-      if (matches.length >= Math.min(3, parsedGrid[0].length)) {
-        dataRows = parsedGrid.slice(1);
+      const firstRow = parsedGrid[0];
+      const hasNumericData = firstRow.some((cell, idx) => {
+        if (idx === 0) return false;
+        const clean = cell.replace(/[,$\s]/g, "").trim();
+        return /^\d+(\.\d+)?$/.test(clean) && clean.length > 0;
+      });
+      if (!hasNumericData) {
+        const headerNames = ["description", "desc", "qty", "quantity", "unit", "price", "rate", "amount", "total", "sl", "s.no", "item #", "#"];
+        const matches = firstRow.filter((c) => headerNames.includes(c.toLowerCase().trim()));
+        if (matches.length >= Math.min(2, firstRow.length)) {
+          dataRows = parsedGrid.slice(1);
+        }
       }
     }
     if (dataRows.length === 0) return;
 
-    // Detect if column 0 represents Serial Number
+    const sample = dataRows.slice(0, 15);
+    const maxCols = Math.max(...dataRows.map((r) => r.length));
+
+    // Helper to check if a specific column across sample rows is predominantly numeric
+    const isColNumeric = (colIndex: number): boolean => {
+      let count = 0;
+      let numericCount = 0;
+      sample.forEach((r) => {
+        if (r[colIndex] !== undefined && r[colIndex].trim().length > 0) {
+          count++;
+          const val = r[colIndex].replace(/[$€£,\s]/g, "").trim();
+          if (/^-?\d+(\.\d+)?$/.test(val)) {
+            numericCount++;
+          }
+        }
+      });
+      return count > 0 && numericCount / count >= 0.7;
+    };
+
+    // Detect if column 0 represents Serial Number (1, 2, 3...)
     const isColZeroSerial = (() => {
       if (result.hasSerialColumn) return true;
-      const sample = dataRows.slice(0, 10);
-      if (sample.length === 0) return false;
-      const maxColLen = Math.max(...sample.map((r) => r.length));
-      if (maxColLen < 2) return false;
+      if (sample.length === 0 || maxCols < 2) return false;
 
-      let numericCount = 0;
+      let serialCount = 0;
       let col1TextCount = 0;
 
       sample.forEach((r) => {
         if (r.length >= 2) {
           const val0 = r[0].replace(/[.\-#\s]/g, "").trim();
           if (/^\d+$/.test(val0) && val0.length <= 5) {
-            numericCount++;
+            serialCount++;
           }
           if (/[a-zA-Z]/.test(r[1])) {
             col1TextCount++;
@@ -2078,18 +2096,8 @@ export default function QuotationBuilder() {
         }
       });
 
-      if (numericCount >= Math.max(1, Math.ceil(sample.length * 0.6)) && col1TextCount >= 1) {
-        return true;
-      }
-
-      if (maxColLen >= 5 && sample.some((r) => r.length >= 5 && (r[0].length <= 5 || /^\d+$/.test(r[0].trim())))) {
-        return true;
-      }
-
-      return false;
+      return serialCount >= Math.max(1, Math.ceil(sample.length * 0.6)) && col1TextCount >= 1;
     })();
-
-    const maxCols = Math.max(...dataRows.map((r) => r.length));
 
     setRows((prevRows) => {
       const updated = [...prevRows];
@@ -2113,46 +2121,110 @@ export default function QuotationBuilder() {
 
         const targetRow = { ...updated[rIndex] };
 
-        // Case A: 1 column copied (e.g. 50 lines selected from a single Excel column)
-        if (cols.length === 1 || maxCols === 1) {
-          const val = cleanCellText(cols[0]);
-          if (startColIndex <= 0) {
-            targetRow.desc = val;
-          } else if (startColIndex === 1) {
-            targetRow.qty = val;
+        // Sub-column paste (User clicked directly on Qty, Unit, or Price column)
+        if (startColIndex > 0) {
+          if (startColIndex === 1) {
+            // Started at Qty
+            targetRow.qty = cleanCellText(cols[0]);
+            if (cols.length === 2) {
+              if (isColNumeric(1) && docType !== "challan") {
+                targetRow.price = cleanCellText(cols[1]);
+              } else {
+                targetRow.unit = cleanCellText(cols[1]);
+              }
+            } else if (cols.length >= 3) {
+              targetRow.unit = cleanCellText(cols[1]);
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+            }
           } else if (startColIndex === 2) {
-            targetRow.unit = val;
+            // Started at Unit
+            targetRow.unit = cleanCellText(cols[0]);
+            if (cols[1] !== undefined && docType !== "challan") {
+              targetRow.price = cleanCellText(cols[1]);
+            }
           } else if (startColIndex === 3) {
-            if (docType !== "challan") targetRow.price = val;
+            // Started at Price
+            if (docType !== "challan") {
+              targetRow.price = cleanCellText(cols[0]);
+            }
           }
         }
-        // Case B: Multi-column paste starting at specific sub-column (Qty, Unit, or Price)
-        else if (startColIndex > 0) {
-          cols.forEach((cellValue, cOffset) => {
-            const cIndex = startColIndex + cOffset;
-            const val = cleanCellText(cellValue);
-            if (cIndex === 1) targetRow.qty = val;
-            else if (cIndex === 2) targetRow.unit = val;
-            else if (cIndex === 3 && docType !== "challan") targetRow.price = val;
-          });
-        }
-        // Case C: Multi-column paste starting at SL or Description with Serial Number in copied Col 0
+        // Pasted starting at SL or Description column (startColIndex <= 0)
         else if (isColZeroSerial) {
-          // [SL, Description, Qty, Unit, Price, (Amount)]
-          // Excel Col 1 is Description (with all commas and semicolons intact!)
-          if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
-          if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
-          if (cols[3] !== undefined) targetRow.unit = cleanCellText(cols[3]);
-          if (cols[4] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[4]);
+          // Copied Col 0 is SL! The remaining columns start at index 1:
+          // [SL (0), Description (1), ...]
+          const itemCols = cols.slice(1);
+          if (itemCols[0] !== undefined) targetRow.desc = cleanCellText(itemCols[0]);
+
+          if (itemCols.length === 2) {
+            // [SL, Desc, Qty]
+            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+          } else if (itemCols.length === 3) {
+            // [SL, Desc, Qty, Unit] OR [SL, Desc, Qty, Price]
+            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+            if (isColNumeric(3)) {
+              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[2]);
+            } else {
+              targetRow.unit = cleanCellText(itemCols[2]);
+            }
+          } else if (itemCols.length === 4) {
+            // [SL, Desc, Qty, Unit, Price] OR [SL, Desc, Qty, Price, Amount]
+            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+            if (isColNumeric(3) && isColNumeric(4)) {
+              // [SL, Desc, Qty, Price, Amount]
+              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[2]);
+            } else {
+              // [SL, Desc, Qty, Unit, Price]
+              targetRow.unit = cleanCellText(itemCols[2]);
+              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3]);
+            }
+          } else if (itemCols.length >= 5) {
+            // [SL, Desc, Qty, Unit, Price, Amount...]
+            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+            targetRow.unit = cleanCellText(itemCols[2]);
+            if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3]);
+          }
         }
-        // Case D: Multi-column paste starting at SL or Description without Serial Number
+        // Copied from Excel WITHOUT Serial Column (Col 0 is Description)
         else {
-          // [Description, Qty, Unit, Price, (Amount)]
-          // Excel Col 0 is Description (with all commas and semicolons intact!)
-          if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-          if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
-          if (cols[2] !== undefined) targetRow.unit = cleanCellText(cols[2]);
-          if (cols[3] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[3]);
+          if (maxCols === 1) {
+            // Single column of items
+            targetRow.desc = cleanCellText(cols[0]);
+          } else if (maxCols === 2) {
+            // [Desc, Qty]
+            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
+            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+          } else if (maxCols === 3) {
+            // [Desc, Qty, Unit] OR [Desc, Qty, Price]
+            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
+            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+            if (isColNumeric(2)) {
+              // Col 2 is numeric rate/price!
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+            } else {
+              // Col 2 is unit (e.g. PCS, NOS, SET, MTR)
+              targetRow.unit = cleanCellText(cols[2]);
+            }
+          } else if (maxCols === 4) {
+            // [Desc, Qty, Unit, Price] OR [Desc, Qty, Price, Amount]
+            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
+            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+
+            if (isColNumeric(2) && isColNumeric(3)) {
+              // [Desc, Qty, Price, Amount]
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+            } else {
+              // Standard [Desc, Qty, Unit, Price]
+              targetRow.unit = cleanCellText(cols[2]);
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[3]);
+            }
+          } else {
+            // 5+ columns: [Desc, Qty, Unit, Price, Amount...]
+            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
+            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+            targetRow.unit = cleanCellText(cols[2]);
+            if (docType !== "challan") targetRow.price = cleanCellText(cols[3]);
+          }
         }
 
         const cleanQty = stripHtml(String(targetRow.qty || ""));

@@ -247,8 +247,18 @@ export function parseClipboardData(
   _options?: ParseClipboardOptions
 ): ParsedClipboardResult {
   const { text, html } = input;
+  const rawText = (text || "").trim();
 
-  // 1. Try HTML Table parsing first (from Excel / Google Sheets)
+  // 1. If clipboard text contains tabs, this is native spreadsheet data (Excel / Google Sheets).
+  // TSV is 100% exact, preserves all quotes, commas, semicolons, and cell boundaries without HTML table artifacts.
+  if (rawText.includes("\t")) {
+    const tsvGrid = parseTSV(rawText);
+    if (tsvGrid.length > 0) {
+      return analyzeGrid(tsvGrid, "tsv");
+    }
+  }
+
+  // 2. Try HTML Table parsing if text did not have tabs (e.g. copied from a website table)
   if (html && html.includes("<table")) {
     const htmlGrid = parseHTMLTable(html);
     if (htmlGrid && htmlGrid.length > 0 && htmlGrid.some((r) => r.length > 1 || htmlGrid.length > 1)) {
@@ -256,7 +266,6 @@ export function parseClipboardData(
     }
   }
 
-  const rawText = (text || "").trim();
   if (!rawText) {
     return {
       grid: [],
@@ -264,14 +273,6 @@ export function parseClipboardData(
       hasSerialColumn: false,
       detectedFormat: "plain_lines",
     };
-  }
-
-  // 2. Try TSV (Tab separated values from Excel / Google Sheets)
-  if (rawText.includes("\t")) {
-    const tsvGrid = parseTSV(rawText);
-    if (tsvGrid.length > 0) {
-      return analyzeGrid(tsvGrid, "tsv");
-    }
   }
 
   // 3. Plain lines: each line is treated as ONE cell (single-column copy from Excel).
@@ -302,7 +303,7 @@ function analyzeGrid(
   let hasHeader = false;
 
   const headerKeywords = [
-    "sl", "s/n", "s.no", "sl.no", "no", "item", "item #", "item no", "#",
+    "sl", "s/n", "s.no", "sl.no", "#",
     "description", "particulars", "items", "details", "desc", "material", "specification",
     "qty", "quantity", "qnty",
     "unit", "uom", "pkg", "unit of measure",
@@ -316,14 +317,22 @@ function analyzeGrid(
     return headerKeywords.some((kw) => c === kw || c === kw + "." || c === kw + ":" || c === kw + " #" || c === "#");
   };
 
-  // Only consider header if multiple columns exist and at least 2 distinct columns match header words
+  // Only consider header if multiple columns exist, no numeric values in non-SL cells, and distinct columns match header words
   if (rawGrid.length > 1 && maxCols >= 2) {
     const firstRow = rawGrid[0];
-    const headerMatches = firstRow.filter((cell) => isHeaderCell(cell));
-    if (firstRow.length >= 4) {
-      hasHeader = headerMatches.length >= 3;
-    } else if (firstRow.length >= 2) {
-      hasHeader = headerMatches.length >= 2;
+    const hasNumericData = firstRow.some((cell, idx) => {
+      if (idx === 0) return false;
+      const clean = cell.replace(/[,$\s]/g, "").trim();
+      return /^\d+(\.\d+)?$/.test(clean) && clean.length > 0;
+    });
+
+    if (!hasNumericData) {
+      const headerMatches = firstRow.filter((cell) => isHeaderCell(cell));
+      if (firstRow.length >= 4) {
+        hasHeader = headerMatches.length >= 3;
+      } else if (firstRow.length >= 2) {
+        hasHeader = headerMatches.length >= 2;
+      }
     }
   }
 
