@@ -3,8 +3,8 @@
  * Supports:
  * - HTML table extraction from Excel/Google Sheets rich clipboard
  * - TSV (Tab Separated Values) with multi-line quote escapes
- * - CSV (Comma / Semicolon separated values)
  * - Intelligent header detection & column alignment
+ * - Guarantees commas and semicolons inside cell content are NEVER split into separate cells
  */
 
 import { stripHtml } from "./textFormatter";
@@ -18,20 +18,27 @@ export interface ParsedClipboardResult {
 }
 
 /**
- * Helper to clean and flatten multiline cell text into continuous space-separated text
+ * Helper to clean and flatten cell text into continuous space-separated text,
+ * preserving commas, semicolons, and all punctuation intact.
  */
 export function cleanCellText(str: string): string {
   if (!str) return "";
   const plain = str.includes("<") && str.includes(">") ? stripHtml(str) : str;
-  return plain
+  let cleaned = plain
     .replace(/[\r\n]+/g, " ")
     .replace(/\u00A0/g, " ")
     .replace(/\s{2,}/g, " ")
     .trim();
+
+  // If cell was wrapped in matching outer quotes from TSV/Excel escaping, unwrap them
+  if (cleaned.startsWith('"') && cleaned.endsWith('"') && cleaned.length >= 2) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  return cleaned;
 }
 
 /**
- * Extracts a 2D string array from an HTML table clipboard payload
+ * Extracts a 2D string array from an HTML table clipboard payload (Excel / Google Sheets)
  */
 export function parseHTMLTable(html: string): string[][] | null {
   if (!html || !html.includes("<table") || typeof DOMParser === "undefined") {
@@ -56,7 +63,7 @@ export function parseHTMLTable(html: string): string[][] | null {
       const rowValues = cells.map((cell) => {
         // Replace <br>, <p>, <div> linebreaks with space so text flows continuously
         const clones = cell.cloneNode(true) as HTMLElement;
-        const brs = clones.querySelectorAll("br");
+        const brs = clones.querySelectorAll("br, p, div");
         brs.forEach((br) => br.replaceWith(" "));
 
         let text = clones.textContent || "";
@@ -78,7 +85,9 @@ export function parseHTMLTable(html: string): string[][] | null {
 }
 
 /**
- * State-machine parser for TSV (Tab-Separated Values)
+ * State-machine parser for TSV (Tab-Separated Values).
+ * Tabs separate columns, newlines separate rows.
+ * Commas and semicolons are NEVER treated as delimiters!
  */
 export function parseTSV(text: string): string[][] {
   const result: string[][] = [];
@@ -94,12 +103,12 @@ export function parseTSV(text: string): string[][] {
       if (char === '"') {
         if (nextChar === '"') {
           cell += '"';
-          i++; // Skip next quote
+          i++; // Skip next escaped quote
         } else {
           inQuotes = false;
         }
       } else if (char === '\r' || char === '\n') {
-        // Convert internal cell newline into space so text wraps naturally across the column
+        // Internal newline within quoted cell converted to space
         cell += ' ';
       } else {
         cell += char;
@@ -139,7 +148,7 @@ export function parseTSV(text: string): string[][] {
     result.push(row);
   }
 
-  // Remove empty trailing row
+  // Remove empty trailing rows
   while (
     result.length > 0 &&
     result[result.length - 1].every((c) => c === "")
@@ -151,7 +160,8 @@ export function parseTSV(text: string): string[][] {
 }
 
 /**
- * Parses CSV text with delimiter (comma or semicolon)
+ * Parses CSV text with delimiter (comma or semicolon).
+ * Kept for optional file import if required.
  */
 export function parseCSV(text: string, delimiter: "," | ";" = ","): string[][] {
   const result: string[][] = [];
@@ -172,7 +182,6 @@ export function parseCSV(text: string, delimiter: "," | ";" = ","): string[][] {
           inQuotes = false;
         }
       } else if (char === '\r' || char === '\n') {
-        // Convert internal cell newline into space so text wraps naturally across the column
         cell += ' ';
       } else {
         cell += char;
@@ -227,14 +236,15 @@ export interface ParseClipboardOptions {
 }
 
 /**
- * Universal clipboard parser that extracts 2D grid
+ * Universal clipboard parser that extracts a 2D grid from Excel, Google Sheets, or text.
+ * Guarantees that commas and semicolons are NEVER treated as column splitters.
  */
 export function parseClipboardData(
   input: {
     text: string;
     html?: string;
   },
-  options?: ParseClipboardOptions
+  _options?: ParseClipboardOptions
 ): ParsedClipboardResult {
   const { text, html } = input;
 
@@ -256,7 +266,7 @@ export function parseClipboardData(
     };
   }
 
-  // 2. Try TSV (Tab separated from Excel / Google Sheets)
+  // 2. Try TSV (Tab separated values from Excel / Google Sheets)
   if (rawText.includes("\t")) {
     const tsvGrid = parseTSV(rawText);
     if (tsvGrid.length > 0) {
@@ -264,27 +274,10 @@ export function parseClipboardData(
     }
   }
 
-  // 3. Try CSV ONLY if explicitly enabled (e.g. from dedicated CSV import modal).
-  // Sentences and descriptions frequently contain commas; they must NEVER be split into columns during direct paste!
+  // 3. Plain lines: each line is treated as ONE cell (single-column copy from Excel).
+  // Sentences and descriptions frequently contain commas and semicolons;
+  // they must NEVER be split into columns or broken into other cells!
   const lines = rawText.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (options?.allowCsv && lines.length > 0) {
-    const commaCount = (lines[0].match(/,/g) || []).length;
-    const semiCount = (lines[0].match(/;/g) || []).length;
-
-    if (commaCount >= 1 && (commaCount >= semiCount)) {
-      const csvGrid = parseCSV(rawText, ",");
-      if (csvGrid.length > 0 && csvGrid[0].length > 1) {
-        return analyzeGrid(csvGrid, "csv");
-      }
-    } else if (semiCount >= 1) {
-      const semiGrid = parseCSV(rawText, ";");
-      if (semiGrid.length > 0 && semiGrid[0].length > 1) {
-        return analyzeGrid(semiGrid, "csv");
-      }
-    }
-  }
-
-  // 4. Fallback: lines as single-column text (preserving entire sentences with commas)
   const lineGrid = lines.map((l) => [cleanCellText(l)]);
   return analyzeGrid(lineGrid, "plain_lines");
 }
@@ -305,13 +298,12 @@ function analyzeGrid(
     };
   }
 
-  // Check if first row is genuinely a header
   const maxCols = Math.max(...rawGrid.map((r) => r.length));
   let hasHeader = false;
 
   const headerKeywords = [
-    "sl", "s/n", "s.no", "no", "item", "item #", "item no", "#",
-    "description", "particulars", "items", "details", "desc", "material", "name",
+    "sl", "s/n", "s.no", "sl.no", "no", "item", "item #", "item no", "#",
+    "description", "particulars", "items", "details", "desc", "material", "specification",
     "qty", "quantity", "qnty",
     "unit", "uom", "pkg", "unit of measure",
     "price", "rate", "unit price", "unit rate",
@@ -320,38 +312,37 @@ function analyzeGrid(
 
   const isHeaderCell = (cell: string) => {
     const c = cell.toLowerCase().trim();
-    if (!c || c.length > 25) return false;
-    return headerKeywords.some((kw) => c === kw || c === kw + "." || c === kw + " #" || c === "#");
+    if (!c || c.length > 30) return false;
+    return headerKeywords.some((kw) => c === kw || c === kw + "." || c === kw + ":" || c === kw + " #" || c === "#");
   };
 
-  // Single column copied lines should never drop the first row as a "header"
+  // Only consider header if multiple columns exist and at least 2 distinct columns match header words
   if (rawGrid.length > 1 && maxCols >= 2) {
     const firstRow = rawGrid[0];
     const headerMatches = firstRow.filter((cell) => isHeaderCell(cell));
-    if (firstRow.length >= 3) {
+    if (firstRow.length >= 4) {
+      hasHeader = headerMatches.length >= 3;
+    } else if (firstRow.length >= 2) {
       hasHeader = headerMatches.length >= 2;
-    } else if (firstRow.length === 2) {
-      hasHeader = headerMatches.length === 2;
     }
   }
 
-  // Check if column 0 consists of sequential numbers (1, 2, 3, 4...) -> Serial Number column
-  // Only valid if table has at least 2 columns
+  // Check if column 0 represents a Serial Number (digits/indices) while column 1 represents Description
   const dataRows = hasHeader ? rawGrid.slice(1) : rawGrid;
   let hasSerialColumn = false;
 
   if (maxCols >= 2 && dataRows.length > 0) {
-    let sequentialCount = 0;
-    dataRows.forEach((r, idx) => {
-      if (r.length >= 2) {
-        const val = r[0].replace(/[.\-\s]/g, "").trim();
-        const num = parseInt(val, 10);
-        if (!isNaN(num) && (num === idx + 1 || num === idx)) {
-          sequentialCount++;
-        }
-      }
-    });
-    hasSerialColumn = sequentialCount >= Math.min(3, dataRows.length);
+    const col0NonEmpty = dataRows.filter((r) => r[0] !== undefined && r[0].trim().length > 0);
+    if (col0NonEmpty.length > 0) {
+      const serialLikeCount = col0NonEmpty.filter((r) => {
+        const val = r[0].replace(/[.\-#\s]/g, "").trim();
+        return /^\d+$/.test(val) && val.length <= 5;
+      }).length;
+
+      const col1HasText = dataRows.some((r) => r.length >= 2 && /[a-zA-Z]/.test(r[1]));
+
+      hasSerialColumn = (serialLikeCount / col0NonEmpty.length >= 0.6) && col1HasText;
+    }
   }
 
   return {

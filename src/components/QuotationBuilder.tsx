@@ -2035,16 +2035,60 @@ export default function QuotationBuilder() {
       eventToPrevent.preventDefault();
     }
 
+    // Blur active contenteditable/input element so it does not retain stale DOM state or overwrite on blur
+    const activeEl = document.activeElement as HTMLElement | null;
+    if (activeEl && (activeEl.isContentEditable || activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
+      activeEl.blur();
+    }
+
     recordChange();
 
-    // Only skip header if table contains multiple columns with recognized header words
+    // Never drop the first row of user data!
+    // Only skip row 0 if it is strictly a column header matching keywords across columns
     let dataRows = parsedGrid;
     if (result.hasHeader && parsedGrid.length > 1 && parsedGrid[0].length >= 2) {
-      dataRows = parsedGrid.slice(1);
+      const headerNames = ["description", "desc", "qty", "quantity", "unit", "price", "rate", "amount", "total", "sl", "s.no", "item #", "#"];
+      const matches = parsedGrid[0].filter((c) => headerNames.includes(c.toLowerCase().trim()));
+      if (matches.length >= Math.min(3, parsedGrid[0].length)) {
+        dataRows = parsedGrid.slice(1);
+      }
     }
     if (dataRows.length === 0) return;
 
-    const hasSerialCol = result.hasSerialColumn && dataRows.some((r) => r.length >= 2);
+    // Detect if column 0 represents Serial Number
+    const isColZeroSerial = (() => {
+      if (result.hasSerialColumn) return true;
+      const sample = dataRows.slice(0, 10);
+      if (sample.length === 0) return false;
+      const maxColLen = Math.max(...sample.map((r) => r.length));
+      if (maxColLen < 2) return false;
+
+      let numericCount = 0;
+      let col1TextCount = 0;
+
+      sample.forEach((r) => {
+        if (r.length >= 2) {
+          const val0 = r[0].replace(/[.\-#\s]/g, "").trim();
+          if (/^\d+$/.test(val0) && val0.length <= 5) {
+            numericCount++;
+          }
+          if (/[a-zA-Z]/.test(r[1])) {
+            col1TextCount++;
+          }
+        }
+      });
+
+      if (numericCount >= Math.max(1, Math.ceil(sample.length * 0.6)) && col1TextCount >= 1) {
+        return true;
+      }
+
+      if (maxColLen >= 5 && sample.some((r) => r.length >= 5 && (r[0].length <= 5 || /^\d+$/.test(r[0].trim())))) {
+        return true;
+      }
+
+      return false;
+    })();
+
     const maxCols = Math.max(...dataRows.map((r) => r.length));
 
     setRows((prevRows) => {
@@ -2069,7 +2113,7 @@ export default function QuotationBuilder() {
 
         const targetRow = { ...updated[rIndex] };
 
-        // Case A: 1 column copied (e.g. 50 lines selected from an Excel column)
+        // Case A: 1 column copied (e.g. 50 lines selected from a single Excel column)
         if (cols.length === 1 || maxCols === 1) {
           const val = cleanCellText(cols[0]);
           if (startColIndex <= 0) {
@@ -2082,36 +2126,33 @@ export default function QuotationBuilder() {
             if (docType !== "challan") targetRow.price = val;
           }
         }
-        // Case B: Multi-column paste starting at SL or Description column
-        else if (startColIndex <= 0) {
-          if (hasSerialCol && cols.length >= 4) {
-            // [SL, Description, Qty, Unit, Price]
-            if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
-            if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
-            if (cols[3] !== undefined) targetRow.unit = cleanCellText(cols[3]);
-            if (cols[4] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[4]);
-          } else if (hasSerialCol && cols.length === 3) {
-            // [SL, Description, Qty]
-            if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
-            if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
-          } else {
-            // [Description, Qty, Unit, Price]
-            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
-            if (cols[2] !== undefined) targetRow.unit = cleanCellText(cols[2]);
-            if (cols[3] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[3]);
-          }
-        }
-        // Case C: Multi-column paste starting at specific column (Qty, Unit, or Price)
-        else {
+        // Case B: Multi-column paste starting at specific sub-column (Qty, Unit, or Price)
+        else if (startColIndex > 0) {
           cols.forEach((cellValue, cOffset) => {
             const cIndex = startColIndex + cOffset;
             const val = cleanCellText(cellValue);
-            if (cIndex === 0) targetRow.desc = val;
-            else if (cIndex === 1) targetRow.qty = val;
+            if (cIndex === 1) targetRow.qty = val;
             else if (cIndex === 2) targetRow.unit = val;
             else if (cIndex === 3 && docType !== "challan") targetRow.price = val;
           });
+        }
+        // Case C: Multi-column paste starting at SL or Description with Serial Number in copied Col 0
+        else if (isColZeroSerial) {
+          // [SL, Description, Qty, Unit, Price, (Amount)]
+          // Excel Col 1 is Description (with all commas and semicolons intact!)
+          if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
+          if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
+          if (cols[3] !== undefined) targetRow.unit = cleanCellText(cols[3]);
+          if (cols[4] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[4]);
+        }
+        // Case D: Multi-column paste starting at SL or Description without Serial Number
+        else {
+          // [Description, Qty, Unit, Price, (Amount)]
+          // Excel Col 0 is Description (with all commas and semicolons intact!)
+          if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
+          if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+          if (cols[2] !== undefined) targetRow.unit = cleanCellText(cols[2]);
+          if (cols[3] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[3]);
         }
 
         const cleanQty = stripHtml(String(targetRow.qty || ""));

@@ -36,6 +36,7 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const isComposingRef = useRef(false);
+  const lastEmittedValueRef = useRef(value || "");
 
   // Synchronize with paired print preview DOM element immediately
   const syncToPrintElement = useCallback((html: string) => {
@@ -46,13 +47,17 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
     }
   }, [syncId]);
 
-  // Synchronize external value with innerHTML when element is not active or initially loaded
+  // Synchronize external value with innerHTML.
+  // If value changed externally (e.g. from Excel paste, undo, redo, or row changes),
+  // update innerHTML immediately so stale DOM content does not persist or overwrite on blur.
   useEffect(() => {
     if (editorRef.current) {
       const currentHTML = editorRef.current.innerHTML;
       const normalizedValue = value || "";
-      if (currentHTML !== normalizedValue && document.activeElement !== editorRef.current) {
+      const isExternalChange = normalizedValue !== lastEmittedValueRef.current;
+      if (currentHTML !== normalizedValue && (document.activeElement !== editorRef.current || isExternalChange)) {
         editorRef.current.innerHTML = normalizedValue;
+        lastEmittedValueRef.current = normalizedValue;
       }
       syncToPrintElement(normalizedValue);
     }
@@ -61,6 +66,7 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
   const handleInput = useCallback(() => {
     if (editorRef.current && !isComposingRef.current) {
       const html = editorRef.current.innerHTML;
+      lastEmittedValueRef.current = html;
       onChange(html);
       syncToPrintElement(html);
       saveCurrentSelection();
