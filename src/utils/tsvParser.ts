@@ -305,10 +305,12 @@ function analyzeGrid(
     };
   }
 
-  // Check if first row is a header
-  const firstRow = rawGrid[0].map((c) => c.toLowerCase().trim());
+  // Check if first row is genuinely a header
+  const maxCols = Math.max(...rawGrid.map((r) => r.length));
+  let hasHeader = false;
+
   const headerKeywords = [
-    "sl", "s/n", "s.no", "no", "item", "item #", "item no",
+    "sl", "s/n", "s.no", "no", "item", "item #", "item no", "#",
     "description", "particulars", "items", "details", "desc", "material", "name",
     "qty", "quantity", "qnty",
     "unit", "uom", "pkg", "unit of measure",
@@ -316,27 +318,41 @@ function analyzeGrid(
     "amount", "total", "total amount", "subtotal"
   ];
 
-  const headerMatches = firstRow.filter((cell) =>
-    headerKeywords.some((kw) => cell === kw || cell.startsWith(kw + " ") || cell.includes(kw))
-  );
+  const isHeaderCell = (cell: string) => {
+    const c = cell.toLowerCase().trim();
+    if (!c || c.length > 25) return false;
+    return headerKeywords.some((kw) => c === kw || c === kw + "." || c === kw + " #" || c === "#");
+  };
 
-  const hasHeader = headerMatches.length >= 2 || (firstRow.length <= 2 && headerMatches.length >= 1);
-
-  // Check if column 0 consists mainly of numbers (1, 2, 3, 4...) -> Serial Number column
-  const dataRows = hasHeader ? rawGrid.slice(1) : rawGrid;
-  let numericSerialCount = 0;
-  
-  dataRows.forEach((r, idx) => {
-    if (r.length > 0) {
-      const val = r[0].replace(/[.\-\s]/g, "").trim();
-      const num = parseInt(val, 10);
-      if (!isNaN(num) && (num === idx + 1 || num === idx || num > 0)) {
-        numericSerialCount++;
-      }
+  // Single column copied lines should never drop the first row as a "header"
+  if (rawGrid.length > 1 && maxCols >= 2) {
+    const firstRow = rawGrid[0];
+    const headerMatches = firstRow.filter((cell) => isHeaderCell(cell));
+    if (firstRow.length >= 3) {
+      hasHeader = headerMatches.length >= 2;
+    } else if (firstRow.length === 2) {
+      hasHeader = headerMatches.length === 2;
     }
-  });
+  }
 
-  const hasSerialColumn = dataRows.length > 0 && numericSerialCount >= Math.min(3, dataRows.length);
+  // Check if column 0 consists of sequential numbers (1, 2, 3, 4...) -> Serial Number column
+  // Only valid if table has at least 2 columns
+  const dataRows = hasHeader ? rawGrid.slice(1) : rawGrid;
+  let hasSerialColumn = false;
+
+  if (maxCols >= 2 && dataRows.length > 0) {
+    let sequentialCount = 0;
+    dataRows.forEach((r, idx) => {
+      if (r.length >= 2) {
+        const val = r[0].replace(/[.\-\s]/g, "").trim();
+        const num = parseInt(val, 10);
+        if (!isNaN(num) && (num === idx + 1 || num === idx)) {
+          sequentialCount++;
+        }
+      }
+    });
+    hasSerialColumn = sequentialCount >= Math.min(3, dataRows.length);
+  }
 
   return {
     grid: rawGrid,

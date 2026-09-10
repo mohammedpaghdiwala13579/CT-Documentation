@@ -13,7 +13,9 @@ import {
   Printer, 
   X,
   Sparkles,
-  Bot
+  Bot,
+  Undo2,
+  Redo2
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
@@ -78,6 +80,12 @@ export interface ExcelRibbonToolbarProps {
   onToggleMerge?: () => void;
   onClearFormatting?: () => void;
 
+  // History Undo / Redo
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+
   // Document Management
   docType: "quotation" | "challan" | "invoice";
   onSelectDocType: (type: "quotation" | "challan" | "invoice") => void;
@@ -120,6 +128,10 @@ export default function ExcelRibbonToolbar({
   canMerge,
   onToggleMerge,
   onClearFormatting,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   docType,
   onSelectDocType,
   includeVesselName = true,
@@ -502,6 +514,42 @@ export default function ExcelRibbonToolbar({
       <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         {/* Formatting Tools Left Section */}
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+
+          {/* GROUP 0: QUICK ACCESS UNDO & REDO */}
+          {(onUndo || onRedo) && (
+            <div className="flex items-center gap-0.5 border-r border-[#4e4e4e] pr-1.5 mr-0.5">
+              <button
+                type="button"
+                id="btn-toolbar-undo"
+                onClick={onUndo}
+                disabled={!canUndo}
+                className={`h-[24px] px-1.5 rounded-xs flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                  canUndo
+                    ? "bg-[#333333] hover:bg-[#444444] text-[#ffffff] border border-[#4e4e4e]"
+                    : "text-[#666666] cursor-not-allowed border border-transparent opacity-60"
+                }`}
+                title="Undo (Ctrl+Z)"
+              >
+                <Undo2 className="h-3.5 w-3.5 text-amber-400" />
+                <span className="hidden sm:inline text-[10px]">Undo</span>
+              </button>
+              <button
+                type="button"
+                id="btn-toolbar-redo"
+                onClick={onRedo}
+                disabled={!canRedo}
+                className={`h-[24px] px-1.5 rounded-xs flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                  canRedo
+                    ? "bg-[#333333] hover:bg-[#444444] text-[#ffffff] border border-[#4e4e4e]"
+                    : "text-[#666666] cursor-not-allowed border border-transparent opacity-60"
+                }`}
+                title="Redo (Ctrl+Y or Ctrl+Shift+Z)"
+              >
+                <Redo2 className="h-3.5 w-3.5 text-amber-400" />
+                <span className="hidden sm:inline text-[10px]">Redo</span>
+              </button>
+            </div>
+          )}
           
           {/* GROUP 1: FONT FAMILY, FONT SIZE & SIZE STEPPERS */}
           <div className="flex items-center gap-1">

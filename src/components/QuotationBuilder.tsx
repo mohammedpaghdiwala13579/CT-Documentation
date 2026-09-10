@@ -245,6 +245,154 @@ export default function QuotationBuilder() {
   const dateRef = useRef<HTMLInputElement>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Document History Stack for Full Undo/Redo via Shortcuts
+  interface DocumentSnapshot {
+    rows: QuotationRow[];
+    mergedRegions: MergedRegion[];
+    cellFormats: CellFormatMap;
+    docType: "quotation" | "challan" | "invoice";
+    messers: string;
+    address: string;
+    vesselName: string;
+    portBerth: string;
+    includeVesselName: boolean;
+    includePortBerth: boolean;
+    currency: string;
+    challanNo: string;
+    requisitionNo: string;
+    invoiceNo: string;
+    poNumber: string;
+    vatPercent: string;
+    transportationFee: string;
+    includeDiscount: boolean;
+    discountType: "percentage" | "fixed";
+    discountValue: string;
+  }
+
+  const undoStackRef = useRef<DocumentSnapshot[]>([]);
+  const redoStackRef = useRef<DocumentSnapshot[]>([]);
+  const isUndoRedoActionRef = useRef<boolean>(false);
+  const lastTypingTimeRef = useRef<number>(0);
+  const [historyChangeCount, setHistoryChangeCount] = useState<number>(0);
+
+  const getCurrentSnapshot = (): DocumentSnapshot => ({
+    rows: JSON.parse(JSON.stringify(rows)),
+    mergedRegions: JSON.parse(JSON.stringify(mergedRegions)),
+    cellFormats: JSON.parse(JSON.stringify(cellFormats)),
+    docType,
+    messers,
+    address,
+    vesselName,
+    portBerth,
+    includeVesselName,
+    includePortBerth,
+    currency,
+    challanNo,
+    requisitionNo,
+    invoiceNo,
+    poNumber,
+    vatPercent,
+    transportationFee,
+    includeDiscount,
+    discountType,
+    discountValue,
+  });
+
+  const recordChange = () => {
+    if (isUndoRedoActionRef.current) return;
+    const snap = getCurrentSnapshot();
+    undoStackRef.current.push(snap);
+    if (undoStackRef.current.length > 60) {
+      undoStackRef.current.shift();
+    }
+    redoStackRef.current = [];
+    setHistoryChangeCount((c) => c + 1);
+  };
+
+  const handleUndo = () => {
+    if (undoStackRef.current.length === 0) {
+      showToast("Nothing to undo", "info");
+      return;
+    }
+    const current = getCurrentSnapshot();
+    const previous = undoStackRef.current.pop()!;
+    redoStackRef.current.push(current);
+    if (redoStackRef.current.length > 60) {
+      redoStackRef.current.shift();
+    }
+
+    isUndoRedoActionRef.current = true;
+    setRows(previous.rows);
+    setMergedRegions(previous.mergedRegions);
+    setCellFormats(previous.cellFormats);
+    setDocType(previous.docType);
+    setMessers(previous.messers);
+    setAddress(previous.address);
+    setVesselName(previous.vesselName);
+    setPortBerth(previous.portBerth);
+    setIncludeVesselName(previous.includeVesselName);
+    setIncludePortBerth(previous.includePortBerth);
+    setCurrency(previous.currency);
+    setChallanNo(previous.challanNo);
+    setRequisitionNo(previous.requisitionNo);
+    setInvoiceNo(previous.invoiceNo);
+    setPoNumber(previous.poNumber);
+    setVatPercent(previous.vatPercent);
+    setTransportationFee(previous.transportationFee);
+    setIncludeDiscount(previous.includeDiscount);
+    setDiscountType(previous.discountType);
+    setDiscountValue(previous.discountValue);
+    setHistoryChangeCount((c) => c + 1);
+
+    setTimeout(() => {
+      isUndoRedoActionRef.current = false;
+    }, 50);
+
+    showToast("Undo (Ctrl+Z)", "info");
+  };
+
+  const handleRedo = () => {
+    if (redoStackRef.current.length === 0) {
+      showToast("Nothing to redo", "info");
+      return;
+    }
+    const current = getCurrentSnapshot();
+    const next = redoStackRef.current.pop()!;
+    undoStackRef.current.push(current);
+    if (undoStackRef.current.length > 60) {
+      undoStackRef.current.shift();
+    }
+
+    isUndoRedoActionRef.current = true;
+    setRows(next.rows);
+    setMergedRegions(next.mergedRegions);
+    setCellFormats(next.cellFormats);
+    setDocType(next.docType);
+    setMessers(next.messers);
+    setAddress(next.address);
+    setVesselName(next.vesselName);
+    setPortBerth(next.portBerth);
+    setIncludeVesselName(next.includeVesselName);
+    setIncludePortBerth(next.includePortBerth);
+    setCurrency(next.currency);
+    setChallanNo(next.challanNo);
+    setRequisitionNo(next.requisitionNo);
+    setInvoiceNo(next.invoiceNo);
+    setPoNumber(next.poNumber);
+    setVatPercent(next.vatPercent);
+    setTransportationFee(next.transportationFee);
+    setIncludeDiscount(next.includeDiscount);
+    setDiscountType(next.discountType);
+    setDiscountValue(next.discountValue);
+    setHistoryChangeCount((c) => c + 1);
+
+    setTimeout(() => {
+      isUndoRedoActionRef.current = false;
+    }, 50);
+
+    showToast("Redo (Ctrl+Y)", "info");
+  };
+
   const triggerDatePicker = () => {
     if (dateRef.current) {
       try {
@@ -792,6 +940,12 @@ export default function QuotationBuilder() {
   }, []);
 
   const handleRowChange = (index: number, field: keyof QuotationRow, value: string) => {
+    const now = Date.now();
+    if (now - lastTypingTimeRef.current > 650) {
+      recordChange();
+    }
+    lastTypingTimeRef.current = now;
+
     setRows((prevRows) => {
       const updated = [...prevRows];
       const targetRow = { ...updated[index] };
@@ -831,6 +985,7 @@ export default function QuotationBuilder() {
       return;
     }
 
+    recordChange();
     setRows((prevRows) => {
       const newRows = [...prevRows];
       const startIdx = newRows.length;
@@ -856,6 +1011,7 @@ export default function QuotationBuilder() {
 
   const setExactTotalRows = (targetCount: number) => {
     const count = Math.max(1, Math.min(MAX_LINES_LIMIT, targetCount));
+    recordChange();
     setRows((prevRows) => {
       if (count === prevRows.length) return prevRows;
       if (count > prevRows.length) {
@@ -888,6 +1044,7 @@ export default function QuotationBuilder() {
   };
 
   const trimTrailingBlankRows = () => {
+    recordChange();
     setRows((prevRows) => {
       let lastNonEmptyIndex = -1;
       for (let i = prevRows.length - 1; i >= 0; i--) {
@@ -910,6 +1067,7 @@ export default function QuotationBuilder() {
   };
 
   const removeRow = () => {
+    recordChange();
     setRows((prevRows) => {
       if (prevRows.length <= 1) return prevRows;
       return prevRows.slice(0, -1);
@@ -932,6 +1090,7 @@ export default function QuotationBuilder() {
       return;
     }
     const insertAt = position === 'above' ? index : index + 1;
+    recordChange();
     setRows((prevRows) => {
       const updated = [...prevRows];
       const newItems: QuotationRow[] = [];
@@ -969,6 +1128,7 @@ export default function QuotationBuilder() {
 
   const handleImportFromExcel = (newRows: QuotationRow[], mode: "replace" | "append" | "insert_at", insertIndex: number = 0) => {
     if (newRows.length === 0) return;
+    recordChange();
     setRows((prevRows) => {
       let result: QuotationRow[] = [];
       if (mode === "replace") {
@@ -1013,6 +1173,7 @@ export default function QuotationBuilder() {
   };
 
   const deleteSpecificRow = (index: number) => {
+    recordChange();
     setRows((prevRows) => {
       if (prevRows.length <= 1) {
         return [{
@@ -1044,6 +1205,7 @@ export default function QuotationBuilder() {
   };
 
   const clearSpecificRow = (index: number) => {
+    recordChange();
     setRows((prevRows) => {
       const updated = [...prevRows];
       updated[index] = {
@@ -1105,6 +1267,7 @@ export default function QuotationBuilder() {
       return;
     }
 
+    recordChange();
     setRows((prevRows) => {
       const updated = prevRows.map((r) => ({ ...r }));
       const pieces: string[] = [];
@@ -1157,6 +1320,7 @@ export default function QuotationBuilder() {
   const unmergeRegionAt = (rowIndex: number, colIndex: number) => {
     const region = getMergeRegionAt(rowIndex, colIndex);
     if (!region) return;
+    recordChange();
     setMergedRegions((prev) => prev.filter((m) => m.id !== region.id));
   };
 
@@ -1188,6 +1352,7 @@ export default function QuotationBuilder() {
   };
 
   const moveRow = (index: number, direction: 'up' | 'down') => {
+    recordChange();
     setRows((prevRows) => {
       if (direction === 'up' && index === 0) return prevRows;
       if (direction === 'down' && index === prevRows.length - 1) return prevRows;
@@ -1372,6 +1537,7 @@ export default function QuotationBuilder() {
       }
     }
 
+    recordChange();
     setCellFormats((prev) => {
       const next = { ...prev };
 
@@ -1411,6 +1577,7 @@ export default function QuotationBuilder() {
   };
 
   const handleApplyBorderPreset = (preset: string) => {
+    recordChange();
     setCellFormats((prev) => {
       const next = { ...prev };
       const minRow = selectionStart && selectionEnd ? Math.min(selectionStart.rowIndex, selectionEnd.rowIndex) : (selectedCell ? selectedCell.rowIndex : selectedRowIndex);
@@ -1568,16 +1735,73 @@ export default function QuotationBuilder() {
     const handleGlobalShortcuts = (e: KeyboardEvent) => {
       if (!e.ctrlKey && !e.metaKey) return;
 
+      const key = e.key.toLowerCase();
+      const isShift = e.shiftKey;
+
+      // Undo shortcut: Ctrl+Z (or Cmd+Z)
+      if (key === "z" && !isShift) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleUndo();
+        return;
+      }
+
+      // Redo shortcut: Ctrl+Y or Ctrl+Shift+Z (or Cmd+Y / Cmd+Shift+Z)
+      if (key === "y" || (key === "z" && isShift)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleRedo();
+        return;
+      }
+
+      // Copy shortcut: Ctrl+C for selected cells or range
+      if (key === "c") {
+        const textSelection = window.getSelection()?.toString();
+        // If user is selecting specific text in an editable cell or input, let browser copy that text
+        if (textSelection && textSelection.trim().length > 0) {
+          return;
+        }
+
+        const minRow = selectionStart && selectionEnd ? Math.min(selectionStart.rowIndex, selectionEnd.rowIndex) : (selectedCell ? selectedCell.rowIndex : selectedRowIndex);
+        const maxRow = selectionStart && selectionEnd ? Math.max(selectionStart.rowIndex, selectionEnd.rowIndex) : (selectedCell ? selectedCell.rowIndex : selectedRowIndex);
+        const minCol = selectionStart && selectionEnd ? Math.min(selectionStart.colIndex, selectionEnd.colIndex) : (selectedCell ? selectedCell.colIndex : 0);
+        const maxCol = selectionStart && selectionEnd ? Math.max(selectionStart.colIndex, selectionEnd.colIndex) : (selectedCell ? selectedCell.colIndex : 3);
+
+        if (minRow >= 0 && maxRow < rows.length) {
+          const tsvRows: string[] = [];
+          for (let r = minRow; r <= maxRow; r++) {
+            const rowData = rows[r];
+            if (!rowData) continue;
+            const cells: string[] = [];
+            for (let c = minCol; c <= maxCol; c++) {
+              if (c === -1) cells.push(String(rowData.sl || r + 1));
+              else if (c === 0) cells.push(stripHtml(rowData.desc || ""));
+              else if (c === 1) cells.push(stripHtml(rowData.qty || ""));
+              else if (c === 2) cells.push(stripHtml(rowData.unit || ""));
+              else if (c === 3) cells.push(stripHtml(rowData.price || ""));
+              else if (c === 4) cells.push(String(rowData.amount || 0));
+            }
+            tsvRows.push(cells.join("\t"));
+          }
+          const tsvString = tsvRows.join("\r\n");
+          if (tsvString && navigator.clipboard?.writeText) {
+            e.preventDefault();
+            navigator.clipboard.writeText(tsvString);
+            showToast(`Copied ${tsvRows.length} row${tsvRows.length > 1 ? "s" : ""} to clipboard`);
+            return;
+          }
+        }
+      }
+
       const target = e.target as HTMLElement;
       const isContentEditable = target?.isContentEditable || !!target?.closest?.("[contenteditable='true']");
       const isSheetInput = target?.closest?.(".sheet") || target?.hasAttribute?.("data-row");
 
       if (!selectedCell && !selectionStart && !isSheetInput && !isContentEditable) return;
 
-      const key = e.key.toLowerCase();
-
       if (key === "b") {
         e.preventDefault();
+        recordChange();
         if (isContentEditable || hasActiveSelectionInEditable()) {
           applyInlineFormatting("bold");
         } else {
@@ -1585,6 +1809,7 @@ export default function QuotationBuilder() {
         }
       } else if (key === "i") {
         e.preventDefault();
+        recordChange();
         if (isContentEditable || hasActiveSelectionInEditable()) {
           applyInlineFormatting("italic");
         } else {
@@ -1592,6 +1817,7 @@ export default function QuotationBuilder() {
         }
       } else if (key === "u") {
         e.preventDefault();
+        recordChange();
         if (isContentEditable || hasActiveSelectionInEditable()) {
           applyInlineFormatting("underline");
         } else {
@@ -1599,15 +1825,19 @@ export default function QuotationBuilder() {
         }
       } else if (key === "l" && !e.shiftKey) {
         e.preventDefault();
+        recordChange();
         handleApplyFormat({ align: "left" });
       } else if (key === "e" && !e.shiftKey) {
         e.preventDefault();
+        recordChange();
         handleApplyFormat({ align: "center" });
       } else if (key === "r" && !e.shiftKey) {
         e.preventDefault();
+        recordChange();
         handleApplyFormat({ align: "right" });
       } else if (e.shiftKey && (key === ">" || key === ".")) {
         e.preventDefault();
+        recordChange();
         const currentSize = activeCellFormat.fontSize || 8.5;
         const newSize = Math.min(72, currentSize + 1);
         if (isContentEditable || hasActiveSelectionInEditable()) {
@@ -1617,6 +1847,7 @@ export default function QuotationBuilder() {
         }
       } else if (e.shiftKey && (key === "<" || key === ",")) {
         e.preventDefault();
+        recordChange();
         const currentSize = activeCellFormat.fontSize || 8.5;
         const newSize = Math.max(5, currentSize - 1);
         if (isContentEditable || hasActiveSelectionInEditable()) {
@@ -1627,9 +1858,9 @@ export default function QuotationBuilder() {
       }
     };
 
-    window.addEventListener("keydown", handleGlobalShortcuts);
-    return () => window.removeEventListener("keydown", handleGlobalShortcuts);
-  }, [activeCellFormat, selectedCell, selectionStart, selectionEnd, selectedRowIndex]);
+    window.addEventListener("keydown", handleGlobalShortcuts, { capture: true });
+    return () => window.removeEventListener("keydown", handleGlobalShortcuts, { capture: true });
+  }, [activeCellFormat, selectedCell, selectionStart, selectionEnd, selectedRowIndex, rows, mergedRegions, cellFormats, docType]);
 
   const handleCellClick = (rowIndex: number, colIndex: number) => {
     setSelectedRowIndex(rowIndex);
@@ -1762,130 +1993,124 @@ export default function QuotationBuilder() {
     }
   };
 
-  const handlePaste = (
-    e: React.ClipboardEvent<HTMLElement>,
+  const performPaste = (
+    clipboardData: DataTransfer | null,
     startRowIndex: number,
-    startColIndex: number
+    startColIndex: number,
+    eventToPrevent?: { preventDefault: () => void }
   ) => {
-    const plainText = e.clipboardData.getData("text/plain") || e.clipboardData.getData("text");
-    const htmlText = e.clipboardData.getData("text/html");
+    if (!clipboardData) return;
+
+    const plainText = clipboardData.getData("text/plain") || clipboardData.getData("text") || "";
+    const htmlText = clipboardData.getData("text/html") || "";
 
     if (!plainText && !htmlText) return;
 
-    // Check whether the clipboard contains authentic multi-column spreadsheet data
-    const hasTabs = plainText.includes("\t");
-    const hasHtmlTable = Boolean(htmlText && htmlText.includes("<table") && htmlText.includes("<td"));
-
-    // Explicitly disable CSV comma splitting during clipboard cell pasting (sentences contain commas)
+    // Explicitly disable CSV comma splitting so text with commas isn't incorrectly split into columns
     const result = parseClipboardData({ text: plainText, html: htmlText }, { allowCsv: false });
     const parsedGrid = result.grid;
 
     if (!parsedGrid || parsedGrid.length === 0) return;
 
-    const isMultiColumnSpreadsheet = hasTabs || (hasHtmlTable && parsedGrid.some((r) => r.length > 1));
-
-    // Case 1: Direct text pasting into an editable cell (Description, Qty, Unit, Price)
-    // When there are no spreadsheet tabs or multi-column table:
-    // The pasted content MUST remain strictly inside the active cell and NEVER spill over to unit, price, etc.
-    if (!isMultiColumnSpreadsheet && startColIndex >= 0) {
-      if (parsedGrid.length <= 1) {
-        // Single line / sentence - allow default contenteditable / input paste, inserting cleanly at cursor
-        return;
-      }
-
-      // If user pasted multi-line text or wrapped sentences (e.g. from PDF or document) into Description (col 0):
-      if (startColIndex === 0) {
-        e.preventDefault();
-        const textToInsert = cleanCellText(plainText);
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && sel.anchorNode && e.currentTarget.contains(sel.anchorNode)) {
-          document.execCommand("insertText", false, textToInsert);
-        } else {
-          handleRowChange(startRowIndex, "desc", textToInsert);
+    // Single-cell paste (1 line, 1 column)
+    if (parsedGrid.length === 1 && parsedGrid[0].length <= 1) {
+      if (startColIndex >= 0) {
+        // If event was triggered inside an active contenteditable element, allow native paste at cursor position
+        if (eventToPrevent) {
+          return;
         }
-        return;
-      }
-
-      // If pasted into a specific single field (Qty, Unit, Price), keep it strictly in that field
-      if (startColIndex > 0) {
-        e.preventDefault();
+        // Pasted into cell via cell selection without active cursor
         const fieldMap = ["desc", "qty", "unit", "price"] as const;
         const field = fieldMap[startColIndex];
         if (field) {
-          const textToInsert = cleanCellText(plainText);
-          handleRowChange(startRowIndex, field, textToInsert);
+          recordChange();
+          handleRowChange(startRowIndex, field, cleanCellText(parsedGrid[0][0]));
         }
         return;
       }
     }
 
-    // Case 2: Multi-cell, multi-line, or multi-column paste from Excel / Google Sheets
-    e.preventDefault();
+    // Multi-cell or multi-line paste (e.g. 50 lines copied from Excel)
+    if (eventToPrevent) {
+      eventToPrevent.preventDefault();
+    }
 
-    const dataRows = result.hasHeader ? parsedGrid.slice(1) : parsedGrid;
+    recordChange();
+
+    // Only skip header if table contains multiple columns with recognized header words
+    let dataRows = parsedGrid;
+    if (result.hasHeader && parsedGrid.length > 1 && parsedGrid[0].length >= 2) {
+      dataRows = parsedGrid.slice(1);
+    }
     if (dataRows.length === 0) return;
 
-    const hasSerialCol = result.hasSerialColumn;
-    const colCount = Math.max(...dataRows.map(r => r.length));
+    const hasSerialCol = result.hasSerialColumn && dataRows.some((r) => r.length >= 2);
+    const maxCols = Math.max(...dataRows.map((r) => r.length));
 
     setRows((prevRows) => {
       const updated = [...prevRows];
+      const targetTotalRows = startRowIndex + dataRows.length;
+
+      // Expand table to ensure every single copied line gets its own row (up to MAX_LINES_LIMIT)
+      while (updated.length < targetTotalRows && updated.length < MAX_LINES_LIMIT) {
+        updated.push({
+          sl: updated.length + 1,
+          desc: "",
+          qty: "",
+          unit: "",
+          price: "",
+          amount: 0,
+        });
+      }
 
       dataRows.forEach((cols, rOffset) => {
         const rIndex = startRowIndex + rOffset;
         if (rIndex >= MAX_LINES_LIMIT) return;
 
-        if (rIndex >= updated.length) {
-          updated.push({
-            sl: updated.length + 1,
-            desc: "",
-            qty: "",
-            unit: "",
-            price: "",
-            amount: 0,
-          });
-        }
-
         const targetRow = { ...updated[rIndex] };
 
-        // Intelligent column routing with clean continuous text
-        if (startColIndex === -1) {
-          // Clicked in SL column
-          if (hasSerialCol || colCount >= 4) {
+        // Case A: 1 column copied (e.g. 50 lines selected from an Excel column)
+        if (cols.length === 1 || maxCols === 1) {
+          const val = cleanCellText(cols[0]);
+          if (startColIndex <= 0) {
+            targetRow.desc = val;
+          } else if (startColIndex === 1) {
+            targetRow.qty = val;
+          } else if (startColIndex === 2) {
+            targetRow.unit = val;
+          } else if (startColIndex === 3) {
+            if (docType !== "challan") targetRow.price = val;
+          }
+        }
+        // Case B: Multi-column paste starting at SL or Description column
+        else if (startColIndex <= 0) {
+          if (hasSerialCol && cols.length >= 4) {
+            // [SL, Description, Qty, Unit, Price]
             if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
             if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
             if (cols[3] !== undefined) targetRow.unit = cleanCellText(cols[3]);
             if (cols[4] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[4]);
+          } else if (hasSerialCol && cols.length === 3) {
+            // [SL, Description, Qty]
+            if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
+            if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
           } else {
+            // [Description, Qty, Unit, Price]
             if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
             if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
             if (cols[2] !== undefined) targetRow.unit = cleanCellText(cols[2]);
             if (cols[3] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[3]);
           }
-        } else if (startColIndex === 0) {
-          // Clicked in Description column (Col 0)
-          if (hasSerialCol && colCount >= 4) {
-            if (cols[1] !== undefined) targetRow.desc = cleanCellText(cols[1]);
-            if (cols[2] !== undefined) targetRow.qty = cleanCellText(cols[2]);
-            if (cols[3] !== undefined) targetRow.unit = cleanCellText(cols[3]);
-            if (cols[4] !== undefined && docType !== "challan") targetRow.price = cleanCellText(cols[4]);
-          } else {
-            cols.forEach((cellValue, cOffset) => {
-              const cIndex = startColIndex + cOffset;
-              if (cIndex === 0) targetRow.desc = cleanCellText(cellValue);
-              else if (cIndex === 1) targetRow.qty = cleanCellText(cellValue);
-              else if (cIndex === 2) targetRow.unit = cleanCellText(cellValue);
-              else if (cIndex === 3 && docType !== "challan") targetRow.price = cleanCellText(cellValue);
-            });
-          }
-        } else {
-          // Pasting into specific sub-column (Qty, Unit, or Price)
+        }
+        // Case C: Multi-column paste starting at specific column (Qty, Unit, or Price)
+        else {
           cols.forEach((cellValue, cOffset) => {
             const cIndex = startColIndex + cOffset;
-            if (cIndex === 0) targetRow.desc = cleanCellText(cellValue);
-            else if (cIndex === 1) targetRow.qty = cleanCellText(cellValue);
-            else if (cIndex === 2) targetRow.unit = cleanCellText(cellValue);
-            else if (cIndex === 3 && docType !== "challan") targetRow.price = cleanCellText(cellValue);
+            const val = cleanCellText(cellValue);
+            if (cIndex === 0) targetRow.desc = val;
+            else if (cIndex === 1) targetRow.qty = val;
+            else if (cIndex === 2) targetRow.unit = val;
+            else if (cIndex === 3 && docType !== "challan") targetRow.price = val;
           });
         }
 
@@ -1897,10 +2122,44 @@ export default function QuotationBuilder() {
         updated[rIndex] = targetRow;
       });
 
-      showToast(`Distributed ${dataRows.length} lines from Excel`);
       return updated;
     });
+
+    showToast(`Pasted ${dataRows.length} lines from Excel`);
   };
+
+  const handlePaste = (
+    e: React.ClipboardEvent<HTMLElement>,
+    startRowIndex: number,
+    startColIndex: number
+  ) => {
+    performPaste(e.clipboardData, startRowIndex, startColIndex, e);
+  };
+
+  // Global window paste listener: allows Ctrl+V to paste into the sheet even when a cell or row is highlighted
+  useEffect(() => {
+    const handleWindowPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      // If user is editing a standard input or textarea, let default native paste proceed
+      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") {
+        return;
+      }
+      // If inside an active contenteditable cell, RichTextCell's onPaste handles it
+      const isInsideEditable = target?.hasAttribute("contenteditable") || !!target?.closest?.("[contenteditable='true']");
+      if (isInsideEditable) {
+        return;
+      }
+
+      const startRow = selectedCell?.rowIndex ?? selectedRowIndex ?? 0;
+      const startCol = selectedCell?.colIndex ?? 0;
+      if (startRow >= 0 && e.clipboardData) {
+        performPaste(e.clipboardData, startRow, startCol, e);
+      }
+    };
+
+    window.addEventListener("paste", handleWindowPaste);
+    return () => window.removeEventListener("paste", handleWindowPaste);
+  }, [selectedCell, selectedRowIndex, rows, docType]);
 
   const unwrapAllDescriptions = () => {
     let fixedCount = 0;
@@ -2189,6 +2448,10 @@ export default function QuotationBuilder() {
       {/* Consolidated Top Toolbar Table - Sticky at Top of Whole Page */}
       <div className="sticky top-0 z-40 w-full max-w-[210mm] px-2 sm:px-0 no-print print:hidden mb-2">
         <ExcelRibbonToolbar
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={undoStackRef.current.length > 0}
+          canRedo={redoStackRef.current.length > 0}
           activeFormat={activeCellFormat}
           onApplyFormat={handleApplyFormat}
           onApplyBorderPreset={handleApplyBorderPreset}
@@ -2196,6 +2459,7 @@ export default function QuotationBuilder() {
           canMerge={!!(selectionStart && selectionEnd && (selectionStart.rowIndex !== selectionEnd.rowIndex || selectionStart.colIndex !== selectionEnd.colIndex))}
           onToggleMerge={toggleMergeSelectedRange}
           onClearFormatting={() => {
+            recordChange();
             if (selectionStart && selectionEnd) {
               const minRow = Math.min(selectionStart.rowIndex, selectionEnd.rowIndex);
               const maxRow = Math.max(selectionStart.rowIndex, selectionEnd.rowIndex);
@@ -2228,6 +2492,7 @@ export default function QuotationBuilder() {
           }}
           docType={docType}
           onSelectDocType={(type) => {
+            recordChange();
             setDocType(type);
             setMergedRegions([]);
             setRows((prev) =>
