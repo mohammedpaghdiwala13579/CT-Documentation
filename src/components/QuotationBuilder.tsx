@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, DollarSign, Percent } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
@@ -152,7 +152,7 @@ export default function QuotationBuilder() {
     if (initialDraft?.includePortBerth !== undefined) return Boolean(initialDraft.includePortBerth);
     return true;
   });
-  const [currency, setCurrency] = useState<string>(() => initialDraft?.currency || "");
+  const [currency, setCurrency] = useState<string>(() => (initialDraft?.currency === "USD" ? "Taka" : initialDraft?.currency || "Taka"));
   const [challanNo, setChallanNo] = useState(() => initialDraft?.challanNo || "");
   const [requisitionNo, setRequisitionNo] = useState(() => initialDraft?.requisitionNo || "");
   const [invoiceNo, setInvoiceNo] = useState(() => initialDraft?.invoiceNo || "");
@@ -187,6 +187,9 @@ export default function QuotationBuilder() {
   const [autoSaveEnabled] = useState<boolean>(true);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  // Active Page View state ("editor" | "saved-docs")
+  const [activePage, setActivePage] = useState<"editor" | "saved-docs">("editor");
 
   // Excel Paste Modal and Batch Row Adder states
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
@@ -443,7 +446,7 @@ export default function QuotationBuilder() {
           address: data.address || "",
           vesselName: data.vesselName || "",
           portBerth: data.portBerth || "",
-          currency: data.currency || "USD",
+          currency: (data.currency === "USD" || !data.currency) ? "Taka" : data.currency,
           discountPercent: data.discountPercent || 0,
           includeDiscount: data.includeDiscount !== undefined ? Boolean(data.includeDiscount) : ((data.discountValue && data.discountValue > 0) || (data.discountPercent && data.discountPercent > 0)),
           discountType: data.discountType || "percentage",
@@ -568,7 +571,7 @@ export default function QuotationBuilder() {
     setPortBerth("");
     setIncludeVesselName(true);
     setIncludePortBerth(true);
-    setCurrency("");
+    setCurrency("Taka");
     setIncludeDiscount(false);
     setDiscountType("percentage");
     setDiscountValue("0");
@@ -609,7 +612,7 @@ export default function QuotationBuilder() {
     setPortBerth(doc.portBerth || "");
     setIncludeVesselName(doc.includeVesselName !== undefined ? Boolean(doc.includeVesselName) : (doc.vesselName !== undefined && doc.vesselName.trim() !== "" ? true : true));
     setIncludePortBerth(doc.includePortBerth !== undefined ? Boolean(doc.includePortBerth) : (doc.portBerth !== undefined && doc.portBerth.trim() !== "" ? true : true));
-    setCurrency(doc.currency || "");
+    setCurrency(doc.currency === "USD" || !doc.currency ? "Taka" : doc.currency);
     
     const docHasDiscount = doc.includeDiscount !== undefined 
       ? Boolean(doc.includeDiscount) 
@@ -2549,97 +2552,132 @@ export default function QuotationBuilder() {
   const safeSelectedRowIndex = Math.max(0, Math.min(selectedRowIndex, rows.length - 1));
   const GRID_COLUMNS = docType === "challan" ? [-1, 0, 1, 2] : [-1, 0, 1, 2, 3, 4];
 
+  const handleClearFormatting = () => {
+    recordChange();
+    if (selectionStart && selectionEnd) {
+      const minRow = Math.min(selectionStart.rowIndex, selectionEnd.rowIndex);
+      const maxRow = Math.max(selectionStart.rowIndex, selectionEnd.rowIndex);
+      const minCol = Math.min(selectionStart.colIndex, selectionEnd.colIndex);
+      const maxCol = Math.max(selectionStart.colIndex, selectionEnd.colIndex);
+      setCellFormats((prev) => {
+        const next = { ...prev };
+        for (let r = minRow; r <= maxRow; r++) {
+          for (let c = minCol; c <= maxCol; c++) {
+            delete next[`${r}_${c}`];
+          }
+        }
+        return next;
+      });
+    } else if (selectedCell) {
+      setCellFormats((prev) => {
+        const next = { ...prev };
+        delete next[`${selectedCell.rowIndex}_${selectedCell.colIndex}`];
+        return next;
+      });
+    } else if (selectedRowIndex >= 0) {
+      setCellFormats((prev) => {
+        const next = { ...prev };
+        [-1, 0, 1, 2, 3, 4].forEach((c) => {
+          delete next[`${selectedRowIndex}_${c}`];
+        });
+        return next;
+      });
+    }
+  };
+
   return (
     <div className="quotation-container relative min-h-screen flex flex-col items-center bg-slate-50 py-3 sm:py-4 text-[#000] font-sans antialiased w-full">
       
-      {/* Consolidated Top Toolbar Table - Sticky at Top of Whole Page */}
-      <div className="sticky top-0 z-40 w-full max-w-[210mm] px-2 sm:px-0 no-print print:hidden mb-2">
-        <ExcelRibbonToolbar
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          canUndo={undoStackRef.current.length > 0}
-          canRedo={redoStackRef.current.length > 0}
-          activeFormat={activeCellFormat}
-          onApplyFormat={handleApplyFormat}
-          onApplyBorderPreset={handleApplyBorderPreset}
-          selectionSummary={selectionSummary}
-          canMerge={!!(selectionStart && selectionEnd && (selectionStart.rowIndex !== selectionEnd.rowIndex || selectionStart.colIndex !== selectionEnd.colIndex))}
-          onToggleMerge={toggleMergeSelectedRange}
-          onClearFormatting={() => {
-            recordChange();
-            if (selectionStart && selectionEnd) {
-              const minRow = Math.min(selectionStart.rowIndex, selectionEnd.rowIndex);
-              const maxRow = Math.max(selectionStart.rowIndex, selectionEnd.rowIndex);
-              const minCol = Math.min(selectionStart.colIndex, selectionEnd.colIndex);
-              const maxCol = Math.max(selectionStart.colIndex, selectionEnd.colIndex);
-              setCellFormats((prev) => {
-                const next = { ...prev };
-                for (let r = minRow; r <= maxRow; r++) {
-                  for (let c = minCol; c <= maxCol; c++) {
-                    delete next[`${r}_${c}`];
-                  }
-                }
-                return next;
-              });
-            } else if (selectedCell) {
-              setCellFormats((prev) => {
-                const next = { ...prev };
-                delete next[`${selectedCell.rowIndex}_${selectedCell.colIndex}`];
-                return next;
-              });
-            } else if (selectedRowIndex >= 0) {
-              setCellFormats((prev) => {
-                const next = { ...prev };
-                [-1, 0, 1, 2, 3, 4].forEach((c) => {
-                  delete next[`${selectedRowIndex}_${c}`];
-                });
-                return next;
-              });
-            }
-          }}
-          docType={docType}
-          onSelectDocType={(type) => {
-            recordChange();
-            setDocType(type);
-            setMergedRegions([]);
-            setRows((prev) =>
-              prev.map((r) => {
-                const q = parseNumericInput(stripHtml(String(r.qty || "")));
-                const p = parseNumericInput(stripHtml(String(r.price || "")));
-                return {
-                  ...r,
-                  amount: type === "challan" ? 0 : q * p,
-                };
-              })
-            );
-          }}
-          includeVesselName={includeVesselName}
-          onToggleVesselName={setIncludeVesselName}
-          includePortBerth={includePortBerth}
-          onTogglePortBerth={setIncludePortBerth}
-          autoSaveEnabled={autoSaveEnabled}
-          lastSavedTime={lastSavedTime}
-          currentDocId={currentDocId}
-          currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name}
-          onCloseCurrentDoc={resetSheetFields}
-          onNewDoc={startNewDoc}
-          onDuplicateDoc={currentDocId ? duplicateCurrentDoc : undefined}
-          onDeleteDoc={currentDocId ? () => deleteSavedDoc(currentDocId) : undefined}
-          onSaveDoc={() => saveCurrentDocToApp()}
-          saveStatus={saveStatus}
-          onOpenExcelModal={() => setIsExcelModalOpen(true)}
-          onExportExcel={handleDownloadExcel}
-          isGeneratingExcel={isGeneratingExcel}
-          onPrint={handlePrint}
-          onDownloadPDF={handleDownloadPDF}
-          isGeneratingPDF={isGeneratingPDF}
-          includeDiscount={includeDiscount}
-          onToggleDiscount={(val) => setIncludeDiscount(val)}
-        />
+      {/* Consolidated Top Toolbar & Page Navigation Bar - Sticky at Top */}
+      <div className="sticky top-0 z-40 w-full max-w-[210mm] px-2 sm:px-0 no-print print:hidden mb-2 flex flex-col gap-1.5">
+        {/* Compressed Single Button to switch between Document Editor and Saved Documents */}
+        <div className="w-full flex items-center justify-end">
+          <button
+            type="button"
+            id="btn-toggle-page-view"
+            onClick={() => setActivePage(activePage === "editor" ? "saved-docs" : "editor")}
+            className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 no-print print:hidden inline-flex items-center gap-1.5 bg-slate-900/95 hover:bg-slate-900 text-white px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-700/80 shadow-md hover:shadow-lg transition-all cursor-pointer backdrop-blur-xs"
+            title={activePage === "editor" ? "Open Saved Documents" : "Back to Document Editor"}
+          >
+            {activePage === "editor" ? (
+              <>
+                <FolderOpen className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                <span>Saved Docs</span>
+              </>
+            ) : (
+              <>
+                <FileEdit className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                <span>Editor</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Excel Ribbon Toolbar on Editor Page */}
+        {activePage === "editor" && (
+          <ExcelRibbonToolbar
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={undoStackRef.current.length > 0}
+            canRedo={redoStackRef.current.length > 0}
+            activeFormat={activeCellFormat}
+            onApplyFormat={handleApplyFormat}
+            onApplyBorderPreset={handleApplyBorderPreset}
+            selectionSummary={selectionSummary}
+            canMerge={!!(selectionStart && selectionEnd && (selectionStart.rowIndex !== selectionEnd.rowIndex || selectionStart.colIndex !== selectionEnd.colIndex))}
+            onToggleMerge={toggleMergeSelectedRange}
+            onClearFormatting={handleClearFormatting}
+            docType={docType}
+            onSelectDocType={(type) => {
+              recordChange();
+              setDocType(type);
+              setMergedRegions([]);
+              setRows((prev) =>
+                prev.map((r) => {
+                  const q = parseNumericInput(stripHtml(String(r.qty || "")));
+                  const p = parseNumericInput(stripHtml(String(r.price || "")));
+                  return {
+                    ...r,
+                    amount: type === "challan" ? 0 : q * p,
+                  };
+                })
+              );
+            }}
+            includeVesselName={includeVesselName}
+            onToggleVesselName={setIncludeVesselName}
+            includePortBerth={includePortBerth}
+            onTogglePortBerth={setIncludePortBerth}
+            autoSaveEnabled={autoSaveEnabled}
+            lastSavedTime={lastSavedTime}
+            currentDocId={currentDocId}
+            currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name}
+            onCloseCurrentDoc={resetSheetFields}
+            onNewDoc={startNewDoc}
+            onDuplicateDoc={currentDocId ? duplicateCurrentDoc : undefined}
+            onDeleteDoc={currentDocId ? () => deleteSavedDoc(currentDocId) : undefined}
+            onSaveDoc={() => saveCurrentDocToApp()}
+            saveStatus={saveStatus}
+            onOpenExcelModal={() => setIsExcelModalOpen(true)}
+            onExportExcel={handleDownloadExcel}
+            isGeneratingExcel={isGeneratingExcel}
+            onPrint={handlePrint}
+            onDownloadPDF={handleDownloadPDF}
+            isGeneratingPDF={isGeneratingPDF}
+            includeDiscount={includeDiscount}
+            onToggleDiscount={(val) => setIncludeDiscount(val)}
+          />
+        )}
       </div>
 
-      {/* A4 Standard-compliant visual grid container */}
-      <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
+      {/* Document Sheet and Editor Wrapper */}
+      <div
+        id="document-editor-wrapper"
+        className={activePage === "saved-docs" ? "hidden" : "w-full max-w-[210mm] flex flex-col items-center"}
+      >
+        <div className="w-full flex flex-col items-center">
+
+          {/* A4 Standard-compliant visual grid container */}
+          <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
         
         {/* Anti-slip Background Watermark Asset */}
         <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
@@ -3386,7 +3424,7 @@ export default function QuotationBuilder() {
                                   Amount in Words:
                                 </span>
                                 <span className="text-[8pt] font-mono italic text-black font-black uppercase leading-tight">
-                                  {numberToWords(calculatedGrandTotal)}
+                                  {numberToWords(calculatedGrandTotal, currency || "Taka")}
                                 </span>
                               </td>
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
@@ -3555,7 +3593,7 @@ export default function QuotationBuilder() {
                                   Amount in Words:
                                 </span>
                                 <span className="text-[7.5pt] font-mono italic text-black font-black uppercase leading-tight">
-                                  {numberToWords(calculatedGrandTotal)}
+                                  {numberToWords(calculatedGrandTotal, currency || "Taka")}
                                 </span>
                               </td>
                               <td className="w-1/2 p-0 align-stretch">
@@ -3623,21 +3661,30 @@ export default function QuotationBuilder() {
           </tfoot>
         </table>
       </div>
+        </div>
+      </div>
 
-      {/* Online Document Search, Lists, and Documentation Panel */}
-      <React.Suspense fallback={<div className="w-full bg-white rounded-2xl border border-slate-200 p-6 mt-6 animate-pulse h-28" />}>
-        <SavedDocumentsPanel
-          savedDocs={savedDocs}
-          currentDocId={currentDocId}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedTypeFilter={selectedTypeFilter}
-          setSelectedTypeFilter={setSelectedTypeFilter}
-          loadSavedDoc={loadSavedDoc}
-          deleteSavedDoc={deleteSavedDoc}
-          renameSavedDoc={renameSavedDoc}
-        />
-      </React.Suspense>
+      {/* Online Document Search, Lists, and Documentation Panel - Displayed when on saved-docs page */}
+      {activePage === "saved-docs" && (
+        <React.Suspense fallback={<div className="w-full max-w-[210mm] mx-auto bg-white rounded-xl border border-slate-200 p-4 mt-4 animate-pulse h-24" />}>
+          <SavedDocumentsPanel
+            savedDocs={savedDocs}
+            currentDocId={currentDocId}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedTypeFilter={selectedTypeFilter}
+            setSelectedTypeFilter={setSelectedTypeFilter}
+            loadSavedDoc={(doc) => {
+              loadSavedDoc(doc);
+              setActivePage("editor");
+            }}
+            deleteSavedDoc={deleteSavedDoc}
+            renameSavedDoc={renameSavedDoc}
+            isPageMode={true}
+            onSwitchPage={(page) => setActivePage(page)}
+          />
+        </React.Suspense>
+      )}
 
       {/* Cell right-click Menu context */}
       {contextMenu && contextMenu.visible && (

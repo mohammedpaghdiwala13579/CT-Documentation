@@ -47,35 +47,35 @@ const ROLE_SYSTEM_INSTRUCTIONS: Record<string, string> = {
 You have comprehensive knowledge of the BANGLADESHI MARITIME & LOCAL SUPPLY MARKET:
 1. SOURCING HUBS & CURRENT BANGLADESH PRICING:
    - Fresh & Dry Provisions (Khatunganj & Chaktai wholesale commodity market, Chittagong):
-     * Fresh Halal Beef: ~750-850 BDT/kg (~$6.20-$7.00 USD/kg)
-     * Fresh Mutton: ~1,100-1,250 BDT/kg (~$9.00-$10.20 USD/kg)
-     * Fresh Broiler Chicken: ~180-220 BDT/kg (~$1.50-$1.80 USD/kg)
-     * Farm Fresh Eggs: ~130-150 BDT/dozen (~$1.10-$1.25 USD/dozen)
-     * Premium Basmati Rice: ~140-180 BDT/kg (~$1.15-$1.50 USD/kg); Miniket: ~75-85 BDT/kg
-     * Seasonal Vegetables (Potatoes, Onions, Cabbage, Tomatoes): ~45-65 BDT/kg (~$0.38-$0.55 USD/kg)
-     * Bottled Mineral Water (1.5L x 12 cases): ~220-250 BDT/case (~$1.85-$2.10 USD/case)
-     * Bulk Fresh Drinking Water via Supply Barge to Outer Anchorage: ~$20-$28 USD/metric ton
+     * Fresh Halal Beef: ~750-850 BDT/kg
+     * Fresh Mutton: ~1,100-1,250 BDT/kg
+     * Fresh Broiler Chicken: ~180-220 BDT/kg
+     * Farm Fresh Eggs: ~130-150 BDT/dozen
+     * Premium Basmati Rice: ~140-180 BDT/kg; Miniket: ~75-85 BDT/kg
+     * Seasonal Vegetables (Potatoes, Onions, Cabbage, Tomatoes): ~45-65 BDT/kg
+     * Bottled Mineral Water (1.5L x 12 cases): ~220-250 BDT/case
+     * Bulk Fresh Drinking Water via Supply Barge to Outer Anchorage: ~2,500-3,500 BDT/metric ton
    - Engine & Deck Marine Stores (Sadarghat, Strand Road & Agrabad, Chittagong):
-     * 220m 24mm/28mm 8-Strand Polypropylene Mooring Rope: ~$480-$680 USD/coil
-     * Galvanized Wire Ropes (6x36 WS IWRC): ~$3.00-$4.50 USD/meter
-     * SOLAS Approved Adult Lifejackets with light & whistle: ~$24-$32 USD/pc
-     * SOLAS Immersion Suits (MED certified): ~$98-$130 USD/pc
-     * Zinc Anodes for hull & ballast tanks: ~$8.00-$9.50 USD/kg
-     * Industrial Cotton Cleaning Rags/Waste: ~65-80 BDT/kg (~$0.55-$0.68 USD/kg)
+     * 220m 24mm/28mm 8-Strand Polypropylene Mooring Rope: ~58,000-82,000 BDT/coil
+     * Galvanized Wire Ropes (6x36 WS IWRC): ~360-550 BDT/meter
+     * SOLAS Approved Adult Lifejackets with light & whistle: ~2,900-3,900 BDT/pc
+     * SOLAS Immersion Suits (MED certified): ~12,000-16,000 BDT/pc
+     * Zinc Anodes for hull & ballast tanks: ~950-1,150 BDT/kg
+     * Industrial Cotton Cleaning Rags/Waste: ~65-80 BDT/kg
    - Ship Breaking Yard OEM Machinery & Spares (Bhatiary & Sitakunda, Chittagong):
      * Genuine reconditioned marine valves (JIS / DIN bronze globe, gate, storm valves), pump impellers, purifiers (Alfa Laval/Mitsubishi), diesel engine spares (Daihatsu, Yanmar, MAN B&W) available at 40-70% savings compared to new imports.
 
 2. SPEED & ACCURACY DIRECTIVES:
    - Provide answers FAST, accurately, and straight to the point.
-   - Always quote current estimated prices in BOTH Bangladeshi Taka (BDT) and US Dollars (USD) (using current exchange benchmark: 1 USD ≈ 120-123 BDT).
-   - Format item lists clearly in markdown tables with: Item Description, IMPA/ISSA Code (if applicable), Standard Unit, and Estimated Unit Price in BDT & USD.
-   - Specify whether the pricing is for Port Berth delivery or Outer Anchorage delivery (including supply boat / launch lighterage costs: ~$280-$450 USD per launch trip from Ghat 15).`,
+   - Always quote current estimated prices in Bangladeshi Taka (BDT / Taka).
+   - Format item lists clearly in markdown tables with: Item Description, IMPA/ISSA Code (if applicable), Standard Unit, and Estimated Unit Price in Taka (BDT).
+   - Specify whether the pricing is for Port Berth delivery or Outer Anchorage delivery (including supply boat / launch lighterage costs: ~35,000-55,000 BDT per launch trip from Ghat 15).`,
 
   pricing_negotiator: `You are the Commercial Director & Senior Pricing Strategist for Comilla Traders in Bangladesh.
 Your expertise covers:
 - Current Bangladeshi ship supply commercial margins (typically 15%-25% on provisions, 20%-35% on technical deck/engine stores, 30%-50% on reconditioned Sitakunda shipyard spares).
-- Outer Anchorage lighterage launch boat hire tariffs (~$280-$450 USD/trip from Sadarghat/Ghat 15 to Chittagong Outer Anchorage depending on sea state and waiting time).
-- Multi-currency conversions (USD, BDT, EUR, SGD, AED) with proper exchange rate volatility buffers (1 USD ≈ 120-123 BDT).
+- Outer Anchorage lighterage launch boat hire tariffs (~35,000-55,000 BDT/trip from Sadarghat/Ghat 15 to Chittagong Outer Anchorage depending on sea state and waiting time).
+- Local maritime supply pricing and invoicing in Bangladeshi Taka (BDT / Taka).
 - Payment terms in shipping: Cash on Delivery (COD), Cash Against Documents (CAD), 30-day DA with foreign owners, and Master's General Receipt.
 - National Board of Revenue (NBR) Bangladesh VAT guidelines: supplies to foreign-flagged vessels under bonded customs supply enjoy export zero-rated VAT status.
 Give fast, sharp, numbers-driven advice that maximizes profit margin while offering competitive quotes to ship owners and vessel managers.`,
@@ -104,7 +104,7 @@ app.post("/api/gemini/extract-items", async (req, res) => {
     }
 
     const chosenModel = model === "gemini-3.1-flash-lite" ? "gemini-3.1-flash-lite" : "gemini-3.8-flash";
-    const candidateModels = [chosenModel, "gemini-3.1-flash-lite", "gemini-3.5-flash"].filter(
+    const candidateModels = [chosenModel, "gemini-3.1-flash-lite", "gemini-3.8-flash"].filter(
       (m, idx, arr) => arr.indexOf(m) === idx
     );
 
@@ -173,7 +173,7 @@ app.post("/api/gemini/audit-document", async (req, res) => {
       return res.status(400).json({ error: "Valid document object with rows is required." });
     }
 
-    const chosenModel = model === "gemini-3.1-pro-preview" ? "gemini-3.1-pro-preview" : "gemini-3.5-flash";
+    const chosenModel = model === "gemini-3.1-pro-preview" ? "gemini-3.1-pro-preview" : "gemini-3.8-flash";
     const ai = getGenAI();
 
     const prompt = `Conduct a rigorous quality, commercial, and maritime compliance audit on this ship chandler document:

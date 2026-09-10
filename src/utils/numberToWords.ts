@@ -1,15 +1,17 @@
-// Helper to convert number to words with dynamic international & local currency support
-export function numberToWords(num: number, currency = ""): string {
-  const curr = (currency || "").toUpperCase().trim();
+// Helper to convert number to words with dynamic currency support (default: Bangladeshi Taka)
+export function numberToWords(num: number, currency = "Taka"): string {
+  const curr = (currency || "TAKA").toUpperCase().trim();
   const currencyLabels: Record<string, { major: string; minor: string }> = {
-    USD: { major: "US Dollars", minor: "Cents" },
+    TAKA: { major: "Taka", minor: "Paisa" },
+    TK: { major: "Taka", minor: "Paisa" },
     BDT: { major: "Taka", minor: "Paisa" },
     EUR: { major: "Euros", minor: "Cents" },
     GBP: { major: "Pounds Sterling", minor: "Pence" },
     SGD: { major: "Singapore Dollars", minor: "Cents" },
     AED: { major: "UAE Dirhams", minor: "Fils" },
   };
-  const { major, minor } = currencyLabels[curr] || { major: curr ? `${curr}` : "", minor: curr ? "Cents" : "" };
+  // Fallback to Taka if unknown or legacy USD
+  const { major, minor } = (curr === "USD" ? { major: "Taka", minor: "Paisa" } : currencyLabels[curr]) || { major: "Taka", minor: "Paisa" };
 
   if (isNaN(num) || num === 0) return major ? `Zero ${major} Only` : "Zero Only";
   if (num < 0) {

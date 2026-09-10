@@ -285,22 +285,6 @@ export default function App() {
           <QuotationBuilder />
         </div>
       </main>
-
-      {/* Dynamic Professional Status Bar Footer */}
-      <footer className="no-print bg-white text-slate-400 py-4 px-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium mt-auto">
-        <div className="flex items-center gap-5 flex-wrap justify-center">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-            <span className="text-[10px] font-mono tracking-wide text-slate-600 uppercase font-semibold">FIREBASE_CONNECTED</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 border-l border-slate-200 pl-5">
-            <span className="text-[10px] text-slate-400 font-mono">DB: ai-studio-2c592343-56ab-4d40-a2ac-d15fed703e91</span>
-          </div>
-        </div>
-        <div className="text-[10px] text-slate-400 uppercase tracking-wider text-center md:text-right font-semibold">
-          &copy; {new Date().getFullYear()} Comilla Traders &bull; Ship Chandler Portal &bull; EnterprisePro Engine v4.2
-        </div>
-      </footer>
     </div>
   );
 }

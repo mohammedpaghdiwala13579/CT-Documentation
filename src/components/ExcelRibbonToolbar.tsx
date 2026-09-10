@@ -15,7 +15,8 @@ import {
   Sparkles,
   Bot,
   Undo2,
-  Redo2
+  Redo2,
+  FolderOpen
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
