@@ -15,7 +15,8 @@ import {
   Trash2,
   Printer,
   ExternalLink,
-  DollarSign
+  DollarSign,
+  FolderKanban
 } from "lucide-react";
 import { SavedDocument } from "../types";
 import { calculateDocGrandTotal } from "./SavedDocumentsPanel";
@@ -108,6 +109,21 @@ export default function ErpDashboard({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-dashboard-records-archive"
+            onClick={onSwitchToArchive}
+            className="h-8 px-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            title="Go to Records Archive"
+            aria-label="Records Archive"
+          >
+            <FolderKanban className="h-3.5 w-3.5 text-blue-600" />
+            <span className="hidden sm:inline">Records Archive</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold">
+              {stats.totalDocs}
+            </span>
+          </button>
+
           <button
             type="button"
             id="btn-quick-new-quotation"

@@ -8,7 +8,8 @@ import {
   Check, 
   Sparkles,
   Smartphone,
-  Laptop
+  Laptop,
+  FolderKanban
 } from "lucide-react";
 
 export interface ErpTopNavProps {
@@ -28,6 +29,8 @@ export interface ErpTopNavProps {
   onToggleMobileSidebar: () => void;
   isInstallable?: boolean;
   onInstallClick?: () => void;
+  onNavigateToArchive?: () => void;
+  savedDocsCount?: number;
 }
 
 export default function ErpTopNav({
@@ -45,11 +48,13 @@ export default function ErpTopNav({
   onToggleMobileSidebar,
   isInstallable,
   onInstallClick,
+  onNavigateToArchive,
+  savedDocsCount,
 }: ErpTopNavProps) {
   return (
     <header
       id="erp-top-nav"
-      className="sticky top-0 z-30 h-13 bg-white border-b border-slate-200 px-4 flex items-center justify-between no-print print:hidden shadow-2xs"
+      className="sticky top-0 z-30 h-14 min-h-[56px] bg-white border-b border-slate-200 px-4 flex items-center justify-between no-print print:hidden shadow-2xs"
     >
       {/* Left: Mobile Menu Button + Breadcrumb */}
       <div className="flex items-center gap-3 min-w-0">
@@ -122,6 +127,24 @@ export default function ErpTopNav({
               <span>Save</span>
             </button>
           </div>
+        )}
+
+        {/* Records Archive Floating Action Button placed at the bottom right */}
+        {onNavigateToArchive && (
+          <button
+            type="button"
+            id="topnav-btn-records-archive"
+            onClick={onNavigateToArchive}
+            className={`fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer border no-print print:hidden ${
+              activeView === "saved-docs"
+                ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-700 shadow-slate-950/30 ring-2 ring-blue-500"
+                : "bg-blue-600 hover:bg-blue-700 text-white border-blue-500/50 shadow-blue-600/30 hover:scale-105 active:scale-95"
+            }`}
+            title={activeView === "saved-docs" ? "Back to Editor" : "Records Archive"}
+            aria-label={activeView === "saved-docs" ? "Back to Editor" : "Records Archive"}
+          >
+            <FolderKanban className="h-5 w-5" />
+          </button>
         )}
 
         {/* Install PWA Button if available */}

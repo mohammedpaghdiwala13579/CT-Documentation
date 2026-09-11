@@ -48,8 +48,8 @@ export default function ErpSidebar({
       {/* Main Sidebar Container */}
       <aside
         id="erp-sidebar"
-        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0B132B] text-slate-300 border-r border-slate-800/80 flex flex-col justify-between transition-all duration-200 no-print print:hidden ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        className={`fixed lg:sticky top-0 bottom-0 lg:bottom-auto left-0 lg:left-auto z-40 h-screen bg-[#0B132B] text-slate-300 border-r border-slate-800/80 flex flex-col justify-between transition-all duration-200 shrink-0 no-print print:hidden ${
+          isMobileOpen ? "translate-x-0 z-50" : "-translate-x-full lg:translate-x-0"
         } ${isCollapsed ? "w-16" : "w-60"}`}
       >
         {/* Top: Header / Brand Identity */}
