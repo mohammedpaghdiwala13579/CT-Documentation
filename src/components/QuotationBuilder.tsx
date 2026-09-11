@@ -3582,10 +3582,10 @@ export default function QuotationBuilder() {
                               </td>
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>SUBTOTAL</span>
-                                      <span className="font-bold text-[8pt]">=</span>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
                                       {!includeDiscount && (
                                         <button
                                           type="button"
@@ -3615,17 +3615,42 @@ export default function QuotationBuilder() {
                               <tr className="align-stretch">
                                 <td className="w-1/2 p-0 border-b border-black align-stretch">
                                   <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
-                                    <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                      <div className="flex items-center justify-end gap-1 w-full pl-1 overflow-hidden">
-                                        {/* Screen: Minimal short form */}
-                                        <span className="no-print print:hidden text-[7pt] font-bold text-slate-700 shrink-0">DISC.</span>
-                                        <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
+                                    <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                      <div className="flex items-center justify-end gap-1 w-full pl-0.5 overflow-visible">
+                                        <div className="flex items-center gap-1 no-print print:hidden shrink-0">
+                                          {/* Fast 1-click toggle between % and Fixed */}
+                                          <div className="inline-flex rounded border border-slate-300 bg-slate-100 p-0.5 shrink-0" title="Switch discount type (% or 123)">
+                                            <button
+                                              type="button"
+                                              onClick={() => setDiscountType("percentage")}
+                                              className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${
+                                                discountType === "percentage"
+                                                  ? "bg-blue-600 text-white shadow-2xs"
+                                                  : "text-slate-600 hover:text-slate-900"
+                                              }`}
+                                              title="Percentage discount (%)"
+                                            >
+                                              %
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => setDiscountType("fixed")}
+                                              className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${
+                                                discountType === "fixed"
+                                                  ? "bg-blue-600 text-white shadow-2xs"
+                                                  : "text-slate-600 hover:text-slate-900"
+                                              }`}
+                                              title="Fixed amount discount (123)"
+                                            >
+                                              123
+                                            </button>
+                                          </div>
                                           <select
                                             id="invoice-discount-type-select"
                                             value={discountType}
                                             onChange={(e) => setDiscountType(e.target.value as "percentage" | "fixed")}
-                                            className="h-[18px] text-[6.5pt] font-bold border border-slate-300 rounded bg-white text-slate-800 px-0.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
-                                            title="Discount type: % (Percentage) or 123 (Fixed Amount)"
+                                            className="sr-only"
+                                            aria-label="Discount Type"
                                           >
                                             <option value="percentage">%</option>
                                             <option value="fixed">123</option>
@@ -3642,9 +3667,14 @@ export default function QuotationBuilder() {
                                                 }
                                               }}
                                               placeholder="0"
-                                              className="h-[18px] w-8 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
+                                              className={`h-[18px] text-center border border-slate-300 rounded font-mono text-[7.5pt] font-bold bg-white text-slate-900 px-1 focus:outline-none focus:ring-1 focus:ring-blue-500 shrink-0 ${
+                                                discountType === "fixed" ? "w-13" : "w-9"
+                                              }`}
+                                              title={`Enter ${discountType === "percentage" ? "discount percentage" : "fixed discount amount"}`}
                                             />
-                                            {discountType === "percentage" && <span className="text-[6.5pt] font-bold text-slate-600 font-mono">%</span>}
+                                            <span className="text-[7pt] font-black text-slate-700 font-mono shrink-0">
+                                              {discountType === "percentage" ? "%" : (currency === "USD" ? "$" : "Tk")}
+                                            </span>
                                           </div>
                                           <button
                                             type="button"
@@ -3652,18 +3682,19 @@ export default function QuotationBuilder() {
                                             onClick={() => setIncludeDiscount(false)}
                                             title="Remove discount from invoice"
                                             className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-0.5 rounded transition-colors cursor-pointer shrink-0"
+                                            aria-label="Remove discount"
                                           >
-                                            <X className="w-2.5 h-2.5" />
+                                            <X className="w-3 h-3 stroke-[2.5]" />
                                           </button>
                                         </div>
                                         {/* Print: Whole word "DISCOUNT" */}
-                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[7.5pt]">
+                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[7.5pt] text-black">
                                           DISCOUNT{discountType === "percentage" && parsedDiscountValue > 0 ? ` (${parsedDiscountValue}%)` : ""}
                                         </span>
-                                        <span className="font-bold text-[8pt] ml-0.5">=</span>
+                                        <span className="font-bold text-[8pt] text-slate-900 ml-0.5 shrink-0">=</span>
                                       </div>
                                     </div>
-                                    <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight text-rose-700">
+                                    <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-bold flex items-center justify-end px-1.5 py-0.5 leading-tight text-rose-700">
                                       {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
                                     </div>
                                   </div>
@@ -3673,7 +3704,7 @@ export default function QuotationBuilder() {
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>VAT</span>
                                       <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
@@ -3688,10 +3719,10 @@ export default function QuotationBuilder() {
                                           }}
                                           className="h-[18px] w-8 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
                                         />
-                                        <span className="text-[7pt]">%</span>
+                                        <span className="text-[7pt] font-bold text-slate-700">%</span>
                                       </div>
                                       <span className="hidden print:inline">({parsedVatPercent}%)</span>
-                                      <span className="font-bold text-[8pt]">=</span>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
                                     </div>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
@@ -3703,7 +3734,7 @@ export default function QuotationBuilder() {
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>TRANS.</span>
                                       <div className="flex items-center no-print print:hidden shrink-0">
@@ -3720,7 +3751,7 @@ export default function QuotationBuilder() {
                                           className="h-[18px] w-12 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
                                         />
                                       </div>
-                                      <span className="font-bold text-[8pt]">=</span>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
                                     </div>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
@@ -3732,9 +3763,9 @@ export default function QuotationBuilder() {
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
-                                  <div className="total-lbl bg-indigo-50/40 w-[130px] shrink-0 pr-1.5 text-right text-[8pt] font-black uppercase flex items-center justify-end gap-1 tracking-wider text-indigo-950">
+                                  <div className="total-lbl bg-indigo-50/40 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[8pt] font-black uppercase flex items-center justify-end gap-1 tracking-wider text-indigo-950">
                                     <span>GRAND TOTAL</span>
-                                    <span className="font-black text-[8.5pt]">=</span>
+                                    <span className="font-black text-[8.5pt] shrink-0">=</span>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-2.5 text-[9.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight text-indigo-950">
                                     {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -3756,9 +3787,9 @@ export default function QuotationBuilder() {
                               </td>
                               <td className="w-1/2 p-0 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end gap-1">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end gap-1">
                                     <span>TOTAL</span>
-                                    <span className="font-bold text-[8pt]">=</span>
+                                    <span className="font-bold text-[8pt] shrink-0">=</span>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight min-h-[22px]">
                                     {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -3779,8 +3810,8 @@ export default function QuotationBuilder() {
             <tr>
               <td className="border-none p-0 m-0">
                 {/* Signatures & Stamps section - repeated on every page while printing */}
-                <div className="sig-section mt-2 pt-0.5 flex flex-row justify-between gap-6 sm:gap-10">
-                  <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-end h-[50px]">
+                <div className="sig-section mt-2.5 pt-0.5 flex flex-row justify-between gap-6 sm:gap-10">
+                  <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-end h-[65px]">
                     <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold text-black">
                       Receiver's Signature
                     </div>
@@ -3788,7 +3819,7 @@ export default function QuotationBuilder() {
                   
                   {/* Authorized stamp hidden for Challan block - only receiving signature to challan */}
                   {docType !== "challan" && (
-                    <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-between h-[50px] relative">
+                    <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-between h-[65px] relative">
                       <div className="sig-title text-[8pt] font-bold text-black">For Comilla Traders</div>
                       
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
@@ -3796,7 +3827,7 @@ export default function QuotationBuilder() {
                           src="https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"
                           alt="Comilla Traders Stamp"
                           referrerPolicy="no-referrer"
-                          className="w-[72px] h-[72px] object-contain select-none"
+                          className="w-[88px] h-[88px] object-contain select-none"
                           style={{ printColorAdjust: "exact" }}
                         />
                       </div>
