@@ -740,7 +740,7 @@ export const paginateRowsForExcel = (
 /**
  * Builds a compact, space-maximized worksheet matching the exact print format.
  * - Leaves the starting 11 cells/rows at the top instead of the business header for pre-printed letterhead.
- * - Cell A1 contains the page format (e.g. "QUOTATION", "DELIVERY CHALLAN", "BILL / INVOICE").
+ * - Cell A1 contains the page format (e.g. "QUOTATION", "CHALLAN", "INVOICE").
  * - Everything is aligned exactly with the print format.
  * - Cell sizes increase dynamically according to text content.
  * - Formatting such as highlight, bold, color, fonts, and borders are fully applied.
@@ -833,9 +833,9 @@ const buildDocumentWorksheet = (
   worksheet.mergeCells(`A1:${lastColLetter}1`);
   const titleCell = worksheet.getCell("A1");
   const baseTitle = isChallan
-    ? "DELIVERY CHALLAN"
+    ? "CHALLAN"
     : isInvoice
-    ? "BILL / INVOICE"
+    ? "INVOICE"
     : "QUOTATION";
 
   const pageFormatTitle = totalPages > 1
@@ -1485,7 +1485,7 @@ const buildDocumentWorksheet = (
 
       // Row 1: SUBTOTAL
       const subtotalLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
-      subtotalLbl.value = "SUBTOTAL";
+      subtotalLbl.value = "SUBTOTAL =";
       subtotalLbl.font = { name: "Arial", size: 8.0, bold: true };
       subtotalLbl.alignment = { vertical: "middle", horizontal: "right" };
       subtotalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1504,7 +1504,7 @@ const buildDocumentWorksheet = (
       // Optional Row: DISCOUNT
       if (hasDiscountRow) {
         const discountLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
-        discountLbl.value = discountType === "percentage" && discountValue > 0 ? `DISCOUNT (${discountValue}%)` : "DISCOUNT";
+        discountLbl.value = (discountType === "percentage" && discountValue > 0 ? `DISCOUNT (${discountValue}%)` : "DISCOUNT") + " =";
         discountLbl.font = { name: "Arial", size: 8.0, bold: true };
         discountLbl.alignment = { vertical: "middle", horizontal: "right" };
         discountLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1519,7 +1519,7 @@ const buildDocumentWorksheet = (
 
       // Row: VAT
       const vatLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
-      vatLbl.value = `VAT (${vatPercent || 0}%)`;
+      vatLbl.value = `VAT (${vatPercent || 0}%) =`;
       vatLbl.font = { name: "Arial", size: 8.0, bold: true };
       vatLbl.alignment = { vertical: "middle", horizontal: "right" };
       vatLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1533,7 +1533,7 @@ const buildDocumentWorksheet = (
 
       // Row: TRANS.
       const transLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
-      transLbl.value = "TRANS.";
+      transLbl.value = "TRANS. =";
       transLbl.font = { name: "Arial", size: 8.0, bold: true };
       transLbl.alignment = { vertical: "middle", horizontal: "right" };
       transLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1547,7 +1547,7 @@ const buildDocumentWorksheet = (
 
       // Row: GRAND TOTAL
       const grandLbl = worksheet.getCell(`E${totalRow + currentOffset}`);
-      grandLbl.value = "GRAND TOTAL";
+      grandLbl.value = "GRAND TOTAL =";
       grandLbl.font = { name: "Arial", size: 7.5, bold: true };
       grandLbl.alignment = { vertical: "middle", horizontal: "right" };
       grandLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE0E7FF" } }; // Subtle Indigo
@@ -1565,15 +1565,15 @@ const buildDocumentWorksheet = (
           cell.border = {
             top: rOffset === 0 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
             bottom: rOffset === numTotalRows - 1 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
-            left: c === 5 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
-            right: c === 6 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
+            left: c === 5 ? { style: "medium", color: { argb: "000000" } } : undefined,
+            right: c === 6 ? { style: "medium", color: { argb: "000000" } } : undefined,
           };
         }
       }
     } else {
       // Quotation TOTAL
       const totalLbl = worksheet.getCell(`E${totalRow}`);
-      totalLbl.value = totalPages > 1 ? "GRAND TOTAL" : "TOTAL";
+      totalLbl.value = (totalPages > 1 ? "GRAND TOTAL" : "TOTAL") + " =";
       totalLbl.font = { name: "Arial", size: 7.5, bold: true };
       totalLbl.alignment = { vertical: "middle", horizontal: "right" };
       totalLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
@@ -1593,8 +1593,8 @@ const buildDocumentWorksheet = (
         cell.border = {
           top: { style: "medium", color: { argb: "000000" } },
           bottom: { style: "medium", color: { argb: "000000" } },
-          left: c === 5 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
-          right: c === 6 ? { style: "medium", color: { argb: "000000" } } : { style: "thin", color: { argb: "000000" } },
+          left: c === 5 ? { style: "medium", color: { argb: "000000" } } : undefined,
+          right: c === 6 ? { style: "medium", color: { argb: "000000" } } : undefined,
         };
       }
     }

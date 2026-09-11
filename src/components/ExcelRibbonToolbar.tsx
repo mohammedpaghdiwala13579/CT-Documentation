@@ -292,17 +292,17 @@ export default function ExcelRibbonToolbar({
     <div
       ref={toolbarRef}
       id="excel-ribbon-toolbar"
-      className="no-print w-full max-w-[210mm] bg-[#232323] text-[#e0e0e0] border border-[#3e3e3e] shadow-xl rounded-md select-none font-sans text-xs px-2 py-1.5 mb-1.5 z-40 transition-all mx-auto"
+      className="no-print w-full max-w-[210mm] bg-white text-slate-800 border border-slate-200 shadow-xs rounded-lg select-none font-sans text-xs px-2.5 py-1.5 mb-2 z-30 transition-all mx-auto"
     >
       {/* ========================================================================= */}
-      {/* ROW 1: DOCUMENT TYPE & ALL ACTION BUTTONS (Cleanly Unified in One Place)   */}
+      {/* ROW 1: DOCUMENT TYPE & ACTION BUTTONS                                     */}
       {/* ========================================================================= */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 mb-1.5 border-b border-[#383838]">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 mb-1.5 border-b border-slate-200">
         
-        {/* Left: Document Types & Autosave Status */}
+        {/* Left: Document Types & Status */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Document Type Tabs */}
-          <div className="flex items-center bg-[#191919] p-0.5 rounded-md border border-[#383838] shadow-inner">
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200">
             {(["quotation", "challan", "invoice"] as const).map((type) => (
               <button
                 key={type}
@@ -311,8 +311,8 @@ export default function ExcelRibbonToolbar({
                 onClick={() => onSelectDocType(type)}
                 className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   docType === type
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "text-[#aaaaaa] hover:text-[#ffffff] hover:bg-[#2b2b2b]"
+                    ? "bg-white text-blue-700 shadow-2xs border border-slate-200/80"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
                 {type}
@@ -320,18 +320,18 @@ export default function ExcelRibbonToolbar({
             ))}
           </div>
 
-          {/* Active Document Indicator (If editing saved document) */}
+          {/* Active Document Indicator */}
           {currentDocId && (
-            <div className="flex items-center gap-1.5 bg-[#1a2233] border border-indigo-500/40 rounded px-2 py-0.5 text-[10px]">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-              <span className="text-indigo-200 font-medium truncate max-w-[120px] sm:max-w-[180px]">
+            <div className="flex items-center gap-1.5 bg-blue-50/60 border border-blue-200/80 rounded-md px-2 py-1 text-[11px]">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+              <span className="text-blue-900 font-medium truncate max-w-[130px] sm:max-w-[200px]">
                 {currentDocName || "Active Sheet"}
               </span>
               {onCloseCurrentDoc && (
                 <button
                   type="button"
                   onClick={onCloseCurrentDoc}
-                  className="text-indigo-300 hover:text-white p-0.5 hover:bg-indigo-500/20 rounded cursor-pointer"
+                  className="text-blue-500 hover:text-blue-800 p-0.5 hover:bg-blue-100 rounded cursor-pointer"
                   title="Close current document"
                 >
                   <X className="h-3 w-3" />
@@ -341,142 +341,93 @@ export default function ExcelRibbonToolbar({
           )}
         </div>
 
-        {/* Right: All Document Action Buttons */}
+        {/* Right: Document Actions */}
         <div className="flex flex-wrap items-center gap-1.5">
           {/* New Sheet */}
           <button
             type="button"
             id="btn-new-sheet"
             onClick={onNewDoc}
-            className="h-[24px] w-[24px] bg-[#333333] hover:bg-[#444444] text-[#e0e0e0] hover:text-white rounded-xs border border-[#4a4a4a] shadow-xs transition-all cursor-pointer flex items-center justify-center"
-            title="New Sheet"
+            className="h-7 px-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-md border border-slate-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+            title="Create New Blank Sheet"
           >
-            <Plus className="h-3.5 w-3.5 text-emerald-400" />
+            <Plus className="h-3.5 w-3.5 text-blue-600" />
+            <span className="hidden sm:inline">New</span>
           </button>
 
-          {/* Duplicate (If editing) */}
+          {/* Duplicate */}
           {currentDocId && onDuplicateDoc && (
             <button
               type="button"
               id="btn-duplicate-doc"
               onClick={onDuplicateDoc}
-              className="h-[24px] w-[24px] bg-[#2d2238] hover:bg-[#3d2f4d] text-indigo-200 hover:text-white rounded-xs border border-indigo-700/50 shadow-xs transition-all cursor-pointer flex items-center justify-center"
+              className="h-7 px-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-md border border-slate-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
               title="Duplicate Sheet"
             >
-              <Copy className="h-3.5 w-3.5 text-indigo-400" />
+              <Copy className="h-3.5 w-3.5 text-slate-500" />
+              <span className="hidden md:inline">Duplicate</span>
             </button>
           )}
 
-          {/* Delete (If editing) */}
+          {/* Delete */}
           {currentDocId && onDeleteDoc && (
             <button
               type="button"
               id="btn-delete-doc"
               onClick={onDeleteDoc}
-              className="h-[24px] w-[24px] bg-[#381c1c] hover:bg-[#4d2626] text-rose-300 hover:text-white rounded-xs border border-rose-800/50 shadow-xs transition-all cursor-pointer flex items-center justify-center"
+              className="h-7 px-2 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-md border border-rose-200 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
               title="Delete Sheet"
             >
-              <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+              <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+              <span className="hidden md:inline">Delete</span>
             </button>
           )}
 
-          {/* Save Button */}
-          <button
-            type="button"
-            id="btn-save-doc"
-            onClick={onSaveDoc}
-            disabled={saveStatus === "saving"}
-            className={`h-[24px] w-[24px] ${
-              saveStatus === "saved"
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : saveStatus === "error"
-                ? "bg-rose-600 hover:bg-rose-700 text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white"
-            } rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center disabled:opacity-80`}
-            title={lastSavedTime ? `Save (Auto-saved at ${lastSavedTime})` : "Save Sheet"}
-          >
-            {saveStatus === "saving" ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            ) : saveStatus === "saved" ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Save className="h-3.5 w-3.5" />
-            )}
-          </button>
-
-          {/* Export Excel Button */}
-          <button
-            type="button"
-            id="btn-export-excel"
-            onClick={onExportExcel}
-            disabled={isGeneratingExcel}
-            className="h-[24px] w-[24px] bg-[#1e4438] hover:bg-[#285c4c] text-emerald-200 hover:text-white border border-emerald-700/50 rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center disabled:opacity-70"
-            title={isGeneratingExcel ? "Generating Excel..." : "Export Excel (.xlsx)"}
-          >
-            {isGeneratingExcel ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin text-emerald-400" />
-            ) : (
-              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-400" />
-            )}
-          </button>
-
-          {/* Print A4 / Save PDF Button */}
-          <button
-            type="button"
-            id="btn-print-doc"
-            onClick={onPrint}
-            className="h-[24px] w-[24px] bg-[#253252] hover:bg-[#32436e] active:scale-95 text-indigo-100 hover:text-white border border-indigo-500/60 rounded-xs shadow-xs transition-all cursor-pointer flex items-center justify-center"
-            title="Print / Save PDF (Ctrl+P)"
-          >
-            <Printer className="h-3.5 w-3.5 text-indigo-300" />
-          </button>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* ROW 2: SPREADSHEET FORMATTING CONTROLS (Orientation & Indent Removed)     */}
+      {/* ROW 2: SPREADSHEET FORMATTING CONTROLS                                    */}
       {/* ========================================================================= */}
       <div className="flex flex-wrap items-center justify-between gap-x-1.5 gap-y-1">
         {/* Formatting Tools Left Section */}
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
 
           {/* GROUP 0: QUICK ACCESS UNDO & REDO */}
           {(onUndo || onRedo) && (
-            <div className="flex items-center gap-0.5 border-r border-[#4e4e4e] pr-1 mr-0.5">
+            <div className="flex items-center gap-0.5 border-r border-slate-200 pr-1 mr-0.5">
               <button
                 type="button"
                 id="btn-toolbar-undo"
                 onClick={onUndo}
                 disabled={!canUndo}
-                className={`h-[22px] px-1 rounded-xs flex items-center gap-1 text-[10px] font-medium transition-colors cursor-pointer ${
+                className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                   canUndo
-                    ? "bg-[#333333] hover:bg-[#444444] text-[#ffffff] border border-[#4e4e4e]"
-                    : "text-[#666666] cursor-not-allowed border border-transparent opacity-60"
+                    ? "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                    : "text-slate-400 cursor-not-allowed border border-transparent opacity-50"
                 }`}
                 title="Undo (Ctrl+Z)"
               >
-                <Undo2 className="h-3 w-3 text-amber-400" />
-                <span className="hidden sm:inline text-[9.5px]">Undo</span>
+                <Undo2 className="h-3 w-3 text-slate-600" />
               </button>
               <button
                 type="button"
                 id="btn-toolbar-redo"
                 onClick={onRedo}
                 disabled={!canRedo}
-                className={`h-[22px] px-1 rounded-xs flex items-center gap-1 text-[10px] font-medium transition-colors cursor-pointer ${
+                className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                   canRedo
-                    ? "bg-[#333333] hover:bg-[#444444] text-[#ffffff] border border-[#4e4e4e]"
-                    : "text-[#666666] cursor-not-allowed border border-transparent opacity-60"
+                    ? "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                    : "text-slate-400 cursor-not-allowed border border-transparent opacity-50"
                 }`}
                 title="Redo (Ctrl+Y or Ctrl+Shift+Z)"
               >
-                <Redo2 className="h-3 w-3 text-amber-400" />
-                <span className="hidden sm:inline text-[9.5px]">Redo</span>
+                <Redo2 className="h-3 w-3 text-slate-600" />
               </button>
             </div>
           )}
           
-          {/* GROUP 1: FONT FAMILY, FONT SIZE & SIZE STEPPERS */}
+          {/* GROUP 1: FONT FAMILY & FONT SIZE */}
           <div className="flex items-center gap-0.5">
             {/* Font Family Dropdown */}
             <div className="relative">
@@ -484,21 +435,21 @@ export default function ExcelRibbonToolbar({
                 type="button"
                 id="btn-font-family"
                 onClick={() => toggleDropdown("fontFamily")}
-                className="h-[22px] w-[102px] bg-[#333333] hover:bg-[#404040] border border-[#4e4e4e] rounded-xs px-1.5 flex items-center justify-between text-[#ffffff] text-[10.5px] font-normal transition-colors cursor-pointer"
+                className="h-6 w-[94px] bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded px-1.5 flex items-center justify-between text-slate-800 text-[10.5px] font-normal transition-colors cursor-pointer"
                 title="Font Family"
               >
                 <span className="truncate" style={{ fontFamily: activeFontFamilyObj.family }}>
                   {activeFontFamilyObj.name}
                 </span>
-                <ChevronDown className="h-2.5 w-2.5 text-[#aaaaaa] ml-0.5 shrink-0" />
+                <ChevronDown className="h-2.5 w-2.5 text-slate-400 ml-0.5 shrink-0" />
               </button>
 
               {openDropdown === "fontFamily" && (
                 <div
                   onMouseDown={(e) => e.preventDefault()}
-                  className="absolute left-0 top-[24px] w-[180px] max-h-[260px] overflow-y-auto bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs py-1 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute left-0 top-[26px] w-[170px] max-h-[240px] overflow-y-auto bg-white border border-slate-200 shadow-xl rounded-md py-1 z-50 text-slate-800"
                 >
-                  <div className="px-2 py-0.5 text-[9px] font-bold text-[#888888] uppercase tracking-wider">
+                  <div className="px-2 py-0.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                     Available Fonts
                   </div>
                   {FONT_FAMILIES.map((font) => (
@@ -513,16 +464,16 @@ export default function ExcelRibbonToolbar({
                         }
                         setOpenDropdown(null);
                       }}
-                      className={`w-full px-2.5 py-1 text-left text-xs flex items-center justify-between hover:bg-[#3d3d3d] transition-colors cursor-pointer ${
+                      className={`w-full px-2 py-1 text-left text-xs flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${
                         (currentFormat.fontFamily || "Calibri").toLowerCase() === font.name.toLowerCase()
-                          ? "bg-[#383838] text-amber-400 font-bold"
-                          : "text-[#e0e0e0]"
+                          ? "bg-blue-50 text-blue-700 font-bold"
+                          : "text-slate-700"
                       }`}
                       style={{ fontFamily: font.family }}
                     >
                       <span className="truncate">{font.name}</span>
                       {(currentFormat.fontFamily || "Calibri").toLowerCase() === font.name.toLowerCase() && (
-                        <Check className="h-3 w-3 text-amber-400 shrink-0" />
+                        <Check className="h-3 w-3 text-blue-600 shrink-0" />
                       )}
                     </button>
                   ))}
@@ -532,7 +483,7 @@ export default function ExcelRibbonToolbar({
 
             {/* Font Size Selector */}
             <div className="relative">
-              <div className="h-[22px] w-[38px] bg-[#333333] border border-[#4e4e4e] rounded-xs flex items-center justify-between overflow-hidden">
+              <div className="h-6 w-[38px] bg-slate-50 border border-slate-300 rounded flex items-center justify-between overflow-hidden">
                 <input
                   id="input-font-size"
                   type="text"
@@ -545,7 +496,7 @@ export default function ExcelRibbonToolbar({
                       handleSizeInputSubmit();
                     }
                   }}
-                  className="w-[22px] h-full bg-transparent text-center text-[#ffffff] text-[10.5px] font-mono outline-none p-0"
+                  className="w-[22px] h-full bg-transparent text-center text-slate-800 text-[10px] font-mono outline-none p-0"
                   title="Font Size"
                 />
                 <button
@@ -553,7 +504,7 @@ export default function ExcelRibbonToolbar({
                   id="btn-font-size-dropdown"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => toggleDropdown("fontSize")}
-                  className="h-full px-0.5 hover:bg-[#4a4a4a] text-[#aaaaaa] flex items-center justify-center cursor-pointer"
+                  className="h-full px-0.5 hover:bg-slate-200 text-slate-500 flex items-center justify-center cursor-pointer"
                   title="Select Font Size"
                 >
                   <ChevronDown className="h-2 w-2" />
@@ -563,7 +514,7 @@ export default function ExcelRibbonToolbar({
               {openDropdown === "fontSize" && (
                 <div
                   onMouseDown={(e) => e.preventDefault()}
-                  className="absolute left-0 top-[24px] w-[54px] max-h-[220px] overflow-y-auto bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs py-1 z-50 animate-in fade-in zoom-in-95 duration-100 text-center"
+                  className="absolute left-0 top-[26px] w-[52px] max-h-[200px] overflow-y-auto bg-white border border-slate-200 shadow-xl rounded-md py-1 z-50 text-center"
                 >
                   {FONT_SIZES.map((size) => (
                     <button
@@ -578,10 +529,10 @@ export default function ExcelRibbonToolbar({
                         setSizeInputVal(String(size));
                         setOpenDropdown(null);
                       }}
-                      className={`w-full py-0.5 text-xs hover:bg-[#3d3d3d] transition-colors cursor-pointer font-mono ${
+                      className={`w-full py-0.5 text-xs hover:bg-slate-50 transition-colors cursor-pointer font-mono ${
                         (currentFormat.fontSize || 11) === size
-                          ? "bg-[#383838] text-amber-400 font-bold"
-                          : "text-[#e0e0e0]"
+                          ? "bg-blue-50 text-blue-700 font-bold"
+                          : "text-slate-700"
                       }`}
                     >
                       {size}
@@ -593,7 +544,7 @@ export default function ExcelRibbonToolbar({
           </div>
 
           {/* Divider */}
-          <div className="h-4 w-[1px] bg-[#444444] mx-0.5" />
+          <div className="h-3.5 w-[1px] bg-slate-200 mx-0.5" />
 
           {/* GROUP 2: BOLD, ITALIC, UNDERLINE, BORDERS, FILL & FONT COLOR */}
           <div className="flex items-center gap-0.5">
@@ -603,10 +554,10 @@ export default function ExcelRibbonToolbar({
               id="btn-bold"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleToggleBold}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center text-[11px] font-bold font-serif transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center text-[10.5px] font-bold font-serif transition-colors cursor-pointer ${
                 currentFormat.bold
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-700 border border-transparent"
               }`}
               title="Bold (Ctrl+B)"
             >
@@ -619,10 +570,10 @@ export default function ExcelRibbonToolbar({
               id="btn-italic"
               onMouseDown={(e) => e.preventDefault()}
               onClick={handleToggleItalic}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center text-[11px] italic font-serif transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center text-[10.5px] italic font-serif transition-colors cursor-pointer ${
                 currentFormat.italic
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-700 border border-transparent"
               }`}
               title="Italic (Ctrl+I)"
             >
@@ -636,10 +587,10 @@ export default function ExcelRibbonToolbar({
                 id="btn-underline"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleToggleUnderline()}
-                className={`h-[22px] px-1 rounded-l-xs flex items-center justify-center text-[11px] underline transition-colors cursor-pointer ${
+                className={`h-6 px-1 rounded-l flex items-center justify-center text-[10.5px] underline transition-colors cursor-pointer ${
                   currentFormat.underline && currentFormat.underline !== "none"
-                    ? "bg-[#4e4e4e] text-white border-l border-t border-b border-[#666666] shadow-inner"
-                    : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                    ? "bg-blue-50 text-blue-700 border-l border-t border-b border-blue-300 shadow-2xs"
+                    : "hover:bg-slate-100 text-slate-700 border border-transparent"
                 }`}
                 title="Underline (Ctrl+U)"
               >
@@ -652,10 +603,10 @@ export default function ExcelRibbonToolbar({
                 id="btn-underline-dropdown"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => toggleDropdown("underline")}
-                className={`h-[22px] px-0.5 rounded-r-xs flex items-center justify-center transition-colors cursor-pointer ${
+                className={`h-6 px-0.5 rounded-r flex items-center justify-center transition-colors cursor-pointer ${
                   currentFormat.underline && currentFormat.underline !== "none"
-                    ? "bg-[#4e4e4e] text-white border-r border-t border-b border-[#666666]"
-                    : "hover:bg-[#3e3e3e] text-[#aaaaaa]"
+                    ? "bg-blue-50 text-blue-700 border-r border-t border-b border-blue-300"
+                    : "hover:bg-slate-100 text-slate-500"
                 }`}
                 title="Underline Options"
               >
@@ -663,7 +614,7 @@ export default function ExcelRibbonToolbar({
               </button>
 
               {openDropdown === "underline" && (
-                <div className="absolute left-0 top-[24px] w-[150px] bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute left-0 top-[26px] w-[140px] bg-white border border-slate-200 shadow-xl rounded-md py-1 z-50">
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
@@ -671,10 +622,10 @@ export default function ExcelRibbonToolbar({
                       handleToggleUnderline("single");
                       setOpenDropdown(null);
                     }}
-                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-[#3d3d3d] flex items-center justify-between text-[#e0e0e0] cursor-pointer"
+                    className="w-full px-2.5 py-1 text-left text-xs hover:bg-slate-50 flex items-center justify-between text-slate-800 cursor-pointer"
                   >
                     <span className="underline">Underline</span>
-                    {currentFormat.underline === "single" && <Check className="h-3 w-3 text-amber-400" />}
+                    {currentFormat.underline === "single" && <Check className="h-3 w-3 text-blue-600" />}
                   </button>
                   <button
                     type="button"
@@ -683,10 +634,10 @@ export default function ExcelRibbonToolbar({
                       handleToggleUnderline("double");
                       setOpenDropdown(null);
                     }}
-                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-[#3d3d3d] flex items-center justify-between text-[#e0e0e0] cursor-pointer"
+                    className="w-full px-2.5 py-1 text-left text-xs hover:bg-slate-50 flex items-center justify-between text-slate-800 cursor-pointer"
                   >
                     <span className="underline decoration-double">Double Underline</span>
-                    {currentFormat.underline === "double" && <Check className="h-3 w-3 text-amber-400" />}
+                    {currentFormat.underline === "double" && <Check className="h-3 w-3 text-blue-600" />}
                   </button>
                   <button
                     type="button"
@@ -695,10 +646,10 @@ export default function ExcelRibbonToolbar({
                       handleToggleUnderline("none");
                       setOpenDropdown(null);
                     }}
-                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-[#3d3d3d] flex items-center justify-between text-[#aaaaaa] cursor-pointer"
+                    className="w-full px-2.5 py-1 text-left text-xs hover:bg-slate-50 flex items-center justify-between text-slate-500 cursor-pointer"
                   >
                     <span>None</span>
-                    {(!currentFormat.underline || currentFormat.underline === "none") && <Check className="h-3 w-3 text-amber-400" />}
+                    {(!currentFormat.underline || currentFormat.underline === "none") && <Check className="h-3 w-3 text-blue-600" />}
                   </button>
                 </div>
               )}
@@ -711,7 +662,7 @@ export default function ExcelRibbonToolbar({
                 id="btn-borders-quick"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleBorderSelect(lastBorderPreset)}
-                className="h-[22px] px-1 rounded-l-xs hover:bg-[#3e3e3e] flex items-center justify-center text-[#e0e0e0] transition-colors cursor-pointer"
+                className="h-6 px-1 rounded-l hover:bg-slate-100 flex items-center justify-center text-slate-700 transition-colors cursor-pointer"
                 title={`Apply ${lastBorderPreset.replace(/_/g, " ")} Border`}
               >
                 <svg className="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -726,15 +677,15 @@ export default function ExcelRibbonToolbar({
                 id="btn-borders-dropdown"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => toggleDropdown("borders")}
-                className="h-[22px] px-0.5 rounded-r-xs hover:bg-[#3e3e3e] text-[#aaaaaa] flex items-center justify-center cursor-pointer"
+                className="h-6 px-0.5 rounded-r hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer"
                 title="Borders"
               >
                 <ChevronDown className="h-2 w-2" />
               </button>
 
               {openDropdown === "borders" && (
-                <div className="absolute left-0 top-[24px] w-[210px] max-h-[300px] overflow-y-auto bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs py-1 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs">
-                  <div className="px-3 py-1 text-[9px] font-bold text-[#888888] uppercase tracking-wider">
+                <div className="absolute left-0 top-[26px] w-[200px] max-h-[280px] overflow-y-auto bg-white border border-slate-200 shadow-xl rounded-md py-1 z-50 text-xs">
+                  <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
                     Border Presets
                   </div>
                   {[
@@ -757,13 +708,13 @@ export default function ExcelRibbonToolbar({
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleBorderSelect(preset.id)}
-                      className="w-full px-3 py-1.5 text-left hover:bg-[#3d3d3d] flex items-center justify-between text-[#e0e0e0] cursor-pointer"
+                      className="w-full px-2.5 py-1 text-left hover:bg-slate-50 flex items-center justify-between text-slate-800 cursor-pointer"
                     >
                       <div className="flex flex-col">
-                        <span className="font-medium">{preset.label}</span>
-                        <span className="text-[9px] text-[#888888]">{preset.desc}</span>
+                        <span className="font-medium text-[11px]">{preset.label}</span>
+                        <span className="text-[9px] text-slate-400">{preset.desc}</span>
                       </div>
-                      {lastBorderPreset === preset.id && <Check className="h-3 w-3 text-amber-400 shrink-0" />}
+                      {lastBorderPreset === preset.id && <Check className="h-3 w-3 text-blue-600 shrink-0" />}
                     </button>
                   ))}
                 </div>
@@ -777,14 +728,14 @@ export default function ExcelRibbonToolbar({
                 id="btn-highlight-quick"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleHighlightColorSelect(activeHighlightColor)}
-                className="h-[22px] px-1 rounded-l-xs hover:bg-[#3e3e3e] flex flex-col items-center justify-center transition-colors cursor-pointer"
+                className="h-6 px-1 rounded-l hover:bg-slate-100 flex flex-col items-center justify-center transition-colors cursor-pointer"
                 title="Highlight / Fill Color"
               >
-                <svg className="h-2.5 w-2.5 text-[#e0e0e0]" viewBox="0 0 16 16" fill="currentColor">
+                <svg className="h-2.5 w-2.5 text-slate-700" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z" />
                 </svg>
                 <div
-                  className="h-[2.5px] w-3 rounded-xs mt-0.5 shadow-xs"
+                  className="h-[2px] w-3 rounded-xs mt-0.5 shadow-xs"
                   style={{ backgroundColor: currentFormat.bgColor || activeHighlightColor }}
                 />
               </button>
@@ -793,7 +744,7 @@ export default function ExcelRibbonToolbar({
                 id="btn-highlight-dropdown"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => toggleDropdown("highlightColor")}
-                className="h-[22px] px-0.5 rounded-r-xs hover:bg-[#3e3e3e] text-[#aaaaaa] flex items-center justify-center cursor-pointer"
+                className="h-6 px-0.5 rounded-r hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer"
                 title="Highlight / Fill Color Palette"
               >
                 <ChevronDown className="h-2 w-2" />
@@ -802,30 +753,30 @@ export default function ExcelRibbonToolbar({
               {openDropdown === "highlightColor" && (
                 <div
                   onMouseDown={(e) => e.preventDefault()}
-                  className="absolute left-0 top-[24px] w-[210px] bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute left-0 top-[26px] w-[200px] bg-white border border-slate-200 shadow-xl rounded-md p-2 z-50 text-slate-800"
                 >
-                  <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#3e3e3e]">
-                    <span className="text-[10px] font-bold text-[#aaaaaa] uppercase tracking-wider">Highlight Colors</span>
+                  <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-100">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Highlight Colors</span>
                     <button
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleHighlightColorSelect("transparent")}
-                      className="text-[10px] text-amber-400 hover:underline cursor-pointer font-semibold"
+                      className="text-[9px] text-blue-600 hover:underline cursor-pointer font-semibold"
                       title="Reset highlight for selected word or text"
                     >
                       No Fill (Reset)
                     </button>
                   </div>
-                  <div className="grid grid-cols-10 gap-1 mb-2">
+                  <div className="grid grid-cols-10 gap-0.5 mb-1.5">
                     {THEME_COLORS.map((colGroup, colIdx) => (
-                      <div key={colIdx} className="flex flex-col gap-1">
+                      <div key={colIdx} className="flex flex-col gap-0.5">
                         {colGroup.map((color, rowIdx) => (
                           <button
                             key={rowIdx}
                             type="button"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => handleHighlightColorSelect(color)}
-                            className="h-4 w-4 rounded-xs border border-black/30 hover:scale-125 transition-transform cursor-pointer"
+                            className="h-3.5 w-3.5 rounded-xs border border-slate-300/80 hover:scale-125 transition-transform cursor-pointer"
                             style={{ backgroundColor: color }}
                             title={color}
                           />
@@ -833,30 +784,30 @@ export default function ExcelRibbonToolbar({
                       </div>
                     ))}
                   </div>
-                  <div className="text-[10px] font-bold text-[#aaaaaa] uppercase tracking-wider mb-1">
+                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Standard Colors
                   </div>
-                  <div className="flex items-center justify-between gap-1 mb-2">
+                  <div className="flex items-center justify-between gap-0.5 mb-1.5">
                     {STANDARD_COLORS.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleHighlightColorSelect(color)}
-                        className="h-4 w-4 rounded-xs border border-black/30 hover:scale-125 transition-transform cursor-pointer"
+                        className="h-3.5 w-3.5 rounded-xs border border-slate-300/80 hover:scale-125 transition-transform cursor-pointer"
                         style={{ backgroundColor: color }}
                         title={color}
                       />
                     ))}
                   </div>
-                  <div className="pt-1 border-t border-[#3e3e3e] flex items-center justify-between">
+                  <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
                     <button
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => highlightColorInputRef.current?.click()}
-                      className="text-[10px] text-[#e0e0e0] hover:text-white flex items-center gap-1 cursor-pointer"
+                      className="text-[9px] text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer font-medium"
                     >
-                      <Palette className="h-3 w-3 text-indigo-400" />
+                      <Palette className="h-2.5 w-2.5 text-blue-600" />
                       <span>Custom Color...</span>
                     </button>
                     <input
@@ -877,12 +828,12 @@ export default function ExcelRibbonToolbar({
                 id="btn-fontcolor-quick"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleFontColorSelect(activeFontColor)}
-                className="h-[22px] px-1 rounded-l-xs hover:bg-[#3e3e3e] flex flex-col items-center justify-center transition-colors cursor-pointer"
+                className="h-6 px-1 rounded-l hover:bg-slate-100 flex flex-col items-center justify-center transition-colors cursor-pointer"
                 title="Font / Text Color"
               >
-                <span className="text-[10px] font-bold leading-none text-[#e0e0e0]">A</span>
+                <span className="text-[10px] font-bold leading-none text-slate-800">A</span>
                 <div
-                  className="h-[2.5px] w-3 rounded-xs mt-0.5 shadow-xs"
+                  className="h-[2px] w-3 rounded-xs mt-0.5 shadow-xs"
                   style={{ backgroundColor: currentFormat.color || activeFontColor }}
                 />
               </button>
@@ -891,7 +842,7 @@ export default function ExcelRibbonToolbar({
                 id="btn-fontcolor-dropdown"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => toggleDropdown("fontColor")}
-                className="h-[22px] px-0.5 rounded-r-xs hover:bg-[#3e3e3e] text-[#aaaaaa] flex items-center justify-center cursor-pointer"
+                className="h-6 px-0.5 rounded-r hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer"
                 title="Font Color Palette"
               >
                 <ChevronDown className="h-2 w-2" />
@@ -900,30 +851,30 @@ export default function ExcelRibbonToolbar({
               {openDropdown === "fontColor" && (
                 <div
                   onMouseDown={(e) => e.preventDefault()}
-                  className="absolute left-0 top-[24px] w-[210px] bg-[#2b2b2b] border border-[#4a4a4a] shadow-2xl rounded-xs p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute left-0 top-[26px] w-[200px] bg-white border border-slate-200 shadow-xl rounded-md p-2 z-50 text-slate-800"
                 >
-                  <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#3e3e3e]">
-                    <span className="text-[10px] font-bold text-[#aaaaaa] uppercase tracking-wider">Theme Colors</span>
+                  <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-100">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Theme Colors</span>
                     <button
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleFontColorSelect("#000000")}
-                      className="text-[10px] text-amber-400 hover:underline cursor-pointer font-semibold"
+                      className="text-[9px] text-blue-600 hover:underline cursor-pointer font-semibold"
                       title="Reset font color to default"
                     >
                       Automatic (Reset)
                     </button>
                   </div>
-                  <div className="grid grid-cols-10 gap-1 mb-2">
+                  <div className="grid grid-cols-10 gap-0.5 mb-1.5">
                     {THEME_COLORS.map((colGroup, colIdx) => (
-                      <div key={colIdx} className="flex flex-col gap-1">
+                      <div key={colIdx} className="flex flex-col gap-0.5">
                         {colGroup.map((color, rowIdx) => (
                           <button
                             key={rowIdx}
                             type="button"
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => handleFontColorSelect(color)}
-                            className="h-4 w-4 rounded-xs border border-black/30 hover:scale-125 transition-transform cursor-pointer"
+                            className="h-3.5 w-3.5 rounded-xs border border-slate-300/80 hover:scale-125 transition-transform cursor-pointer"
                             style={{ backgroundColor: color }}
                             title={color}
                           />
@@ -931,30 +882,30 @@ export default function ExcelRibbonToolbar({
                       </div>
                     ))}
                   </div>
-                  <div className="text-[10px] font-bold text-[#aaaaaa] uppercase tracking-wider mb-1">
+                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Standard Colors
                   </div>
-                  <div className="flex items-center justify-between gap-1 mb-2">
+                  <div className="flex items-center justify-between gap-0.5 mb-1.5">
                     {STANDARD_COLORS.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleFontColorSelect(color)}
-                        className="h-4 w-4 rounded-xs border border-black/30 hover:scale-125 transition-transform cursor-pointer"
+                        className="h-3.5 w-3.5 rounded-xs border border-slate-300/80 hover:scale-125 transition-transform cursor-pointer"
                         style={{ backgroundColor: color }}
                         title={color}
                       />
                     ))}
                   </div>
-                  <div className="pt-1 border-t border-[#3e3e3e] flex items-center justify-between">
+                  <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
                     <button
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => fontColorInputRef.current?.click()}
-                      className="text-[10px] text-[#e0e0e0] hover:text-white flex items-center gap-1 cursor-pointer"
+                      className="text-[9px] text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer font-medium"
                     >
-                      <Palette className="h-3 w-3 text-indigo-400" />
+                      <Palette className="h-2.5 w-2.5 text-blue-600" />
                       <span>Custom Color...</span>
                     </button>
                     <input
@@ -970,7 +921,7 @@ export default function ExcelRibbonToolbar({
           </div>
 
           {/* Divider */}
-          <div className="h-4 w-[1px] bg-[#444444] mx-0.5" />
+          <div className="h-3.5 w-[1px] bg-slate-200 mx-0.5" />
 
           {/* GROUP 3: ALIGNMENT (VALIGN & HALIGN) */}
           <div className="flex items-center gap-0.5">
@@ -979,10 +930,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-valign-top"
               onClick={() => onApplyFormat({ valign: "top" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.valign === "top"
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Top Align"
             >
@@ -996,10 +947,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-valign-middle"
               onClick={() => onApplyFormat({ valign: "middle" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.valign === "middle" || !currentFormat.valign
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Middle Align"
             >
@@ -1013,10 +964,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-valign-bottom"
               onClick={() => onApplyFormat({ valign: "bottom" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.valign === "bottom"
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Bottom Align"
             >
@@ -1026,17 +977,17 @@ export default function ExcelRibbonToolbar({
             </button>
 
             {/* Sub-divider */}
-            <div className="h-3.5 w-[1px] bg-[#3e3e3e] mx-0.5" />
+            <div className="h-3 w-[1px] bg-slate-200 mx-0.5" />
 
             {/* Align Left */}
             <button
               type="button"
               id="btn-align-left"
               onClick={() => onApplyFormat({ align: "left" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.align === "left" || (!currentFormat.align && true)
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Align Left (Ctrl+L)"
             >
@@ -1050,10 +1001,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-align-center"
               onClick={() => onApplyFormat({ align: "center" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.align === "center"
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Center (Ctrl+E)"
             >
@@ -1067,10 +1018,10 @@ export default function ExcelRibbonToolbar({
               type="button"
               id="btn-align-right"
               onClick={() => onApplyFormat({ align: "right" })}
-              className={`h-[22px] w-[22px] rounded-xs flex items-center justify-center transition-colors cursor-pointer ${
+              className={`h-6 w-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
                 currentFormat.align === "right"
-                  ? "bg-[#4e4e4e] text-white border border-[#666666] shadow-inner"
-                  : "hover:bg-[#3e3e3e] text-[#e0e0e0]"
+                  ? "bg-blue-50 text-blue-700 border border-blue-300 shadow-2xs"
+                  : "hover:bg-slate-100 text-slate-600 border border-transparent"
               }`}
               title="Align Right (Ctrl+R)"
             >
@@ -1081,7 +1032,7 @@ export default function ExcelRibbonToolbar({
           </div>
 
           {/* Divider */}
-          <div className="h-4 w-[1px] bg-[#444444] mx-0.5" />
+          <div className="h-3.5 w-[1px] bg-slate-200 mx-0.5" />
 
           {/* GROUP 4: MERGE & CLEAR FORMATS */}
           <div className="flex items-center gap-0.5">
@@ -1090,7 +1041,7 @@ export default function ExcelRibbonToolbar({
                 type="button"
                 id="btn-merge-center"
                 onClick={onToggleMerge}
-                className="h-[22px] px-1.5 bg-[#333333] hover:bg-[#404040] text-[#ffffff] border border-[#4e4e4e] rounded-xs flex items-center gap-1 transition-colors cursor-pointer text-[9.5px] font-semibold"
+                className="h-6 px-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded flex items-center gap-1 transition-colors cursor-pointer text-[9.5px] font-semibold"
                 title="Merge & Center selected cells"
               >
                 <svg className="h-2.5 w-2.5" viewBox="0 0 16 16" fill="currentColor">
@@ -1109,7 +1060,7 @@ export default function ExcelRibbonToolbar({
                   applyInlineFormatting("clearFormat");
                   onClearFormatting();
                 }}
-                className="h-[22px] px-1.5 hover:bg-[#3e3e3e] text-[#aaaaaa] hover:text-white rounded-xs flex items-center gap-1 transition-colors cursor-pointer text-[9.5px]"
+                className="h-6 px-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded flex items-center transition-colors cursor-pointer text-[9.5px]"
                 title="Clear Formatting (Reset text & cell styles)"
               >
                 <span>Clear</span>
@@ -1119,9 +1070,9 @@ export default function ExcelRibbonToolbar({
         </div>
 
         {/* Selection Status Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 text-[9.5px] text-[#999999] font-mono bg-[#191919] px-1.5 py-0.5 rounded-xs border border-[#383838]">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>{selectionSummary || (hasSelection ? "Cell Selected" : "Sheet Editor")}</span>
+        <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-slate-500 font-mono bg-slate-50 px-2 py-1 rounded-md border border-slate-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span>{selectionSummary || (hasSelection ? "Cell Selected" : "A4 Canvas")}</span>
         </div>
       </div>
     </div>

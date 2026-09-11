@@ -8,6 +8,9 @@ import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, C
 import ExcelRibbonToolbar from "./ExcelRibbonToolbar";
 import RichTextCell from "./RichTextCell";
 import FloatingTextToolbar from "./FloatingTextToolbar";
+import ErpSidebar from "./ErpSidebar";
+import ErpTopNav from "./ErpTopNav";
+import ErpDashboard from "./ErpDashboard";
 import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelectionInEditable } from "../utils/textFormatter";
 
 // Lazy-loaded secondary components for instant initial app startup
@@ -157,6 +160,27 @@ export default function QuotationBuilder() {
   const [requisitionNo, setRequisitionNo] = useState(() => initialDraft?.requisitionNo || "");
   const [invoiceNo, setInvoiceNo] = useState(() => initialDraft?.invoiceNo || "");
   const [poNumber, setPoNumber] = useState(() => initialDraft?.poNumber || "");
+  const [quotationNo, setQuotationNo] = useState(() => initialDraft?.quotationNo || "");
+  const [includeInvoiceNo, setIncludeInvoiceNo] = useState<boolean>(() => {
+    if (initialDraft?.includeInvoiceNo !== undefined) return Boolean(initialDraft.includeInvoiceNo);
+    return true;
+  });
+  const [includeChallanNo, setIncludeChallanNo] = useState<boolean>(() => {
+    if (initialDraft?.includeChallanNo !== undefined) return Boolean(initialDraft.includeChallanNo);
+    return true;
+  });
+  const [includeQuotationNo, setIncludeQuotationNo] = useState<boolean>(() => {
+    if (initialDraft?.includeQuotationNo !== undefined) return Boolean(initialDraft.includeQuotationNo);
+    return true;
+  });
+  const [includeRequisitionNo, setIncludeRequisitionNo] = useState<boolean>(() => {
+    if (initialDraft?.includeRequisitionNo !== undefined) return Boolean(initialDraft.includeRequisitionNo);
+    return true;
+  });
+  const [includePoNumber, setIncludePoNumber] = useState<boolean>(() => {
+    if (initialDraft?.includePoNumber !== undefined) return Boolean(initialDraft.includePoNumber);
+    return true;
+  });
   const [vatPercent, setVatPercent] = useState<string>(() => initialDraft?.vatPercent !== undefined ? String(initialDraft.vatPercent) : "0");
   const [transportationFee, setTransportationFee] = useState<string>(() => initialDraft?.transportationFee !== undefined ? String(initialDraft.transportationFee) : "0");
   const [includeDiscount, setIncludeDiscount] = useState<boolean>(() => {
@@ -188,12 +212,15 @@ export default function QuotationBuilder() {
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  // Active Page View state ("editor" | "saved-docs")
-  const [activePage, setActivePage] = useState<"editor" | "saved-docs">("editor");
+  // Active ERP View state ("dashboard" | "editor" | "saved-docs")
+  const [activeView, setActiveView] = useState<"dashboard" | "editor" | "saved-docs">("editor");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
   // Excel Paste Modal and Batch Row Adder states
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [customRowCountInput, setCustomRowCountInput] = useState<string>("10");
+  const [customSubtractCountInput, setCustomSubtractCountInput] = useState<string>("10");
   const [targetTotalRowCountInput, setTargetTotalRowCountInput] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<{ text: string; type?: "info" | "success" } | null>(null);
 
@@ -259,6 +286,12 @@ export default function QuotationBuilder() {
     requisitionNo: string;
     invoiceNo: string;
     poNumber: string;
+    quotationNo: string;
+    includeInvoiceNo: boolean;
+    includeChallanNo: boolean;
+    includeQuotationNo: boolean;
+    includeRequisitionNo: boolean;
+    includePoNumber: boolean;
     vatPercent: string;
     transportationFee: string;
     includeDiscount: boolean;
@@ -288,6 +321,12 @@ export default function QuotationBuilder() {
     requisitionNo,
     invoiceNo,
     poNumber,
+    quotationNo,
+    includeInvoiceNo,
+    includeChallanNo,
+    includeQuotationNo,
+    includeRequisitionNo,
+    includePoNumber,
     vatPercent,
     transportationFee,
     includeDiscount,
@@ -334,6 +373,12 @@ export default function QuotationBuilder() {
     setRequisitionNo(previous.requisitionNo);
     setInvoiceNo(previous.invoiceNo);
     setPoNumber(previous.poNumber);
+    setQuotationNo(previous.quotationNo || "");
+    setIncludeInvoiceNo(previous.includeInvoiceNo !== undefined ? previous.includeInvoiceNo : true);
+    setIncludeChallanNo(previous.includeChallanNo !== undefined ? previous.includeChallanNo : true);
+    setIncludeQuotationNo(previous.includeQuotationNo !== undefined ? previous.includeQuotationNo : true);
+    setIncludeRequisitionNo(previous.includeRequisitionNo !== undefined ? previous.includeRequisitionNo : true);
+    setIncludePoNumber(previous.includePoNumber !== undefined ? previous.includePoNumber : true);
     setVatPercent(previous.vatPercent);
     setTransportationFee(previous.transportationFee);
     setIncludeDiscount(previous.includeDiscount);
@@ -376,6 +421,12 @@ export default function QuotationBuilder() {
     setRequisitionNo(next.requisitionNo);
     setInvoiceNo(next.invoiceNo);
     setPoNumber(next.poNumber);
+    setQuotationNo(next.quotationNo || "");
+    setIncludeInvoiceNo(next.includeInvoiceNo !== undefined ? next.includeInvoiceNo : true);
+    setIncludeChallanNo(next.includeChallanNo !== undefined ? next.includeChallanNo : true);
+    setIncludeQuotationNo(next.includeQuotationNo !== undefined ? next.includeQuotationNo : true);
+    setIncludeRequisitionNo(next.includeRequisitionNo !== undefined ? next.includeRequisitionNo : true);
+    setIncludePoNumber(next.includePoNumber !== undefined ? next.includePoNumber : true);
     setVatPercent(next.vatPercent);
     setTransportationFee(next.transportationFee);
     setIncludeDiscount(next.includeDiscount);
@@ -533,6 +584,12 @@ export default function QuotationBuilder() {
       requisitionNo: String(requisitionNo || ""),
       invoiceNo: String(invoiceNo || ""),
       poNumber: String(poNumber || ""),
+      quotationNo: String(quotationNo || ""),
+      includeInvoiceNo: Boolean(includeInvoiceNo),
+      includeChallanNo: Boolean(includeChallanNo),
+      includeQuotationNo: Boolean(includeQuotationNo),
+      includeRequisitionNo: Boolean(includeRequisitionNo),
+      includePoNumber: Boolean(includePoNumber),
       rows: sanitizedRows,
       mergedRegions: sanitizedMergedRegions,
       cellFormats: { ...cellFormats },
@@ -579,6 +636,12 @@ export default function QuotationBuilder() {
     setRequisitionNo("");
     setInvoiceNo("");
     setPoNumber("");
+    setQuotationNo("");
+    setIncludeInvoiceNo(true);
+    setIncludeChallanNo(true);
+    setIncludeQuotationNo(true);
+    setIncludeRequisitionNo(true);
+    setIncludePoNumber(true);
     setVatPercent("0");
     setTransportationFee("0");
     
@@ -625,6 +688,12 @@ export default function QuotationBuilder() {
     setRequisitionNo(doc.requisitionNo || "");
     setInvoiceNo(doc.invoiceNo || "");
     setPoNumber(doc.poNumber || "");
+    setQuotationNo(doc.quotationNo || "");
+    setIncludeInvoiceNo(doc.includeInvoiceNo !== undefined ? Boolean(doc.includeInvoiceNo) : true);
+    setIncludeChallanNo(doc.includeChallanNo !== undefined ? Boolean(doc.includeChallanNo) : true);
+    setIncludeQuotationNo(doc.includeQuotationNo !== undefined ? Boolean(doc.includeQuotationNo) : true);
+    setIncludeRequisitionNo(doc.includeRequisitionNo !== undefined ? Boolean(doc.includeRequisitionNo) : true);
+    setIncludePoNumber(doc.includePoNumber !== undefined ? Boolean(doc.includePoNumber) : true);
     setRows(doc.rows.map(r => ({ ...r })));
     setMergedRegions((doc.mergedRegions || []).map(m => ({ ...m })));
     setCellFormats(doc.cellFormats ? { ...doc.cellFormats } : {});
@@ -673,9 +742,12 @@ export default function QuotationBuilder() {
     }
   };
 
-  const startNewDoc = () => {
-    if (window.confirm("Start a new document? Unsaved changes on your active sheet will be overwritten.")) {
+  const startNewDoc = (targetType?: "quotation" | "challan" | "invoice", skipConfirm = false) => {
+    if (skipConfirm || window.confirm("Start a new document? Unsaved changes on your active sheet will be overwritten.")) {
       resetSheetFields();
+      if (targetType) {
+        setDocType(targetType);
+      }
     }
   };
 
@@ -1063,12 +1135,17 @@ export default function QuotationBuilder() {
     });
   };
 
-  const removeRow = () => {
+  const removeRows = (count: number = 1) => {
     recordChange();
     setRows((prevRows) => {
       if (prevRows.length <= 1) return prevRows;
-      return prevRows.slice(0, -1);
+      const keepCount = Math.max(1, prevRows.length - count);
+      return prevRows.slice(0, keepCount);
     });
+  };
+
+  const removeRow = () => {
+    removeRows(1);
   };
 
   const insertRow = (index: number, position: 'above' | 'below') => {
@@ -2586,47 +2663,34 @@ export default function QuotationBuilder() {
   };
 
   return (
-    <div className="quotation-container relative min-h-screen flex flex-col items-center bg-slate-50 py-3 sm:py-4 text-[#000] font-sans antialiased w-full">
-      
-      {/* Consolidated Top Toolbar & Page Navigation Bar - Sticky at Top */}
-      <div className="sticky top-0 z-40 w-full max-w-[210mm] px-2 sm:px-0 no-print print:hidden mb-2 flex flex-col gap-1.5">
-        {/* Compressed Single Button to switch between Document Editor and Saved Documents */}
-        <div className="w-full flex items-center justify-end">
-          <button
-            type="button"
-            id="btn-toggle-page-view"
-            onClick={() => setActivePage(activePage === "editor" ? "saved-docs" : "editor")}
-            className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 no-print print:hidden inline-flex items-center gap-1.5 bg-slate-900/95 hover:bg-slate-900 text-white px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-700/80 shadow-md hover:shadow-lg transition-all cursor-pointer backdrop-blur-xs"
-            title={activePage === "editor" ? "Open Saved Documents" : "Back to Document Editor"}
-          >
-            {activePage === "editor" ? (
-              <>
-                <FolderOpen className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-                <span>Saved Docs</span>
-              </>
-            ) : (
-              <>
-                <FileEdit className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-                <span>Editor</span>
-              </>
-            )}
-          </button>
-        </div>
+    <div className="erp-app-shell flex min-h-screen bg-slate-100 text-slate-900 font-sans antialiased w-full selection:bg-blue-600 selection:text-white">
+      {/* Persistent Collapsible Sidebar with built-in responsive mobile drawer */}
+      <div className="no-print print:hidden sticky top-0 h-screen z-40 shrink-0">
+        <ErpSidebar
+          activeView={activeView}
+          onSelectView={(v) => {
+            setActiveView(v);
+            setIsMobileSidebarOpen(false);
+          }}
+          onNewDoc={(type) => {
+            startNewDoc(type, true);
+            setActiveView("editor");
+            setIsMobileSidebarOpen(false);
+          }}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          savedDocsCount={savedDocs.length}
+        />
+      </div>
 
-        {/* Excel Ribbon Toolbar on Editor Page */}
-        {activePage === "editor" && (
-          <ExcelRibbonToolbar
-            onUndo={handleUndo}
-            onRedo={handleRedo}
-            canUndo={undoStackRef.current.length > 0}
-            canRedo={redoStackRef.current.length > 0}
-            activeFormat={activeCellFormat}
-            onApplyFormat={handleApplyFormat}
-            onApplyBorderPreset={handleApplyBorderPreset}
-            selectionSummary={selectionSummary}
-            canMerge={!!(selectionStart && selectionEnd && (selectionStart.rowIndex !== selectionEnd.rowIndex || selectionStart.colIndex !== selectionEnd.colIndex))}
-            onToggleMerge={toggleMergeSelectedRange}
-            onClearFormatting={handleClearFormatting}
+      {/* Main ERP Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
+        {/* Clean Sticky Top Navigation */}
+        <div className="no-print print:hidden sticky top-0 z-30 w-full">
+          <ErpTopNav
+            activeView={activeView}
             docType={docType}
             onSelectDocType={(type) => {
               recordChange();
@@ -2643,38 +2707,104 @@ export default function QuotationBuilder() {
                 })
               );
             }}
-            includeVesselName={includeVesselName}
-            onToggleVesselName={setIncludeVesselName}
-            includePortBerth={includePortBerth}
-            onTogglePortBerth={setIncludePortBerth}
-            autoSaveEnabled={autoSaveEnabled}
-            lastSavedTime={lastSavedTime}
-            currentDocId={currentDocId}
-            currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name}
-            onCloseCurrentDoc={resetSheetFields}
-            onNewDoc={startNewDoc}
-            onDuplicateDoc={currentDocId ? duplicateCurrentDoc : undefined}
-            onDeleteDoc={currentDocId ? () => deleteSavedDoc(currentDocId) : undefined}
-            onSaveDoc={() => saveCurrentDocToApp()}
+            currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name || (messers ? `${messers} (${dateVal})` : undefined)}
             saveStatus={saveStatus}
-            onOpenExcelModal={() => setIsExcelModalOpen(true)}
+            lastSavedTime={lastSavedTime}
+            onSaveDoc={() => saveCurrentDocToApp()}
             onExportExcel={handleDownloadExcel}
             isGeneratingExcel={isGeneratingExcel}
             onPrint={handlePrint}
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
-            includeDiscount={includeDiscount}
-            onToggleDiscount={(val) => setIncludeDiscount(val)}
+            onOpenExcelModal={() => setIsExcelModalOpen(true)}
+            onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
           />
-        )}
-      </div>
+        </div>
 
-      {/* Document Sheet and Editor Wrapper */}
-      <div
-        id="document-editor-wrapper"
-        className={activePage === "saved-docs" ? "hidden" : "w-full max-w-[210mm] flex flex-col items-center"}
-      >
-        <div className="w-full flex flex-col items-center">
+        {/* View 1: ERP Dashboard */}
+        {activeView === "dashboard" && (
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-200">
+            <ErpDashboard
+              savedDocs={savedDocs}
+              onOpenDoc={(doc) => {
+                loadSavedDoc(doc);
+                setActiveView("editor");
+              }}
+              onNewDoc={(type) => {
+                startNewDoc(type, true);
+                setActiveView("editor");
+              }}
+              onDeleteDoc={(id) => deleteSavedDoc(id)}
+              onDuplicateDoc={(doc) => {
+                loadSavedDoc(doc);
+                duplicateCurrentDoc();
+              }}
+              onSwitchToArchive={() => setActiveView("saved-docs")}
+            />
+          </div>
+        )}
+
+        {/* View 2: Document Editor (centered A4 canvas with minimal surrounding UI & compact ribbon toolbar) */}
+        <div
+          id="document-editor-wrapper"
+          className={activeView === "editor" ? "flex flex-col items-center py-4 px-2 sm:px-4 w-full" : "hidden"}
+        >
+          {/* Compact Ribbon Toolbar */}
+          <div className="w-full max-w-[210mm] no-print print:hidden mb-3">
+            <ExcelRibbonToolbar
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={undoStackRef.current.length > 0}
+              canRedo={redoStackRef.current.length > 0}
+              activeFormat={activeCellFormat}
+              onApplyFormat={handleApplyFormat}
+              onApplyBorderPreset={handleApplyBorderPreset}
+              selectionSummary={selectionSummary}
+              canMerge={!!(selectionStart && selectionEnd && (selectionStart.rowIndex !== selectionEnd.rowIndex || selectionStart.colIndex !== selectionEnd.colIndex))}
+              onToggleMerge={toggleMergeSelectedRange}
+              onClearFormatting={handleClearFormatting}
+              docType={docType}
+              onSelectDocType={(type) => {
+                recordChange();
+                setDocType(type);
+                setMergedRegions([]);
+                setRows((prev) =>
+                  prev.map((r) => {
+                    const q = parseNumericInput(stripHtml(String(r.qty || "")));
+                    const p = parseNumericInput(stripHtml(String(r.price || "")));
+                    return {
+                      ...r,
+                      amount: type === "challan" ? 0 : q * p,
+                    };
+                  })
+                );
+              }}
+              includeVesselName={includeVesselName}
+              onToggleVesselName={setIncludeVesselName}
+              includePortBerth={includePortBerth}
+              onTogglePortBerth={setIncludePortBerth}
+              autoSaveEnabled={autoSaveEnabled}
+              lastSavedTime={lastSavedTime}
+              currentDocId={currentDocId}
+              currentDocName={savedDocs.find((d) => d.id === currentDocId)?.name}
+              onCloseCurrentDoc={resetSheetFields}
+              onNewDoc={() => startNewDoc()}
+              onDuplicateDoc={currentDocId ? duplicateCurrentDoc : undefined}
+              onDeleteDoc={currentDocId ? () => deleteSavedDoc(currentDocId) : undefined}
+              onSaveDoc={() => saveCurrentDocToApp()}
+              saveStatus={saveStatus}
+              onOpenExcelModal={() => setIsExcelModalOpen(true)}
+              onExportExcel={handleDownloadExcel}
+              isGeneratingExcel={isGeneratingExcel}
+              onPrint={handlePrint}
+              onDownloadPDF={handleDownloadPDF}
+              isGeneratingPDF={isGeneratingPDF}
+              includeDiscount={includeDiscount}
+              onToggleDiscount={(val) => setIncludeDiscount(val)}
+            />
+          </div>
+
+          <div className="w-full flex flex-col items-center">
 
           {/* A4 Standard-compliant visual grid container */}
           <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
@@ -2744,7 +2874,7 @@ export default function QuotationBuilder() {
 
                 {/* Repeating Document Title on multi-page browser printing */}
                 <div className="doc-title text-center text-[11pt] sm:text-[12pt] font-black uppercase tracking-[6px] my-0.5">
-                  {docType === "challan" ? "Delivery Challan" : docType === "invoice" ? "Bill / Invoice" : "Quotation"}
+                  {docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation"}
                 </div>
 
                 {/* Repeating Metadata Information Input Grid on multi-page browser printing */}
@@ -2885,187 +3015,200 @@ export default function QuotationBuilder() {
                   <div className={`meta-box grid border border-black p-2 bg-slate-50/30 rounded-xs ${
                     docType === "invoice" ? "grid-cols-3 gap-1.5" : "grid-cols-2 gap-1.5"
                   }`}>
-                    {docType === "invoice" ? (
-                      <>
-                        <div className="meta-inner-field col-span-1">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Invoice No.:</label>
-                          <input 
-                            type="text" 
-                            value={invoiceNo}
-                            onChange={(e) => setInvoiceNo(e.target.value)}
-                            placeholder="Invoice number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
+                    {/* INVOICE NO (Invoice only) */}
+                    {docType === "invoice" && (
+                      <div className={`meta-inner-field col-span-1 ${!includeInvoiceNo ? "print:hidden" : ""}`}>
+                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
+                          <span className="flex items-center gap-1">
+                            <input 
+                              type="checkbox" 
+                              checked={includeInvoiceNo} 
+                              onChange={(e) => {
+                                recordChange();
+                                setIncludeInvoiceNo(e.target.checked);
+                              }}
+                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
+                              title={includeInvoiceNo ? "Click to deselect Invoice No." : "Click to select Invoice No."}
+                            />
+                            <span className={!includeInvoiceNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
+                              Invoice No.:
+                            </span>
+                          </span>
+                          {!includeInvoiceNo && (
+                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
+                          )}
+                        </label>
+                        <input 
+                          type="text" 
+                          value={invoiceNo}
+                          onChange={(e) => setInvoiceNo(e.target.value)}
+                          placeholder={includeInvoiceNo ? "Invoice number" : "Omitted from print"}
+                          disabled={!includeInvoiceNo}
+                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
+                            !includeInvoiceNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
+                          }`}
+                        />
+                        {includeInvoiceNo && (
                           <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
                             {invoiceNo || " "}
                           </div>
-                        </div>
-                        <div className="meta-inner-field col-span-1">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Challan No.:</label>
-                          <input 
-                            type="text" 
-                            value={challanNo}
-                            onChange={(e) => setChallanNo(e.target.value)}
-                            placeholder="Challan number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
+                        )}
+                      </div>
+                    )}
+
+                    {/* CHALLAN NO (Invoice or Challan) */}
+                    {(docType === "invoice" || docType === "challan") && (
+                      <div className={`meta-inner-field col-span-1 ${!includeChallanNo ? "print:hidden" : ""}`}>
+                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
+                          <span className="flex items-center gap-1">
+                            <input 
+                              type="checkbox" 
+                              checked={includeChallanNo} 
+                              onChange={(e) => {
+                                recordChange();
+                                setIncludeChallanNo(e.target.checked);
+                              }}
+                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
+                              title={includeChallanNo ? "Click to deselect Challan No." : "Click to select Challan No."}
+                            />
+                            <span className={!includeChallanNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
+                              Challan No.:
+                            </span>
+                          </span>
+                          {!includeChallanNo && (
+                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
+                          )}
+                        </label>
+                        <input 
+                          type="text" 
+                          value={challanNo}
+                          onChange={(e) => setChallanNo(e.target.value)}
+                          placeholder={includeChallanNo ? "Challan number" : "Omitted from print"}
+                          disabled={!includeChallanNo}
+                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
+                            !includeChallanNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
+                          }`}
+                        />
+                        {includeChallanNo && (
                           <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
                             {challanNo || " "}
                           </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* DATE (Always visible in all forms, no checkbox - "except date") */}
+                    <div className="meta-inner-field col-span-1 relative">
+                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                        Date:
+                      </label>
+                      <div className="flex items-center gap-1 no-print print:hidden">
+                        <input 
+                          type="text" 
+                          value={dateVal}
+                          onChange={(e) => setDateVal(e.target.value)}
+                          className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
+                        />
+                        <button
+                          type="button"
+                          onClick={triggerDatePicker}
+                          className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                          title="Open Date Picker"
+                        >
+                          <Calendar className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
+                        {dateVal || " "}
+                      </div>
+                      <input
+                        ref={dateRef}
+                        type="date"
+                        onChange={handleDatePickerChange}
+                        className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
+                      />
+                    </div>
+
+                    {/* REQUISITION NO */}
+                    <div className={`meta-inner-field ${
+                      docType === "challan" ? "col-span-2" : "col-span-1"
+                    } ${!includeRequisitionNo ? "print:hidden" : ""}`}>
+                      <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
+                        <span className="flex items-center gap-1">
+                          <input 
+                            type="checkbox" 
+                            checked={includeRequisitionNo} 
+                            onChange={(e) => {
+                              recordChange();
+                              setIncludeRequisitionNo(e.target.checked);
+                            }}
+                            className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
+                            title={includeRequisitionNo ? "Click to deselect Requisition No." : "Click to select Requisition No."}
+                          />
+                          <span className={!includeRequisitionNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
+                            Requisition No.:
+                          </span>
+                        </span>
+                        {!includeRequisitionNo && (
+                          <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
+                        )}
+                      </label>
+                      <input 
+                        type="text" 
+                        value={requisitionNo}
+                        onChange={(e) => setRequisitionNo(e.target.value)}
+                        placeholder={includeRequisitionNo ? "Requisition number" : "Omitted from print"}
+                        disabled={!includeRequisitionNo}
+                        className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
+                          !includeRequisitionNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
+                        }`}
+                      />
+                      {includeRequisitionNo && (
+                        <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
+                          {requisitionNo || " "}
                         </div>
-                        <div className="meta-inner-field col-span-1 relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Date:</label>
-                          <div className="flex items-center gap-1 no-print print:hidden">
+                      )}
+                    </div>
+
+                    {/* PO NUMBER (Invoice only - NOT in Quotation or Challan) */}
+                    {docType === "invoice" && (
+                      <div className={`meta-inner-field col-span-2 ${!includePoNumber ? "print:hidden" : ""}`}>
+                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
+                          <span className="flex items-center gap-1">
                             <input 
-                              type="text" 
-                              value={dateVal}
-                              onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
+                              type="checkbox" 
+                              checked={includePoNumber} 
+                              onChange={(e) => {
+                                recordChange();
+                                setIncludePoNumber(e.target.checked);
+                              }}
+                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
+                              title={includePoNumber ? "Click to deselect PO Number" : "Click to select PO Number"}
                             />
-                            <button
-                              type="button"
-                              onClick={triggerDatePicker}
-                              className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                            >
-                              <Calendar className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
-                            {dateVal || " "}
-                          </div>
-                          <input
-                            ref={dateRef}
-                            type="date"
-                            onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
-                          />
-                        </div>
-                        <div className="meta-inner-field col-span-1">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
-                          <input 
-                            type="text" 
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {requisitionNo || " "}
-                          </div>
-                        </div>
-                        <div className="meta-inner-field col-span-2">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">PO Number:</label>
-                          <input 
-                            type="text" 
-                            value={poNumber}
-                            onChange={(e) => setPoNumber(e.target.value)}
-                            placeholder="PO number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
+                            <span className={!includePoNumber ? "text-slate-400 line-through decoration-slate-300" : ""}>
+                              PO Number:
+                            </span>
+                          </span>
+                          {!includePoNumber && (
+                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
+                          )}
+                        </label>
+                        <input 
+                          type="text" 
+                          value={poNumber}
+                          onChange={(e) => setPoNumber(e.target.value)}
+                          placeholder={includePoNumber ? "PO number" : "Omitted from print"}
+                          disabled={!includePoNumber}
+                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
+                            !includePoNumber ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
+                          }`}
+                        />
+                        {includePoNumber && (
                           <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
                             {poNumber || " "}
                           </div>
-                        </div>
-                      </>
-                    ) : docType === "challan" ? (
-                      <>
-                        <div className="meta-inner-field col-span-1">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Challan No.:</label>
-                          <input 
-                            type="text" 
-                            value={challanNo}
-                            onChange={(e) => setChallanNo(e.target.value)}
-                            placeholder="Challan number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {challanNo || " "}
-                          </div>
-                        </div>
-                        <div className="meta-inner-field col-span-1 relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Date:</label>
-                          <div className="flex items-center gap-1 no-print print:hidden">
-                            <input 
-                              type="text" 
-                              value={dateVal}
-                              onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
-                            />
-                            <button
-                              type="button"
-                              onClick={triggerDatePicker}
-                              className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                            >
-                              <Calendar className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
-                            {dateVal || " "}
-                          </div>
-                          <input
-                            ref={dateRef}
-                            type="date"
-                            onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
-                          />
-                        </div>
-                        <div className="meta-inner-field col-span-2">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
-                          <input 
-                            type="text" 
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {requisitionNo || " "}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="meta-inner-field col-span-1 relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Date:</label>
-                          <div className="flex items-center gap-1 no-print print:hidden">
-                            <input 
-                              type="text" 
-                              value={dateVal}
-                              onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
-                            />
-                            <button
-                              type="button"
-                              onClick={triggerDatePicker}
-                              className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                            >
-                              <Calendar className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
-                            {dateVal || " "}
-                          </div>
-                          <input
-                            ref={dateRef}
-                            type="date"
-                            onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
-                          />
-                        </div>
-                        <div className="meta-inner-field col-span-1">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Requisition No.:</label>
-                          <input 
-                            type="text" 
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition number"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden"
-                          />
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {requisitionNo || " "}
-                          </div>
-                        </div>
-                      </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -3329,11 +3472,10 @@ export default function QuotationBuilder() {
                     <button
                       type="button"
                       onClick={() => addRows(1)}
-                      className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs h-8 px-3 rounded-lg shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
-                      title="Add 1 line (+)"
+                      className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs h-8 w-8 rounded-lg shadow-xs transition-all cursor-pointer flex items-center justify-center"
+                      title="Add line (+)"
                     >
                       <Plus className="h-4 w-4 stroke-[2.5]" />
-                      <span>+1 Line</span>
                     </button>
 
                     {/* Subtract 1 Line */}
@@ -3341,11 +3483,10 @@ export default function QuotationBuilder() {
                       type="button"
                       onClick={removeRow}
                       disabled={rows.length <= 1}
-                      className="bg-white hover:bg-rose-50 active:scale-95 border border-rose-200 text-rose-600 font-bold text-xs h-8 px-2.5 rounded-lg shadow-xs transition-all cursor-pointer flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="bg-white hover:bg-rose-50 active:scale-95 border border-rose-200 text-rose-600 font-bold text-xs h-8 w-8 rounded-lg shadow-xs transition-all cursor-pointer flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                       title="Subtract line (-)"
                     >
                       <Minus className="h-4 w-4 stroke-[2.5]" />
-                      <span>-1</span>
                     </button>
 
                     <div className="h-5 w-[1px] bg-slate-200 mx-0.5 hidden sm:block" />
@@ -3361,7 +3502,7 @@ export default function QuotationBuilder() {
                       }}
                       className="flex items-center gap-1 bg-white border border-slate-300 hover:border-indigo-400 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 rounded-lg p-0.5 transition-all shadow-2xs"
                     >
-                      <span className="text-[11px] font-semibold text-slate-500 pl-2">Add</span>
+                      <span className="text-xs font-black text-indigo-600 pl-2 pr-0.5">+</span>
                       <input
                         type="number"
                         min="1"
@@ -3369,44 +3510,56 @@ export default function QuotationBuilder() {
                         value={customRowCountInput}
                         onChange={(e) => setCustomRowCountInput(e.target.value)}
                         placeholder="10"
-                        className="w-14 h-6.5 text-center text-xs font-mono font-bold text-slate-800 border-none outline-none focus:outline-none bg-slate-50 rounded px-1"
-                        title="Enter number of lines to add at once (max 1,000 total)"
+                        className="w-12 h-6.5 text-center text-xs font-mono font-bold text-slate-800 border-none outline-none focus:outline-none bg-slate-50 rounded px-1"
+                        title="Enter number of lines to add (max 1,000 total)"
                       />
                       <button
                         type="submit"
                         disabled={rows.length >= 1000}
-                        className="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white disabled:opacity-40 disabled:hover:bg-indigo-50 disabled:hover:text-indigo-700 font-bold text-xs h-6.5 px-2.5 rounded transition-all cursor-pointer flex items-center gap-1"
-                        title="Add specified number of lines (limit 1,000)"
+                        className="bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white disabled:opacity-40 disabled:hover:bg-indigo-50 disabled:hover:text-indigo-700 font-bold text-xs h-6.5 w-7 rounded transition-all cursor-pointer flex items-center justify-center"
+                        title="Add lines (+)"
                       >
-                        <Plus className="h-3 w-3 stroke-[2.5]" />
-                        <span>Lines</span>
+                        <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
                       </button>
                     </form>
 
-                    {/* Quick Preset Buttons */}
-                    <div className="hidden md:flex items-center gap-1">
-                      {[5, 10, 20, 50].map((count) => (
-                        <button
-                          key={count}
-                          type="button"
-                          disabled={rows.length >= 1000}
-                          onClick={() => addRows(count)}
-                          className="bg-white hover:bg-slate-100 active:scale-95 disabled:opacity-40 text-slate-600 hover:text-indigo-600 border border-slate-200 font-semibold text-[11px] h-7 px-2 rounded-md transition-all cursor-pointer"
-                          title={`Quick add +${count} lines`}
-                        >
-                          +{count}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Minimal quick subtract multiple lines */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const num = parseInt(customSubtractCountInput, 10);
+                        if (!isNaN(num) && num > 0) {
+                          removeRows(num);
+                        }
+                      }}
+                      className="flex items-center gap-1 bg-white border border-slate-300 hover:border-rose-400 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-100 rounded-lg p-0.5 transition-all shadow-2xs"
+                    >
+                      <span className="text-xs font-black text-rose-600 pl-2 pr-0.5">-</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={customSubtractCountInput}
+                        onChange={(e) => setCustomSubtractCountInput(e.target.value)}
+                        placeholder="10"
+                        className="w-12 h-6.5 text-center text-xs font-mono font-bold text-slate-800 border-none outline-none focus:outline-none bg-slate-50 rounded px-1"
+                        title="Enter number of lines to subtract"
+                      />
+                      <button
+                        type="submit"
+                        disabled={rows.length <= 1}
+                        className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white disabled:opacity-40 disabled:hover:bg-rose-50 disabled:hover:text-rose-700 font-bold text-xs h-6.5 w-7 rounded transition-all cursor-pointer flex items-center justify-center"
+                        title="Subtract lines (-)"
+                      >
+                        <Minus className="h-3.5 w-3.5 stroke-[2.5]" />
+                      </button>
+                    </form>
                   </div>
 
                   {/* Status counter */}
                   <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold shrink-0">
-                    <span className="bg-slate-200/80 text-slate-700 px-2.5 py-1 rounded-md font-mono text-[11px]" title="Total Lines / 1,000 Max Limit">
-                      Total: <strong className="text-slate-900">{rows.length}</strong> / 1000
-                    </span>
-                    <span className="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-md font-mono text-[11px]">
-                      Filled: <strong>{rows.filter(r => String(r.desc || "").trim() || String(r.qty || "").trim() || String(r.unit || "").trim() || String(r.price || "").trim()).length}</strong>
+                    <span className="bg-slate-200/80 text-slate-700 px-2.5 py-1 rounded-md font-mono text-[11px]" title="Lines / 1,000 Max Limit">
+                      <strong className="text-slate-900">{rows.length}</strong> / 1000
                     </span>
                   </div>
                 </div>
@@ -3428,10 +3581,11 @@ export default function QuotationBuilder() {
                                 </span>
                               </td>
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                    <div className="flex items-center justify-end gap-1.5 w-full pl-2">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>SUBTOTAL</span>
+                                      <span className="font-bold text-[8pt]">=</span>
                                       {!includeDiscount && (
                                         <button
                                           type="button"
@@ -3442,16 +3596,16 @@ export default function QuotationBuilder() {
                                               setDiscountValue("");
                                             }
                                           }}
-                                          className="no-print print:hidden px-1 py-0.5 text-[6.5pt] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded cursor-pointer transition-colors flex items-center gap-0.5 shrink-0"
+                                          className="no-print print:hidden px-1 py-0.2 text-[6pt] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded cursor-pointer transition-colors flex items-center gap-0.5 shrink-0"
                                           title="Add discount option to invoice"
                                         >
-                                          <Plus className="w-2 h-2" />
+                                          <Plus className="w-1.5 h-1.5" />
                                           <span>DISC.</span>
                                         </button>
                                       )}
                                     </div>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight">
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight">
                                     {rowsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
                                 </div>
@@ -3460,17 +3614,17 @@ export default function QuotationBuilder() {
                             {includeDiscount && (
                               <tr className="align-stretch">
                                 <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                  <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                    <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                      <div className="flex items-center justify-end gap-1 w-full pl-1.5 overflow-hidden">
+                                  <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                    <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                      <div className="flex items-center justify-end gap-1 w-full pl-1 overflow-hidden">
                                         {/* Screen: Minimal short form */}
-                                        <span className="no-print print:hidden text-[7.5pt] font-bold text-slate-700 shrink-0">DISC.</span>
-                                        <div className="flex items-center gap-1 no-print print:hidden shrink-0">
+                                        <span className="no-print print:hidden text-[7pt] font-bold text-slate-700 shrink-0">DISC.</span>
+                                        <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
                                           <select
                                             id="invoice-discount-type-select"
                                             value={discountType}
                                             onChange={(e) => setDiscountType(e.target.value as "percentage" | "fixed")}
-                                            className="h-[20px] text-[7pt] font-bold border border-slate-300 rounded bg-white text-slate-800 px-0.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
+                                            className="h-[18px] text-[6.5pt] font-bold border border-slate-300 rounded bg-white text-slate-800 px-0.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
                                             title="Discount type: % (Percentage) or 123 (Fixed Amount)"
                                           >
                                             <option value="percentage">%</option>
@@ -3488,9 +3642,9 @@ export default function QuotationBuilder() {
                                                 }
                                               }}
                                               placeholder="0"
-                                              className="h-[20px] w-10 text-center border border-slate-300 rounded font-mono text-[7.5pt] bg-white text-slate-800 px-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
+                                              className="h-[18px] w-8 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5 focus:outline-none focus:ring-1 focus:ring-slate-400 shrink-0"
                                             />
-                                            {discountType === "percentage" && <span className="text-[7pt] font-bold text-slate-600 font-mono">%</span>}
+                                            {discountType === "percentage" && <span className="text-[6.5pt] font-bold text-slate-600 font-mono">%</span>}
                                           </div>
                                           <button
                                             type="button"
@@ -3503,12 +3657,13 @@ export default function QuotationBuilder() {
                                           </button>
                                         </div>
                                         {/* Print: Whole word "DISCOUNT" */}
-                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[8pt]">
+                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[7.5pt]">
                                           DISCOUNT{discountType === "percentage" && parsedDiscountValue > 0 ? ` (${parsedDiscountValue}%)` : ""}
                                         </span>
+                                        <span className="font-bold text-[8pt] ml-0.5">=</span>
                                       </div>
                                     </div>
-                                    <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight text-rose-700">
+                                    <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight text-rose-700">
                                       {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
                                     </div>
                                   </div>
@@ -3517,9 +3672,9 @@ export default function QuotationBuilder() {
                             )}
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                    <div className="flex items-center justify-end gap-1.5 w-full pl-2">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>VAT</span>
                                       <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
                                         <input
@@ -3531,14 +3686,15 @@ export default function QuotationBuilder() {
                                               setVatPercent(val);
                                             }
                                           }}
-                                          className="w-10 text-center border border-slate-300 rounded font-mono text-[8pt] bg-white text-slate-800 py-0.5"
+                                          className="h-[18px] w-8 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
                                         />
-                                        <span>%</span>
+                                        <span className="text-[7pt]">%</span>
                                       </div>
                                       <span className="hidden print:inline">({parsedVatPercent}%)</span>
+                                      <span className="font-bold text-[8pt]">=</span>
                                     </div>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight">
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
                                     {vatAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
                                 </div>
@@ -3546,9 +3702,9 @@ export default function QuotationBuilder() {
                             </tr>
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 border-b border-black align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end tracking-wider">
-                                    <div className="flex items-center justify-end gap-1.5 w-full pl-2">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
                                       <span>TRANS.</span>
                                       <div className="flex items-center no-print print:hidden shrink-0">
                                         <input
@@ -3561,12 +3717,13 @@ export default function QuotationBuilder() {
                                             }
                                           }}
                                           placeholder="0"
-                                          className="w-14 text-center border border-slate-300 rounded font-mono text-[8pt] bg-white text-slate-800 py-0.5"
+                                          className="h-[18px] w-12 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
                                         />
                                       </div>
+                                      <span className="font-bold text-[8pt]">=</span>
                                     </div>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-semibold flex items-center justify-end px-2 py-0.5 leading-tight">
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
                                     {parsedTransportationFee.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
                                 </div>
@@ -3574,11 +3731,12 @@ export default function QuotationBuilder() {
                             </tr>
                             <tr className="align-stretch">
                               <td className="w-1/2 p-0 align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[24px] w-full">
-                                  <div className="total-lbl bg-indigo-50/40 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8.5pt] font-black uppercase flex items-center justify-end tracking-wider text-indigo-950">
-                                    GRAND TOTAL
+                                <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
+                                  <div className="total-lbl bg-indigo-50/40 w-[130px] shrink-0 pr-1.5 text-right text-[8pt] font-black uppercase flex items-center justify-end gap-1 tracking-wider text-indigo-950">
+                                    <span>GRAND TOTAL</span>
+                                    <span className="font-black text-[8.5pt]">=</span>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[10pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight text-indigo-950">
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[9.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight text-indigo-950">
                                     {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
                                 </div>
@@ -3597,11 +3755,12 @@ export default function QuotationBuilder() {
                                 </span>
                               </td>
                               <td className="w-1/2 p-0 align-stretch">
-                                <div className="flex flex-row items-stretch h-full min-h-[26px] w-full">
-                                  <div className="total-lbl bg-slate-50 w-[170px] shrink-0 pr-2 text-right border-r-2 border-black text-[8pt] font-bold uppercase flex items-center justify-end">
-                                    TOTAL
+                                <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[130px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end gap-1">
+                                    <span>TOTAL</span>
+                                    <span className="font-bold text-[8pt]">=</span>
                                   </div>
-                                  <div className="total-val flex-grow text-right pr-4 text-[9pt] font-mono font-black flex items-center justify-end px-2 py-0.5 leading-tight min-h-[26px]">
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight min-h-[22px]">
                                     {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                   </div>
                                 </div>
@@ -3664,27 +3823,30 @@ export default function QuotationBuilder() {
         </div>
       </div>
 
-      {/* Online Document Search, Lists, and Documentation Panel - Displayed when on saved-docs page */}
-      {activePage === "saved-docs" && (
-        <React.Suspense fallback={<div className="w-full max-w-[210mm] mx-auto bg-white rounded-xl border border-slate-200 p-4 mt-4 animate-pulse h-24" />}>
-          <SavedDocumentsPanel
-            savedDocs={savedDocs}
-            currentDocId={currentDocId}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedTypeFilter={selectedTypeFilter}
-            setSelectedTypeFilter={setSelectedTypeFilter}
-            loadSavedDoc={(doc) => {
-              loadSavedDoc(doc);
-              setActivePage("editor");
-            }}
-            deleteSavedDoc={deleteSavedDoc}
-            renameSavedDoc={renameSavedDoc}
-            isPageMode={true}
-            onSwitchPage={(page) => setActivePage(page)}
-          />
-        </React.Suspense>
-      )}
+        {/* View 3: Records Archive */}
+        {activeView === "saved-docs" && (
+          <div className="p-4 sm:p-6 lg:p-8 max-w-5xl w-full mx-auto animate-in fade-in duration-200">
+            <React.Suspense fallback={<div className="w-full max-w-[210mm] mx-auto bg-white rounded border border-slate-200 p-4 mt-4 animate-pulse h-24" />}>
+              <SavedDocumentsPanel
+                savedDocs={savedDocs}
+                currentDocId={currentDocId}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedTypeFilter={selectedTypeFilter}
+                setSelectedTypeFilter={setSelectedTypeFilter}
+                loadSavedDoc={(doc) => {
+                  loadSavedDoc(doc);
+                  setActiveView("editor");
+                }}
+                deleteSavedDoc={deleteSavedDoc}
+                renameSavedDoc={renameSavedDoc}
+                isPageMode={true}
+                onSwitchPage={(page) => setActiveView(page === "saved-docs" ? "saved-docs" : "editor")}
+              />
+            </React.Suspense>
+          </div>
+        )}
+      </div>
 
       {/* Cell right-click Menu context */}
       {contextMenu && contextMenu.visible && (

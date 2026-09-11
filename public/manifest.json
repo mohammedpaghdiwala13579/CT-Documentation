@@ -1,7 +1,7 @@
 {
   "name": "Comilla Traders Terminal",
   "short_name": "Comilla Traders",
-  "description": "Professional Ship Chandler Quotation & Delivery Challan Terminal",
+  "description": "Professional Ship Chandler Quotation & Challan Terminal",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",

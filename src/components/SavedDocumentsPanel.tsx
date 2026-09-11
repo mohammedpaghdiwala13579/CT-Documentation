@@ -105,15 +105,15 @@ export default function SavedDocumentsPanel({
       {/* Compact Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-md shrink-0">
+          <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md shrink-0">
             <FolderOpen className="h-4 w-4" />
           </div>
           <div className="flex items-baseline gap-2">
-            <h2 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
-              {isPageMode ? "Saved Documents Library" : "Saved Documents"}
+            <h2 className="text-xs sm:text-sm font-semibold text-slate-900 tracking-tight">
+              {isPageMode ? "Documents Archive" : "Saved Documents"}
             </h2>
-            <span className="bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
-              {filteredDocs.length} {filteredDocs.length === 1 ? "file" : "files"}
+            <span className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-medium px-2 py-0.5 rounded">
+              {filteredDocs.length} {filteredDocs.length === 1 ? "record" : "records"}
             </span>
           </div>
         </div>
@@ -125,18 +125,18 @@ export default function SavedDocumentsPanel({
               type="button"
               id="btn-panel-switch-page"
               onClick={() => onSwitchPage(isPageMode ? "editor" : "saved-docs")}
-              className="inline-flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] px-2.5 py-1 rounded-md transition-all cursor-pointer"
-              title={isPageMode ? "Go back to Document Editor" : "Open full Saved Documents Page"}
+              className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-medium text-[11px] px-2.5 py-1 rounded transition-colors cursor-pointer"
+              title={isPageMode ? "Go back to Document Editor" : "Open full Documents Archive"}
             >
               {isPageMode ? (
                 <>
                   <FileEdit className="h-3 w-3" />
-                  <span>Editor Page</span>
+                  <span>Open Editor</span>
                 </>
               ) : (
                 <>
                   <ArrowUpRight className="h-3 w-3" />
-                  <span>Full Page</span>
+                  <span>Full Archive</span>
                 </>
               )}
             </button>
@@ -152,10 +152,10 @@ export default function SavedDocumentsPanel({
           <input
             type="text"
             id="input-saved-docs-search"
-            placeholder="Search by name, messers, challan no..."
+            placeholder="Search by name, client, vessel, reference..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-3xs transition-all"
+            className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
           />
           {searchQuery && (
             <button
@@ -169,7 +169,7 @@ export default function SavedDocumentsPanel({
         </div>
 
         {/* Minimal Type Filters */}
-        <div className="flex items-center gap-1 bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/50 shrink-0">
+        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
           {(["all", "quotation", "challan", "invoice"] as const).map((type) => {
             const count =
               type === "all"
@@ -182,9 +182,9 @@ export default function SavedDocumentsPanel({
                 type="button"
                 id={`btn-filter-${type}`}
                 onClick={() => setSelectedTypeFilter(type)}
-                className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded text-[10.5px] font-medium tracking-wide transition-colors cursor-pointer capitalize ${
                   isSelected
-                    ? "bg-white text-indigo-700 shadow-3xs"
+                    ? "bg-white text-blue-700 shadow-2xs font-semibold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -199,9 +199,9 @@ export default function SavedDocumentsPanel({
       {(() => {
         if (savedDocs.length === 0) {
           return (
-            <div className="flex flex-col items-center justify-center py-8 px-3 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/40">
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center border border-dashed border-slate-200 rounded bg-slate-50/50">
               <FileText className="h-7 w-7 text-slate-300 stroke-[1.5]" />
-              <h3 className="font-bold text-xs text-slate-700 uppercase tracking-wider mt-2">No Saved Documents</h3>
+              <h3 className="font-semibold text-xs text-slate-700 uppercase tracking-wider mt-2">No Saved Documents</h3>
               <p className="text-[11px] text-slate-400 mt-0.5 max-w-xs">
                 Save your active sheet from the toolbar to access it here anytime.
               </p>
@@ -211,9 +211,9 @@ export default function SavedDocumentsPanel({
 
         if (filteredDocs.length === 0) {
           return (
-            <div className="flex flex-col items-center justify-center py-8 px-3 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/40">
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center border border-dashed border-slate-200 rounded bg-slate-50/50">
               <Search className="h-6 w-6 text-slate-300 stroke-[1.5]" />
-              <h3 className="font-bold text-xs text-slate-700 uppercase tracking-wider mt-2">No Matching Files</h3>
+              <h3 className="font-semibold text-xs text-slate-700 uppercase tracking-wider mt-2">No Matching Files</h3>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 No documents match the search string or filter selection.
               </p>
@@ -223,7 +223,7 @@ export default function SavedDocumentsPanel({
                   setSearchQuery("");
                   setSelectedTypeFilter("all");
                 }}
-                className="mt-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] py-1 px-2.5 rounded border border-slate-200 transition-all cursor-pointer"
+                className="mt-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px] py-1 px-3 rounded border border-slate-200 transition-colors cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -233,15 +233,15 @@ export default function SavedDocumentsPanel({
 
         return (
           <div
-            className={`overflow-x-auto rounded-lg border border-slate-200/80 bg-white ${
+            className={`overflow-x-auto rounded border border-slate-200 bg-white ${
               !isPageMode ? "max-h-72 overflow-y-auto" : ""
             }`}
           >
             <table className="w-full text-left text-xs border-collapse">
               {/* Only 3 Columns: Name, Grand Total, Actions */}
-              <thead className="bg-slate-50/90 text-[10.5px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+              <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
                 <tr>
-                  <th className="px-3 py-2 text-left">Name</th>
+                  <th className="px-3 py-2 text-left">Document & Client</th>
                   <th className="px-3 py-2 text-right w-36 sm:w-44">Grand Total</th>
                   <th className="px-3 py-2 text-right w-44 sm:w-56 pr-3">Actions</th>
                 </tr>
@@ -256,33 +256,33 @@ export default function SavedDocumentsPanel({
                       key={doc.id}
                       id={`saved-doc-row-${doc.id}`}
                       onClick={() => loadSavedDoc(doc)}
-                      className={`hover:bg-slate-50/90 transition-colors cursor-pointer group ${
-                        isActive ? "bg-indigo-50/35 hover:bg-indigo-50/50" : ""
+                      className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${
+                        isActive ? "bg-blue-50/40 hover:bg-blue-50/60" : ""
                       }`}
                     >
                       {/* 1. Name Column */}
-                      <td className="px-3 py-2 align-middle">
+                      <td className="px-3 py-2.5 align-middle">
                         <div className="flex flex-col gap-0.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {isActive && (
-                              <span className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-800 text-[9px] font-bold px-1.5 py-0.2 rounded-sm tracking-wide">
-                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse" />
+                              <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wide">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
                                 ACTIVE
                               </span>
                             )}
                             <span
-                              className="font-bold text-slate-900 text-xs truncate max-w-[180px] sm:max-w-[280px]"
+                              className="font-semibold text-slate-900 text-xs truncate max-w-[180px] sm:max-w-[280px]"
                               title={doc.name}
                             >
                               {doc.name}
                             </span>
                             <span
-                              className={`inline-flex items-center rounded px-1.5 py-0.2 text-[9px] font-extrabold uppercase tracking-wider border ${
+                              className={`inline-flex items-center rounded px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider border ${
                                 doc.docType === "quotation"
                                   ? "bg-blue-50 border-blue-200 text-blue-700"
                                   : doc.docType === "challan"
                                   ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                  : "bg-indigo-50 border-indigo-200 text-indigo-700"
+                                  : "bg-slate-100 border-slate-200 text-slate-700"
                               }`}
                             >
                               {doc.docType}
@@ -291,7 +291,7 @@ export default function SavedDocumentsPanel({
 
                           {/* Subtle client/date metadata in Name column */}
                           {(doc.messers || doc.vesselName || doc.dateVal) && (
-                            <div className="text-[10px] text-slate-400 truncate max-w-[220px] sm:max-w-[320px]">
+                            <div className="text-[10.5px] text-slate-500 truncate max-w-[220px] sm:max-w-[320px]">
                               {[doc.messers, doc.vesselName, doc.dateVal].filter(Boolean).join(" • ")}
                             </div>
                           )}
@@ -299,13 +299,13 @@ export default function SavedDocumentsPanel({
                       </td>
 
                       {/* 2. Grand Total Column */}
-                      <td className="px-3 py-2 text-right align-middle font-mono font-bold text-xs text-slate-900">
+                      <td className="px-3 py-2.5 text-right align-middle font-mono font-semibold text-xs text-slate-900">
                         {totalDisplay}
                       </td>
 
                       {/* 3. Actions Column */}
                       <td
-                        className="px-3 py-2 text-right align-middle space-x-1 no-print whitespace-nowrap"
+                        className="px-3 py-2.5 text-right align-middle space-x-1 no-print whitespace-nowrap"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {/* Open in Editor */}
@@ -313,7 +313,7 @@ export default function SavedDocumentsPanel({
                           type="button"
                           id={`btn-open-doc-${doc.id}`}
                           onClick={() => loadSavedDoc(doc)}
-                          className="inline-flex items-center gap-1 text-[10.5px] font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors cursor-pointer"
                           title="Open in Document Editor"
                         >
                           <FileEdit className="h-3 w-3" />
@@ -325,7 +325,7 @@ export default function SavedDocumentsPanel({
                           type="button"
                           id={`btn-rename-doc-${doc.id}`}
                           onClick={(e) => renameSavedDoc(doc.id, e)}
-                          className="inline-flex items-center gap-1 text-[10.5px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 px-1.5 py-1 rounded transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 px-1.5 py-1 rounded transition-colors cursor-pointer"
                           title="Rename Document"
                         >
                           <Pencil className="h-3 w-3" />
@@ -336,7 +336,7 @@ export default function SavedDocumentsPanel({
                           type="button"
                           id={`btn-delete-doc-${doc.id}`}
                           onClick={(e) => deleteSavedDoc(doc.id, e)}
-                          className="inline-flex items-center gap-1 text-[10.5px] font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-1.5 py-1 rounded transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-1.5 py-1 rounded transition-colors cursor-pointer"
                           title="Delete Document"
                         >
                           <Trash2 className="h-3 w-3" />

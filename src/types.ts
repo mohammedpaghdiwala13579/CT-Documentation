@@ -67,6 +67,12 @@ export interface SavedDocument {
   portBerth?: string;
   includeVesselName?: boolean;
   includePortBerth?: boolean;
+  quotationNo?: string;
+  includeInvoiceNo?: boolean;
+  includeChallanNo?: boolean;
+  includeQuotationNo?: boolean;
+  includeRequisitionNo?: boolean;
+  includePoNumber?: boolean;
   notes?: string;
 }
 

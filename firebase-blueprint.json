@@ -2,7 +2,7 @@
   "entities": {
     "document": {
       "title": "SavedDocument",
-      "description": "A saved quotation, invoice, or delivery challan document",
+      "description": "A saved quotation, invoice, or challan document",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
