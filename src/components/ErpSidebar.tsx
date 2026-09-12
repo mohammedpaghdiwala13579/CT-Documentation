@@ -246,58 +246,7 @@ export default function ErpSidebar({
             </button>
           </div>
 
-          {/* Quick Business Page Jump (Expanded) */}
-          {!isCollapsed && onSelectCompany && (
-            <div className="px-3 pt-2 mt-1 border-t border-slate-800/60">
-              <span className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                Business Header Pages
-              </span>
 
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSelectCompany("comilla");
-                    onSelectView("editor");
-                    onCloseMobile();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded text-[11px] font-medium flex items-center justify-between transition-colors cursor-pointer ${
-                    !isZainee
-                      ? "bg-blue-900/40 text-blue-200 border border-blue-700/50"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/40"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Ship className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-                    <span className="truncate">Comilla Traders Page</span>
-                  </div>
-                  {!isZainee && <span className="text-[9px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold">Active</span>}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSelectCompany("zainee");
-                    onSelectView("editor");
-                    onCloseMobile();
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded text-[11px] font-medium flex items-center justify-between transition-colors cursor-pointer ${
-                    isZainee
-                      ? "bg-emerald-900/40 text-emerald-200 border border-emerald-700/50"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/40"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="h-3.5 w-3.5 rounded-full overflow-hidden shrink-0 bg-white">
-                      <img src="https://i.ibb.co.com/V8VJdXK/123.png" alt="" className="h-full w-full object-contain" />
-                    </div>
-                    <span className="truncate">Zainee Enterprise Page</span>
-                  </div>
-                  {isZainee && <span className="text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded font-bold">Active</span>}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Quick Create Section (Expanded only) */}
           {!isCollapsed && (

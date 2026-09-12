@@ -255,6 +255,16 @@ export default function SavedDocumentsPanel({
             </button>
           </div>
         </div>
+
+        {/* Multi-Entity Isolation Security Badge */}
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded bg-slate-50 border border-slate-200 text-[10.5px] text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold text-slate-700">Strict Entity Isolation Active:</span>
+            <span>Saved &amp; deleted files for Zainee Enterprise are completely isolated from Comilla Traders.</span>
+          </div>
+          <span className="font-mono text-[9px] text-slate-400 font-medium">Dual Vault Architecture</span>
+        </div>
       </div>
 
       {/* Strictly 3-Column Documents Table (Name | Grand Total | Actions) */}
@@ -416,7 +426,7 @@ export default function SavedDocumentsPanel({
                           id={`btn-delete-doc-${doc.id}`}
                           onClick={(e) => deleteSavedDoc(doc.id, e)}
                           className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-1.5 py-1 rounded transition-colors cursor-pointer"
-                          title="Delete Document"
+                          title={`Delete from ${doc.companyId === "zainee" || doc.id.startsWith("ze-") ? "Zainee Enterprise" : "Comilla Traders"} (isolated)`}
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
