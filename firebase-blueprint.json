@@ -28,7 +28,11 @@
   "firestore": {
     "documents/{documentId}": {
       "schema": "document",
-      "description": "Collection of saved quotation, invoice, and challan documents"
+      "description": "Collection of saved quotation, invoice, and challan documents for Comilla Traders"
+    },
+    "zainee_documents/{documentId}": {
+      "schema": "document",
+      "description": "Collection of saved quotation, invoice, and challan documents for Zainee Enterprise with distinct Firebase ID"
     }
   }
 }

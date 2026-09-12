@@ -10,5 +10,10 @@ service cloud.firestore {
     match /documents/{documentId} {
       allow read, write: if true;
     }
+
+    // Allow read/write access to the zainee_documents collection for Zainee Enterprise
+    match /zainee_documents/{documentId} {
+      allow read, write: if true;
+    }
   }
 }

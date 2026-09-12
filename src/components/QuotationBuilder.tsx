@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
 import { parseClipboardData, parseTSV, cleanCellText } from "../utils/tsvParser";
-import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, CellBorders } from "../types";
+import { QuotationRow, MergedRegion, SavedDocument, CellFormat, CellFormatMap, CellBorders, CompanyId, CompanyProfile } from "../types";
+import { COMPANY_PROFILES } from "../utils/companyProfiles";
 import ExcelRibbonToolbar from "./ExcelRibbonToolbar";
 import RichTextCell from "./RichTextCell";
 import FloatingTextToolbar from "./FloatingTextToolbar";
@@ -216,6 +217,26 @@ export default function QuotationBuilder() {
   const [activeView, setActiveView] = useState<"dashboard" | "editor" | "saved-docs">("editor");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
+
+  // Business Branding & Entity state ("comilla" | "zainee")
+  const [activeCompany, setActiveCompany] = useState<CompanyId>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("active_company_id");
+      if (stored === "zainee" || stored === "comilla") return stored;
+    }
+    return "comilla";
+  });
+
+  const currentCompany = COMPANY_PROFILES[activeCompany] || COMPANY_PROFILES.comilla;
+  const isZainee = activeCompany === "zainee";
+
+  const handleSwitchCompany = (company: CompanyId) => {
+    setActiveCompany(company);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("active_company_id", company);
+    }
+    showToast(`Switched business entity to ${COMPANY_PROFILES[company].name}`, "info");
+  };
 
   // Excel Paste Modal and Batch Row Adder states
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
@@ -459,70 +480,96 @@ export default function QuotationBuilder() {
     setDateVal(`${dd}/${mm}/${yyyy}`);
   };
 
-  // Listen to Firestore documents
+  // Listen to Firestore documents from both "documents" (Comilla Traders) and "zainee_documents" (Zainee Enterprise)
   useEffect(() => {
-    const q = query(collection(db, "documents"), orderBy("updatedAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs: SavedDocument[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        
-        const docRows = (data.rows || []).map((r: any) => ({
-          sl: Number(r.sl) || 0,
-          desc: String(r.desc ?? ""),
-          qty: String(r.qty ?? ""),
-          unit: String(r.unit ?? ""),
-          price: String(r.price ?? ""),
-          amount: Number(r.amount) || 0,
-        }));
-        
-        const docMergedRegions: MergedRegion[] = Array.isArray(data.mergedRegions)
-          ? data.mergedRegions.map((m: any) => ({
-              id: String(m.id ?? `region-${Math.random().toString(36).substring(2, 9)}`),
-              startRow: Number(m.startRow) || 0,
-              endRow: Number(m.endRow) || 0,
-              startCol: Number(m.startCol) ?? 0,
-              endCol: Number(m.endCol) ?? 0,
-            }))
-          : [];
-          
-        docs.push({
-          id: doc.id,
-          name: data.name || "",
-          createdAt: data.createdAt || "",
-          updatedAt: data.updatedAt || "",
-          docType: data.docType || "quotation",
-          dateVal: data.dateVal || "",
-          messers: data.messers || "",
-          address: data.address || "",
-          vesselName: data.vesselName || "",
-          portBerth: data.portBerth || "",
-          currency: (data.currency === "USD" || !data.currency) ? "Taka" : data.currency,
-          discountPercent: data.discountPercent || 0,
-          includeDiscount: data.includeDiscount !== undefined ? Boolean(data.includeDiscount) : ((data.discountValue && data.discountValue > 0) || (data.discountPercent && data.discountPercent > 0)),
-          discountType: data.discountType || "percentage",
-          discountValue: data.discountValue !== undefined ? data.discountValue : (data.discountPercent || 0),
-          challanNo: data.challanNo || "",
-          requisitionNo: data.requisitionNo || "",
-          invoiceNo: data.invoiceNo || "",
-          poNumber: data.poNumber || "",
-          rows: docRows,
-          mergedRegions: docMergedRegions,
-          cellFormats: (data.cellFormats as CellFormatMap) || {},
-          vatPercent: data.vatPercent,
-          transportationFee: data.transportationFee
-        });
-      });
-      setSavedDocs(docs);
+    let comillaDocs: SavedDocument[] = [];
+    let zaineeDocs: SavedDocument[] = [];
+
+    const updateAllDocs = () => {
+      const combined = [...comillaDocs, ...zaineeDocs].sort((a, b) => 
+        new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
+      );
+      setSavedDocs(combined);
+    };
+
+    const parseDocSnapshot = (docSnap: any, defaultCompanyId: CompanyId): SavedDocument => {
+      const data = docSnap.data();
+      const docRows = (data.rows || []).map((r: any) => ({
+        sl: Number(r.sl) || 0,
+        desc: String(r.desc ?? ""),
+        qty: String(r.qty ?? ""),
+        unit: String(r.unit ?? ""),
+        price: String(r.price ?? ""),
+        amount: Number(r.amount) || 0,
+      }));
+      
+      const docMergedRegions: MergedRegion[] = Array.isArray(data.mergedRegions)
+        ? data.mergedRegions.map((m: any) => ({
+            id: String(m.id ?? `region-${Math.random().toString(36).substring(2, 9)}`),
+            startRow: Number(m.startRow) || 0,
+            endRow: Number(m.endRow) || 0,
+            startCol: Number(m.startCol) ?? 0,
+            endCol: Number(m.endCol) ?? 0,
+          }))
+        : [];
+
+      const companyId: CompanyId = data.companyId || (docSnap.id.startsWith("ze-") ? "zainee" : defaultCompanyId);
+
+      return {
+        id: docSnap.id,
+        companyId,
+        companyName: data.companyName || COMPANY_PROFILES[companyId]?.name,
+        name: data.name || "",
+        createdAt: data.createdAt || "",
+        updatedAt: data.updatedAt || "",
+        docType: data.docType || "quotation",
+        dateVal: data.dateVal || "",
+        messers: data.messers || "",
+        address: data.address || "",
+        vesselName: data.vesselName || "",
+        portBerth: data.portBerth || "",
+        currency: (data.currency === "USD" || !data.currency) ? "Taka" : data.currency,
+        discountPercent: data.discountPercent || 0,
+        includeDiscount: data.includeDiscount !== undefined ? Boolean(data.includeDiscount) : ((data.discountValue && data.discountValue > 0) || (data.discountPercent && data.discountPercent > 0)),
+        discountType: data.discountType || "percentage",
+        discountValue: data.discountValue !== undefined ? data.discountValue : (data.discountPercent || 0),
+        challanNo: data.challanNo || "",
+        requisitionNo: data.requisitionNo || "",
+        invoiceNo: data.invoiceNo || "",
+        poNumber: data.poNumber || "",
+        rows: docRows,
+        mergedRegions: docMergedRegions,
+        cellFormats: (data.cellFormats as CellFormatMap) || {},
+        vatPercent: data.vatPercent,
+        transportationFee: data.transportationFee
+      };
+    };
+
+    const qComilla = query(collection(db, "documents"), orderBy("updatedAt", "desc"));
+    const unsubComilla = onSnapshot(qComilla, (snapshot) => {
+      comillaDocs = snapshot.docs.map(d => parseDocSnapshot(d, "comilla"));
+      updateAllDocs();
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, "documents");
+      console.warn("documents listener notice:", error);
     });
 
-    return () => unsubscribe();
+    const qZainee = query(collection(db, "zainee_documents"), orderBy("updatedAt", "desc"));
+    const unsubZainee = onSnapshot(qZainee, (snapshot) => {
+      zaineeDocs = snapshot.docs.map(d => parseDocSnapshot(d, "zainee"));
+      updateAllDocs();
+    }, (error) => {
+      console.warn("zainee_documents listener notice:", error);
+    });
+
+    return () => {
+      unsubComilla();
+      unsubZainee();
+    };
   }, []);
 
-  const generateUUID = () => {
-    return 'doc-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now();
+  const generateUUID = (company: CompanyId = activeCompany) => {
+    const prefix = company === "zainee" ? "ze-doc-" : "doc-";
+    return prefix + Math.random().toString(36).substring(2, 11) + '-' + Date.now();
   };
 
   const saveCurrentDocToApp = async (customName?: string) => {
@@ -543,7 +590,9 @@ export default function QuotationBuilder() {
     const defaultName = `${docTypeLabel}${docIdentifier} - ${messers || "Unnamed Client"} (${dateVal})`;
     const nameToUse = customName || savedDocs.find(d => d.id === currentDocId)?.name || defaultName;
 
-    const docId = currentDocId || generateUUID();
+    const isZaineeDoc = activeCompany === "zainee" || (currentDocId ? currentDocId.startsWith("ze-") : false);
+    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
+    const docId = currentDocId || generateUUID(isZaineeDoc ? "zainee" : "comilla");
 
     const sanitizedRows = rows.map(r => ({
       sl: Number(r.sl) || 0,
@@ -564,6 +613,8 @@ export default function QuotationBuilder() {
 
     const docData: SavedDocument = {
       id: docId,
+      companyId: isZaineeDoc ? "zainee" : "comilla",
+      companyName: isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders",
       name: String(nameToUse || "Unnamed Document"),
       createdAt: String(savedDocs.find(d => d.id === currentDocId)?.createdAt || now),
       updatedAt: String(now),
@@ -599,7 +650,7 @@ export default function QuotationBuilder() {
 
     setSaveStatus("saving");
     try {
-      await setDoc(doc(db, "documents", docId), docData);
+      await setDoc(doc(db, targetCollection, docId), docData);
       if (!currentDocId) {
         setCurrentDocId(docId);
       }
@@ -611,7 +662,7 @@ export default function QuotationBuilder() {
       console.error("Error saving document:", e);
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 3000);
-      handleFirestoreError(e, OperationType.WRITE, `documents/${docId}`);
+      handleFirestoreError(e, OperationType.WRITE, `${targetCollection}/${docId}`);
     }
   };
 
@@ -702,6 +753,15 @@ export default function QuotationBuilder() {
     setVatPercent(doc.vatPercent !== undefined ? String(doc.vatPercent) : "0");
     setTransportationFee(doc.transportationFee !== undefined ? String(doc.transportationFee) : "0");
 
+    // Automatically switch active company to the loaded document's entity
+    if (doc.companyId === "zainee" || doc.id.startsWith("ze-")) {
+      setActiveCompany("zainee");
+      if (typeof window !== "undefined") localStorage.setItem("active_company_id", "zainee");
+    } else {
+      setActiveCompany("comilla");
+      if (typeof window !== "undefined") localStorage.setItem("active_company_id", "comilla");
+    }
+
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -709,15 +769,19 @@ export default function QuotationBuilder() {
 
   const deleteSavedDoc = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this saved document from the online database?")) {
+    const isZaineeDoc = id.startsWith("ze-") || savedDocs.find(d => d.id === id)?.companyId === "zainee";
+    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
+    const entityLabel = isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders";
+
+    if (window.confirm(`Are you sure you want to delete this ${entityLabel} document from the online database?`)) {
       try {
-        await deleteDoc(doc(db, "documents", id));
+        await deleteDoc(doc(db, targetCollection, id));
         if (currentDocId === id) {
           resetSheetFields();
         }
       } catch (e) {
         console.error("Error deleting document:", e);
-        handleFirestoreError(e, OperationType.DELETE, `documents/${id}`);
+        handleFirestoreError(e, OperationType.DELETE, `${targetCollection}/${id}`);
       }
     }
   };
@@ -726,6 +790,9 @@ export default function QuotationBuilder() {
     e.stopPropagation();
     const documentObj = savedDocs.find(d => d.id === id);
     if (!documentObj) return;
+    const isZaineeDoc = id.startsWith("ze-") || documentObj.companyId === "zainee";
+    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
+
     const newName = window.prompt("Rename this document:", documentObj.name);
     if (newName && newName.trim() !== "") {
       try {
@@ -734,10 +801,10 @@ export default function QuotationBuilder() {
           name: newName.trim(),
           updatedAt: new Date().toISOString()
         };
-        await setDoc(doc(db, "documents", id), updatedData);
+        await setDoc(doc(db, targetCollection, id), updatedData);
       } catch (e) {
         console.error("Error renaming document:", e);
-        handleFirestoreError(e, OperationType.WRITE, `documents/${id}`);
+        handleFirestoreError(e, OperationType.WRITE, `${targetCollection}/${id}`);
       }
     }
   };
@@ -752,15 +819,19 @@ export default function QuotationBuilder() {
   };
 
   const duplicateCurrentDoc = async () => {
+    const isZaineeDoc = activeCompany === "zainee";
+    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
     const defaultName = `Copy of ${messers ? messers.trim() : "Quotation"} (${dateVal})`;
     const docName = window.prompt("Enter a name for the duplicated copy:", defaultName);
     if (!docName || docName.trim() === "") return;
 
     setSaveStatus("saving");
-    const newId = `doc_${Date.now()}`;
+    const newId = isZaineeDoc ? ('ze-doc-' + Date.now()) : ('doc-' + Date.now());
     try {
-      const docPayload = {
+      const docPayload: SavedDocument = {
         id: newId,
+        companyId: isZaineeDoc ? "zainee" : "comilla",
+        companyName: isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders",
         name: docName.trim(),
         docType,
         dateVal,
@@ -795,7 +866,7 @@ export default function QuotationBuilder() {
         updatedAt: new Date().toISOString()
       };
 
-      await setDoc(doc(db, "documents", newId), docPayload);
+      await setDoc(doc(db, targetCollection, newId), docPayload);
       setCurrentDocId(newId);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 3000);
@@ -803,7 +874,7 @@ export default function QuotationBuilder() {
       console.error("Error duplicating document:", err);
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 3000);
-      handleFirestoreError(err, OperationType.WRITE, `documents/${newId}`);
+      handleFirestoreError(err, OperationType.WRITE, `${targetCollection}/${newId}`);
     }
   };
 
@@ -823,7 +894,9 @@ export default function QuotationBuilder() {
     if (!hasAnyContent) return;
 
     const timer = setTimeout(async () => {
-      const docId = currentDocId || generateUUID();
+      const isZaineeDoc = activeCompany === "zainee" || (currentDocId ? currentDocId.startsWith("ze-") : false);
+      const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
+      const docId = currentDocId || generateUUID(isZaineeDoc ? "zainee" : "comilla");
       const now = new Date().toISOString();
       let docIdentifier = "";
       if (docType === "challan" && challanNo) {
@@ -855,6 +928,8 @@ export default function QuotationBuilder() {
 
       const docData: SavedDocument = {
         id: docId,
+        companyId: isZaineeDoc ? "zainee" : "comilla",
+        companyName: isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders",
         name: String(nameToUse || "Unnamed Document"),
         createdAt: String(savedDocs.find(d => d.id || docId)?.createdAt || now),
         updatedAt: String(now),
@@ -884,7 +959,7 @@ export default function QuotationBuilder() {
 
       setSaveStatus("saving");
       try {
-        await setDoc(doc(db, "documents", docId), docData);
+        await setDoc(doc(db, targetCollection, docId), docData);
         if (!currentDocId) {
           setCurrentDocId(docId);
         }
@@ -896,13 +971,14 @@ export default function QuotationBuilder() {
         console.error("Auto-save failed:", e);
         setSaveStatus("error");
         setTimeout(() => setSaveStatus("idle"), 3000);
-        handleFirestoreError(e, OperationType.WRITE, `documents/${docId}`);
+        handleFirestoreError(e, OperationType.WRITE, `${targetCollection}/${docId}`);
       }
     }, 1500);
 
     autoSaveTimerRef.current = timer;
     return () => clearTimeout(timer);
   }, [
+    activeCompany,
     docType,
     dateVal,
     messers,
@@ -2396,14 +2472,16 @@ export default function QuotationBuilder() {
         includeDiscount,
         discountType,
         parsedDiscountValue,
-        discountAmount
+        discountAmount,
+        activeCompany
       );
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 
+      const compPrefix = activeCompany === "zainee" ? "ZE" : "CT";
       const filePrefix = docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation";
       const identifier = docType === "challan" ? (challanNo || "NEW") : docType === "invoice" ? (invoiceNo || "NEW") : (requisitionNo || "NEW");
-      const defaultFileName = `${filePrefix}_${identifier.replace(/[\/\\?%*:|"<>\s]/g, "_")}.xlsx`;
+      const defaultFileName = `${compPrefix}_${filePrefix}_${identifier.replace(/[\/\\?%*:|"<>\s]/g, "_")}.xlsx`;
 
       // 1. Try modern File System Access API first (highly supported on Desktop browsers like Chrome, Edge, Opera)
       // This allows selecting directory, browsing existing files, renaming, or choosing paths dynamically.
@@ -2681,6 +2759,8 @@ export default function QuotationBuilder() {
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         savedDocsCount={savedDocs.length}
+        activeCompany={activeCompany}
+        onSelectCompany={handleSwitchCompany}
       />
 
       {/* Main ERP Content Area */}
@@ -2718,6 +2798,8 @@ export default function QuotationBuilder() {
             onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             onNavigateToArchive={() => setActiveView(activeView === "saved-docs" ? "editor" : "saved-docs")}
             savedDocsCount={savedDocs.length}
+            activeCompany={activeCompany}
+            onSelectCompany={handleSwitchCompany}
           />
         </div>
 
@@ -2726,6 +2808,8 @@ export default function QuotationBuilder() {
           <div className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-200">
             <ErpDashboard
               savedDocs={savedDocs}
+              activeCompany={activeCompany}
+              onSelectCompany={handleSwitchCompany}
               onOpenDoc={(doc) => {
                 loadSavedDoc(doc);
                 setActiveView("editor");
@@ -2806,71 +2890,73 @@ export default function QuotationBuilder() {
 
           <div className="w-full flex flex-col items-center">
 
-          {/* A4 Standard-compliant visual grid container */}
-          <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
-        
-        {/* Anti-slip Background Watermark Asset */}
-        <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
-          <img 
-            src="https://i.ibb.co.com/3mNycQXx/1.png" 
-            alt="Watermark background" 
-            referrerPolicy="no-referrer"
-            className="w-[70%] opacity-[0.045] object-contain select-none max-w-[500px]"
-            style={{ printColorAdjust: "exact" }}
-          />
-        </div>
+            {/* A4 Standard-compliant visual grid container */}
+            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
+          
+          {/* Anti-slip Background Watermark Asset */}
+          <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
+            <img 
+              src={isZainee ? currentCompany.logoUrl : "https://i.ibb.co.com/3mNycQXx/1.png"} 
+              alt="Watermark background" 
+              referrerPolicy="no-referrer"
+              className={`object-contain select-none max-w-[500px] ${isZainee ? "w-[45%] opacity-[0.035]" : "w-[70%] opacity-[0.045]"}`}
+              style={{ printColorAdjust: "exact" }}
+            />
+          </div>
 
-        {/* Outer Layout Table ensuring thead repeats company details on multi-page browser printing */}
-        <table className="print-outer-layout-table w-full border-none p-0 m-0 relative z-10">
-          <thead className="print:table-header-group">
-            <tr>
-              <td className="border-none p-0 m-0">
-                {/* Top blank margin repeating on every printed page */}
-                <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
-                
-                <div className="business-header border-b-2 border-black pb-1 mb-1 flex flex-col sm:flex-row items-center justify-between gap-2 text-black text-left">
-                  <div className="flex items-center gap-2.5">
-                    <div className="logo-container h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-black flex items-center justify-center shadow-xs">
-                      <img
-                        src="https://i.ibb.co.com/gFBkpt8B/Chat-GPT-Image-Apr-23-2026-01-10-13-PM.png"
-                        alt="Comilla Traders Logo"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h1 className="text-[15pt] sm:text-[17pt] font-black tracking-tight leading-none text-black">
-                        COMILLA TRADERS
-                      </h1>
-                      <p className="text-[7.5pt] font-extrabold text-slate-700 tracking-wider uppercase mt-0.5">
-                        Ship Chandler, Marine Supplier & General Merchant
-                      </p>
-                      <p className="text-[6.5pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
-                        Mechanical & Electrical Marine Engineering Services
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="contact-details text-right text-[7pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block">
-                    <p className="font-bold whitespace-nowrap">
-                      Office: <span className="font-medium whitespace-nowrap">Jubilee Road, Chattogram, Bangladesh</span>
-                    </p>
-                    <p className="font-bold whitespace-nowrap">
-                      Helplines: <span className="font-medium font-mono whitespace-nowrap">01819315746, 01712-900431</span>
-                    </p>
-                    <p className="font-bold whitespace-nowrap">
-                      Official Email: <span className="font-medium whitespace-nowrap">comillatraders@gmail.com</span>
-                    </p>
-                    <p className="font-bold text-[6.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
-                      CHATTOGRAM &bull; BANGLADESH
-                    </p>
-                  </div>
+          {/* Outer Layout Table ensuring thead repeats company details on multi-page browser printing */}
+          <table className="print-outer-layout-table w-full border-none p-0 m-0 relative z-10">
+            <thead className="print:table-header-group">
+              <tr>
+                <td className="border-none p-0 m-0">
+                  {/* Top blank margin repeating on every printed page */}
+                  <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
                   
-                  {/* Print contact information layout */}
-                  <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
-                    <p>Jubilee Road, Chattogram &bull; Hotlines: 01819315746</p>
-                    <p>comillatraders@gmail.com</p>
+                  <div className="business-header border-b-2 border-black pb-1 mb-1 flex flex-col sm:flex-row items-center justify-between gap-2 text-black text-left">
+                    <div className="flex items-center gap-2.5">
+                      <div className="logo-container h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
+                        <img
+                          src={currentCompany.logoUrl}
+                          alt={`${currentCompany.name} Logo`}
+                          className="w-full h-full object-contain p-0.5"
+                        />
+                      </div>
+                      <div>
+                        <h1 className="text-[15pt] sm:text-[17pt] font-black tracking-tight leading-none text-black uppercase">
+                          {currentCompany.name}
+                        </h1>
+                        <p className="text-[7.5pt] font-extrabold text-slate-700 tracking-wider uppercase mt-0.5">
+                          {currentCompany.tagline1}
+                        </p>
+                        {currentCompany.tagline2 && (
+                          <p className="text-[6.5pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                            {currentCompany.tagline2}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="contact-details text-right text-[7pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block">
+                      <p className="font-bold whitespace-nowrap">
+                        Office: <span className="font-medium whitespace-nowrap">{currentCompany.officeAddress}</span>
+                      </p>
+                      <p className="font-bold whitespace-nowrap">
+                        Helplines: <span className="font-medium font-mono whitespace-nowrap">{currentCompany.helplines}</span>
+                      </p>
+                      <p className="font-bold whitespace-nowrap">
+                        Official Email: <span className="font-medium whitespace-nowrap">{currentCompany.email}</span>
+                      </p>
+                      <p className="font-bold text-[6.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
+                        {currentCompany.locationCity}
+                      </p>
+                    </div>
+                    
+                    {/* Print contact information layout */}
+                    <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
+                      <p>{currentCompany.officeAddress} &bull; Hotlines: {currentCompany.helplines}</p>
+                      <p>{currentCompany.email}</p>
+                    </div>
                   </div>
-                </div>
 
                 {/* Repeating Document Title on multi-page browser printing */}
                 <div className="doc-title text-center text-[11pt] sm:text-[12pt] font-black uppercase tracking-[6px] my-0.5">
@@ -3817,20 +3903,22 @@ export default function QuotationBuilder() {
                     </div>
                   </div>
                   
-                  {/* Authorized stamp hidden for Challan block - only receiving signature to challan */}
+                  {/* Authorized signature block - stamps removed for Zainee Enterprise */}
                   {docType !== "challan" && (
                     <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-between h-[65px] relative">
-                      <div className="sig-title text-[8pt] font-bold text-black">For Comilla Traders</div>
+                      <div className="sig-title text-[8pt] font-bold text-black">For {currentCompany.name}</div>
                       
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
-                        <img 
-                          src="https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"
-                          alt="Comilla Traders Stamp"
-                          referrerPolicy="no-referrer"
-                          className="w-[88px] h-[88px] object-contain select-none"
-                          style={{ printColorAdjust: "exact" }}
-                        />
-                      </div>
+                      {currentCompany.hasStamp && currentCompany.stampUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
+                          <img 
+                            src={currentCompany.stampUrl}
+                            alt={`${currentCompany.name} Stamp`}
+                            referrerPolicy="no-referrer"
+                            className="w-[88px] h-[88px] object-contain select-none"
+                            style={{ printColorAdjust: "exact" }}
+                          />
+                        </div>
+                      )}
 
                       <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold relative z-20 text-black">
                         Authorized Signature
@@ -3865,6 +3953,8 @@ export default function QuotationBuilder() {
                 setSearchQuery={setSearchQuery}
                 selectedTypeFilter={selectedTypeFilter}
                 setSelectedTypeFilter={setSelectedTypeFilter}
+                activeCompany={activeCompany}
+                onSelectCompany={handleSwitchCompany}
                 loadSavedDoc={(doc) => {
                   loadSavedDoc(doc);
                   setActiveView("editor");

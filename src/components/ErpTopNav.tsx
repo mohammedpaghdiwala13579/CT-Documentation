@@ -9,8 +9,12 @@ import {
   Sparkles,
   Smartphone,
   Laptop,
-  FolderKanban
+  FolderKanban,
+  Building2,
+  Ship,
+  ArrowLeftRight
 } from "lucide-react";
+import { CompanyId } from "../types";
 
 export interface ErpTopNavProps {
   activeView: "dashboard" | "editor" | "saved-docs";
@@ -31,6 +35,8 @@ export interface ErpTopNavProps {
   onInstallClick?: () => void;
   onNavigateToArchive?: () => void;
   savedDocsCount?: number;
+  activeCompany?: CompanyId;
+  onSelectCompany?: (company: CompanyId) => void;
 }
 
 export default function ErpTopNav({
@@ -50,13 +56,17 @@ export default function ErpTopNav({
   onInstallClick,
   onNavigateToArchive,
   savedDocsCount,
+  activeCompany = "comilla",
+  onSelectCompany,
 }: ErpTopNavProps) {
+  const isZainee = activeCompany === "zainee";
+
   return (
     <header
       id="erp-top-nav"
       className="sticky top-0 z-30 h-14 min-h-[56px] bg-white border-b border-slate-200 px-4 flex items-center justify-between no-print print:hidden shadow-2xs"
     >
-      {/* Left: Mobile Menu Button + Breadcrumb */}
+      {/* Left: Mobile Menu Button + Breadcrumb + Business Switcher */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           type="button"
@@ -68,7 +78,9 @@ export default function ErpTopNav({
         </button>
 
         <div className="flex items-center gap-2 text-xs truncate">
-          <span className="font-semibold text-slate-500 hidden sm:inline">CT Maritime</span>
+          <span className="font-semibold text-slate-500 hidden sm:inline">
+            {isZainee ? "Zainee ERP" : "CT Maritime"}
+          </span>
           <span className="text-slate-300 hidden sm:inline">/</span>
           <span className="font-bold text-slate-900 truncate">
             {activeView === "dashboard"
@@ -78,6 +90,33 @@ export default function ErpTopNav({
               : currentDocName || "Document Canvas"}
           </span>
         </div>
+
+        {/* 1-Click Business Header Quick Switcher */}
+        {onSelectCompany && (
+          <div className="hidden md:flex items-center ml-2 pl-2 border-l border-slate-200">
+            <button
+              type="button"
+              id="topnav-company-toggle-btn"
+              onClick={() => onSelectCompany(isZainee ? "comilla" : "zainee")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer border ${
+                isZainee
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                  : "bg-blue-50 text-blue-800 border-blue-300 hover:bg-blue-100"
+              }`}
+              title={`Currently showing ${isZainee ? "Zainee Enterprise" : "Comilla Traders"}. Click to switch.`}
+            >
+              <div className="h-4 w-4 rounded-full overflow-hidden bg-white border border-slate-300 shrink-0 flex items-center justify-center">
+                {isZainee ? (
+                  <img src="https://i.ibb.co.com/V8VJdXK/123.png" alt="ZE" className="h-full w-full object-contain" />
+                ) : (
+                  <Ship className="h-2.5 w-2.5 text-blue-600" />
+                )}
+              </div>
+              <span className="font-bold">{isZainee ? "Zainee Enterprise" : "Comilla Traders"}</span>
+              <ArrowLeftRight className="h-3 w-3 opacity-60 ml-0.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right: Actions */}

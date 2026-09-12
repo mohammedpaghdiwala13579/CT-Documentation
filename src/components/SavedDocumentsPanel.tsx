@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   FolderOpen, 
   Search, 
@@ -9,9 +9,11 @@ import {
   Layers, 
   Check,
   FileEdit,
-  ArrowUpRight
+  ArrowUpRight,
+  Ship,
+  Building2
 } from "lucide-react";
-import { SavedDocument } from "../types";
+import { SavedDocument, CompanyId } from "../types";
 
 export interface SavedDocumentsPanelProps {
   savedDocs: SavedDocument[];
@@ -26,6 +28,8 @@ export interface SavedDocumentsPanelProps {
   // Multi-page navigation
   isPageMode?: boolean;
   onSwitchPage?: (page: "editor" | "saved-docs") => void;
+  activeCompany?: CompanyId;
+  onSelectCompany?: (company: CompanyId) => void;
 }
 
 export function calculateDocGrandTotal(doc: SavedDocument): { formatted: string; numeric: number } {
@@ -72,9 +76,17 @@ export default function SavedDocumentsPanel({
   renameSavedDoc,
   isPageMode = false,
   onSwitchPage,
+  activeCompany,
+  onSelectCompany,
 }: SavedDocumentsPanelProps) {
-  // Filter documents by search and document type
+  const [companyFilter, setCompanyFilter] = useState<"all" | CompanyId>("all");
+
+  // Filter documents by company, search and document type
   const filteredDocs = savedDocs.filter((doc) => {
+    const docCompany: CompanyId = doc.companyId || (doc.id.startsWith("ze-") ? "zainee" : "comilla");
+    if (companyFilter !== "all" && docCompany !== companyFilter) {
+      return false;
+    }
     if (selectedTypeFilter !== "all" && doc.docType !== selectedTypeFilter) {
       return false;
     }
@@ -144,54 +156,104 @@ export default function SavedDocumentsPanel({
         </div>
       </div>
 
-      {/* Ultra-compact Search Bar & Document Type Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
-          <input
-            type="text"
-            id="input-saved-docs-search"
-            placeholder="Search by name, client, vessel, reference..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
+      {/* Ultra-compact Search Bar & Filters */}
+      <div className="flex flex-col gap-2 mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              id="input-saved-docs-search"
+              placeholder="Search by name, client, vessel, reference..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Minimal Type Filters */}
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
+            {(["all", "quotation", "challan", "invoice"] as const).map((type) => {
+              const count =
+                type === "all"
+                  ? savedDocs.length
+                  : savedDocs.filter((d) => d.docType === type).length;
+              const isSelected = selectedTypeFilter === type;
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  id={`btn-filter-${type}`}
+                  onClick={() => setSelectedTypeFilter(type)}
+                  className={`px-2.5 py-1 rounded text-[10.5px] font-medium tracking-wide transition-colors cursor-pointer capitalize ${
+                    isSelected
+                      ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {type === "all" ? "All" : type} ({count})
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Minimal Type Filters */}
-        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded border border-slate-200 shrink-0">
-          {(["all", "quotation", "challan", "invoice"] as const).map((type) => {
-            const count =
-              type === "all"
-                ? savedDocs.length
-                : savedDocs.filter((d) => d.docType === type).length;
-            const isSelected = selectedTypeFilter === type;
-            return (
-              <button
-                key={type}
-                type="button"
-                id={`btn-filter-${type}`}
-                onClick={() => setSelectedTypeFilter(type)}
-                className={`px-2.5 py-1 rounded text-[10.5px] font-medium tracking-wide transition-colors cursor-pointer capitalize ${
-                  isSelected
-                    ? "bg-white text-blue-700 shadow-2xs font-semibold"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {type === "all" ? "All" : type} ({count})
-              </button>
-            );
-          })}
+        {/* Company Entity Filter Tabs */}
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+          <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500">
+            <Building2 className="h-3 w-3 text-slate-400" />
+            <span className="font-semibold uppercase tracking-wider text-[9.5px]">Business:</span>
+          </div>
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded border border-slate-200">
+            <button
+              type="button"
+              id="btn-filter-company-all"
+              onClick={() => setCompanyFilter("all")}
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+                companyFilter === "all"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All Entities ({savedDocs.length})
+            </button>
+            <button
+              type="button"
+              id="btn-filter-company-zainee"
+              onClick={() => setCompanyFilter("zainee")}
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                companyFilter === "zainee"
+                  ? "bg-emerald-600 text-white shadow-2xs font-bold"
+                  : "text-emerald-700 hover:bg-emerald-50"
+              }`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Zainee Enterprise ({savedDocs.filter(d => d.companyId === "zainee" || d.id.startsWith("ze-")).length})
+            </button>
+            <button
+              type="button"
+              id="btn-filter-company-comilla"
+              onClick={() => setCompanyFilter("comilla")}
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
+                companyFilter === "comilla"
+                  ? "bg-blue-600 text-white shadow-2xs font-bold"
+                  : "text-blue-700 hover:bg-blue-50"
+              }`}
+            >
+              <Ship className="h-2.5 w-2.5" />
+              Comilla Traders ({savedDocs.filter(d => d.companyId !== "zainee" && !d.id.startsWith("ze-")).length})
+            </button>
+          </div>
         </div>
       </div>
 
@@ -287,14 +349,31 @@ export default function SavedDocumentsPanel({
                             >
                               {doc.docType}
                             </span>
+
+                            {/* Company Identifier Badge */}
+                            {(doc.companyId === "zainee" || doc.id.startsWith("ze-")) ? (
+                              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold bg-emerald-50 border border-emerald-300 text-emerald-800">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                Zainee Enterprise
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold bg-blue-50 border border-blue-200 text-blue-800">
+                                <Ship className="h-2.5 w-2.5 text-blue-600" />
+                                Comilla Traders
+                              </span>
+                            )}
                           </div>
 
-                          {/* Subtle client/date metadata in Name column */}
-                          {(doc.messers || doc.vesselName || doc.dateVal) && (
-                            <div className="text-[10.5px] text-slate-500 truncate max-w-[220px] sm:max-w-[320px]">
-                              {[doc.messers, doc.vesselName, doc.dateVal].filter(Boolean).join(" • ")}
-                            </div>
-                          )}
+                          {/* Subtle client/date metadata and Firebase ID in Name column */}
+                          <div className="flex items-center gap-2 text-[10.5px] text-slate-500 truncate max-w-[280px] sm:max-w-[380px]">
+                            {(doc.messers || doc.vesselName || doc.dateVal) && (
+                              <span>{[doc.messers, doc.vesselName, doc.dateVal].filter(Boolean).join(" • ")}</span>
+                            )}
+                            <span className="text-slate-300">•</span>
+                            <span className="font-mono text-[9px] text-slate-400 font-medium" title={`Firebase ID: ${doc.id}`}>
+                              {doc.id}
+                            </span>
+                          </div>
                         </div>
                       </td>
 

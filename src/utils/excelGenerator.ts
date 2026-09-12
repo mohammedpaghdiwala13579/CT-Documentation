@@ -771,7 +771,8 @@ const buildDocumentWorksheet = (
   includeDiscount: boolean = false,
   discountType: "percentage" | "fixed" = "percentage",
   discountValue: number = 0,
-  discountAmount: number = 0
+  discountAmount: number = 0,
+  companyName: string = "Comilla Traders"
 ) => {
   // Page Setup: Fit to 1 Page Wide and 1 Page Tall on standard A4 portrait
   worksheet.pageSetup = {
@@ -1611,11 +1612,11 @@ const buildDocumentWorksheet = (
   currentRowNum++;
 
   if (!isChallan) {
-    // "For Comilla Traders" row on right
+    // Company authorization row on right
     worksheet.getRow(currentRowNum).height = 14;
     worksheet.mergeCells(`E${currentRowNum}:F${currentRowNum}`);
     const authTitle = worksheet.getCell(`E${currentRowNum}`);
-    authTitle.value = "For Comilla Traders";
+    authTitle.value = `For ${companyName}`;
     authTitle.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     authTitle.alignment = { vertical: "middle", horizontal: "center" };
     currentRowNum++;
@@ -1687,18 +1688,30 @@ export const generateExcelWorkbook = async (
   includeDiscount?: boolean,
   discountType?: "percentage" | "fixed",
   discountValue?: number,
-  discountAmount?: number
+  discountAmount?: number,
+  companyId: "comilla" | "zainee" = "comilla"
 ): Promise<ExcelJS.Workbook> => {
+  const isZainee = companyId === "zainee";
+  const companyName = isZainee ? "Zainee Enterprise" : "Comilla Traders";
+
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Comilla Traders";
-  workbook.lastModifiedBy = "Comilla Traders";
+  workbook.creator = companyName;
+  workbook.lastModifiedBy = companyName;
   workbook.created = new Date();
   workbook.modified = new Date();
 
-  // Fetch images in parallel
+  // Fetch images in parallel (Zainee Enterprise uses requested logo and strictly no stamps)
+  const logoUrl = isZainee
+    ? "https://i.ibb.co.com/V8VJdXK/123.png"
+    : "https://i.ibb.co.com/gFBkpt8B/Chat-GPT-Image-Apr-23-2026-01-10-13-PM.png";
+
+  const stampUrl = isZainee
+    ? null
+    : "https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png";
+
   const [logoData, stampData] = await Promise.all([
-    getBase64Image("https://i.ibb.co.com/gFBkpt8B/Chat-GPT-Image-Apr-23-2026-01-10-13-PM.png"),
-    getBase64Image("https://i.ibb.co.com/jZswrtn6/image-4-removebg-preview.png"),
+    getBase64Image(logoUrl),
+    stampUrl ? getBase64Image(stampUrl) : Promise.resolve(null),
   ]);
 
   let logoId: number | null = null;
@@ -1710,7 +1723,7 @@ export const generateExcelWorkbook = async (
   }
 
   let stampId: number | null = null;
-  if (stampData) {
+  if (stampData && !isZainee) {
     stampId = workbook.addImage({
       base64: stampData.base64,
       extension: (stampData.ext as any) || "png",
@@ -1774,7 +1787,8 @@ export const generateExcelWorkbook = async (
       includeDiscount || false,
       discountType || "percentage",
       discountValue || 0,
-      discountAmount || 0
+      discountAmount || 0,
+      companyName
     );
   });
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { 
   FileText, 
   FileSpreadsheet, 
@@ -16,9 +16,11 @@ import {
   Printer,
   ExternalLink,
   DollarSign,
-  FolderKanban
+  FolderKanban,
+  Building2
 } from "lucide-react";
-import { SavedDocument } from "../types";
+import { SavedDocument, CompanyId } from "../types";
+import { COMPANY_PROFILES } from "../utils/companyProfiles";
 import { calculateDocGrandTotal } from "./SavedDocumentsPanel";
 
 export interface ErpDashboardProps {
@@ -28,6 +30,8 @@ export interface ErpDashboardProps {
   onDeleteDoc: (id: string, e?: React.MouseEvent) => void;
   onDuplicateDoc: (doc: SavedDocument) => void;
   onSwitchToArchive: () => void;
+  activeCompany?: CompanyId;
+  onSelectCompany?: (company: CompanyId) => void;
 }
 
 export default function ErpDashboard({
@@ -37,7 +41,16 @@ export default function ErpDashboard({
   onDeleteDoc,
   onDuplicateDoc,
   onSwitchToArchive,
+  activeCompany = "comilla",
+  onSelectCompany,
 }: ErpDashboardProps) {
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<"all" | CompanyId>("all");
+
+  const displayedDocs = useMemo(() => {
+    if (selectedCompanyFilter === "all") return savedDocs;
+    return savedDocs.filter(d => (d.companyId || (d.id.startsWith("ze-") ? "zainee" : "comilla")) === selectedCompanyFilter);
+  }, [savedDocs, selectedCompanyFilter]);
+
   // Compute Operations KPIs
   const stats = useMemo(() => {
     let totalQuotations = 0;
@@ -47,7 +60,7 @@ export default function ErpDashboard({
     let invoiceValue = 0;
     const vesselSet = new Set<string>();
 
-    savedDocs.forEach((doc) => {
+    displayedDocs.forEach((doc) => {
       const { numeric } = calculateDocGrandTotal(doc);
       if (doc.vesselName && doc.vesselName.trim()) {
         vesselSet.add(doc.vesselName.trim());
@@ -64,7 +77,7 @@ export default function ErpDashboard({
       }
     });
 
-    const totalDocs = savedDocs.length;
+    const totalDocs = displayedDocs.length;
     const activeVessels = vesselSet.size;
 
     return {
@@ -76,14 +89,14 @@ export default function ErpDashboard({
       invoiceValue,
       activeVessels,
     };
-  }, [savedDocs]);
+  }, [displayedDocs]);
 
   // Recent 8 documents
   const recentDocs = useMemo(() => {
-    return [...savedDocs]
+    return [...displayedDocs]
       .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
       .slice(0, 8);
-  }, [savedDocs]);
+  }, [displayedDocs]);
 
   // Document percentage breakdown
   const docBreakdown = useMemo(() => {
@@ -98,41 +111,107 @@ export default function ErpDashboard({
     <div id="erp-dashboard-view" className="w-full max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
       
       {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-slate-200">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            Operations & Documentation Overview
-          </h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            Comilla Traders • Ship Chandler, Maritime Supply & Logistics Terminal
-          </p>
+      <div className="flex flex-col gap-3 pb-2 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              Operations & Documentation Overview
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Multi-Entity Enterprise Hub • Comilla Traders & Zainee Enterprise
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              id="btn-dashboard-records-archive"
+              onClick={onSwitchToArchive}
+              className="h-8 px-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+              title="Go to Records Archive"
+              aria-label="Records Archive"
+            >
+              <FolderKanban className="h-3.5 w-3.5 text-blue-600" />
+              <span className="hidden sm:inline">Records Archive</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold">
+                {stats.totalDocs}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              id="btn-quick-new-quotation"
+              onClick={() => onNewDoc("quotation")}
+              className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>New Document</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            id="btn-dashboard-records-archive"
-            onClick={onSwitchToArchive}
-            className="h-8 px-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-            title="Go to Records Archive"
-            aria-label="Records Archive"
-          >
-            <FolderKanban className="h-3.5 w-3.5 text-blue-600" />
-            <span className="hidden sm:inline">Records Archive</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold">
-              {stats.totalDocs}
+        {/* Multi-Entity Filter Switcher */}
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+              <Building2 className="h-3.5 w-3.5 text-slate-400" />
+              Entity View:
             </span>
-          </button>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              <button
+                type="button"
+                id="btn-dash-filter-all"
+                onClick={() => setSelectedCompanyFilter("all")}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                  selectedCompanyFilter === "all"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                All Businesses ({savedDocs.length})
+              </button>
 
-          <button
-            type="button"
-            id="btn-quick-new-quotation"
-            onClick={() => onNewDoc("quotation")}
-            className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>New Quotation</span>
-          </button>
+              <button
+                type="button"
+                id="btn-dash-filter-zainee"
+                onClick={() => {
+                  setSelectedCompanyFilter("zainee");
+                  if (onSelectCompany) onSelectCompany("zainee");
+                }}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedCompanyFilter === "zainee"
+                    ? "bg-emerald-600 text-white shadow-2xs font-bold"
+                    : "text-emerald-700 hover:bg-emerald-50"
+                }`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Zainee Enterprise ({savedDocs.filter(d => d.companyId === "zainee" || d.id.startsWith("ze-")).length})
+              </button>
+
+              <button
+                type="button"
+                id="btn-dash-filter-comilla"
+                onClick={() => {
+                  setSelectedCompanyFilter("comilla");
+                  if (onSelectCompany) onSelectCompany("comilla");
+                }}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedCompanyFilter === "comilla"
+                    ? "bg-blue-600 text-white shadow-2xs font-bold"
+                    : "text-blue-700 hover:bg-blue-50"
+                }`}
+              >
+                <Ship className="h-3 w-3" />
+                Comilla Traders ({savedDocs.filter(d => d.companyId !== "zainee" && !d.id.startsWith("ze-")).length})
+              </button>
+            </div>
+          </div>
+
+          {selectedCompanyFilter !== "all" && (
+            <span className="text-[11px] text-slate-500 hidden sm:inline">
+              Showing analytics specifically for <strong className="text-slate-800">{COMPANY_PROFILES[selectedCompanyFilter].name}</strong>
+            </span>
+          )}
         </div>
       </div>
 
@@ -383,11 +462,29 @@ export default function ErpDashboard({
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                       onClick={() => onOpenDoc(doc)}
                     >
-                      <td className="py-2.5 px-4 font-semibold text-slate-900 flex items-center gap-2">
-                        <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate max-w-[200px]" title={doc.name}>
-                          {doc.name || "Untitled Document"}
-                        </span>
+                      <td className="py-2.5 px-4 font-semibold text-slate-900 flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate max-w-[200px]" title={doc.name}>
+                            {doc.name || "Untitled Document"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 ml-5">
+                          {(doc.companyId === "zainee" || doc.id.startsWith("ze-")) ? (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Zainee Enterprise
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                              <Ship className="h-2.5 w-2.5 text-blue-600" />
+                              Comilla Traders
+                            </span>
+                          )}
+                          <span className="font-mono text-[9px] text-slate-400">
+                            {doc.id}
+                          </span>
+                        </div>
                       </td>
 
                       <td className="py-2.5 px-3">

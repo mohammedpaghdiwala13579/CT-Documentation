@@ -37,6 +37,26 @@ export interface CellFormat {
   borders?: CellBorders;
 }
 
+export type CompanyId = "comilla" | "zainee";
+
+export interface CompanyProfile {
+  id: CompanyId;
+  name: string;
+  tagline1: string;
+  tagline2: string;
+  logoUrl: string;
+  officeAddress: string;
+  helplines: string;
+  email: string;
+  locationCity: string;
+  hasStamp: boolean;
+  stampUrl?: string;
+  watermarkUrl?: string;
+  signatureForLabel: string;
+  firebaseCollection: string;
+  idPrefix: string;
+}
+
 export type CellFormatMap = Record<string, CellFormat>;
 
 export interface SavedDocument {
@@ -45,6 +65,8 @@ export interface SavedDocument {
   createdAt: string;
   updatedAt: string;
   docType: "quotation" | "challan" | "invoice";
+  companyId?: CompanyId;
+  companyName?: string;
   dateVal: string;
   messers: string;
   address: string;
