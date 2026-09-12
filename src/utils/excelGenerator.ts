@@ -615,17 +615,19 @@ export const calculateItemVisualLines = (
 
 /**
  * Calculates dynamic row height in points for item rows.
- * Provides comfortable vertical centering clearance (at least 19.5pt) so upper ascenders
- * and lower descenders of text never get cut off or hidden behind cell borders.
+ * Default single-line height is 15.0pt (normal standard cell size, matching rows 2 to 11).
+ * Multi-line items expand dynamically according to wrapped lines and font size,
+ * ensuring every line is fully visible, crisp, and never cut off.
  */
 export const getItemRowHeight = (visualLines: number, fontSize: number = 8.5): number => {
-  const lineRate = Math.max(12, fontSize * 1.35 + 1.0);
   if (visualLines <= 1) {
-    // Sized precisely according to sentence size so maximum items fit per page cleanly and clearly
-    return Math.max(16.5, Math.round(fontSize * 1.35 + 4.0));
+    // Normal standard cell size (15pt) exactly matching the normal cell size of rows 2 to 11
+    // Allows more items to fit cleanly and compactly on a single page
+    return 15.0;
   }
-  // Multi-line: calculates exact height for all wrapped lines to fit sentences cleanly
-  return Math.max(16.5, Math.round(visualLines * lineRate + 4.0));
+  // Multi-line: calculates exact height for all wrapped lines so every line is fully visible
+  const lineRate = Math.max(12.0, fontSize * 1.3);
+  return Math.max(15.0, Math.round(visualLines * lineRate + 2.0));
 };
 
 export interface ExcelPageChunk {
@@ -634,10 +636,21 @@ export interface ExcelPageChunk {
   isLastPage: boolean;
 }
 
+export interface ExcelMetadataOptions {
+  vesselName?: string;
+  portBerth?: string;
+  includeVesselName?: boolean;
+  includePortBerth?: boolean;
+  includeInvoiceNo?: boolean;
+  includeChallanNo?: boolean;
+  includeRequisitionNo?: boolean;
+  includePoNumber?: boolean;
+}
+
 /**
  * Dynamically paginates items to maximize space utilization on each A4 page.
  * Uses exact vertical height budgets based on item text.
- * When the page reaches its maximum vertical capacity, remaining items are transferred to the next page.
+ * Ensures more items fit comfortably on a single page before creating a second page.
  */
 export const paginateRowsForExcel = (
   allRows: QuotationRow[],
@@ -653,9 +666,32 @@ export const paginateRowsForExcel = (
   const descColWidth = getOptimalDescColWidth(allRows, isChallan);
   
   // Maximum usable vertical height budget for items on A4 page (in points)
-  // Sized to allow high density while keeping each cell crisp and unclipped
-  const REGULAR_PAGE_BUDGET = isChallan ? 520 : 500;
-  const LAST_PAGE_BUDGET = isChallan ? 520 : isInvoice ? 425 : 475;
+  // Sized to maximize items on a single page matching PDF density:
+  // - Regular page: 525pt allows ~35 items
+  // - Last page:
+  //   - Challan (no totals block): 525pt allows ~35 items
+  //   - Quotation (totals + signatures): 485pt allows ~32 items
+  //   - Invoice (subtotal, vat, trans, grand total + signatures): 445pt allows ~29-30 items
+  const REGULAR_PAGE_BUDGET = 525;
+  const LAST_PAGE_BUDGET = isChallan ? 525 : isInvoice ? 445 : 485;
+
+  // First check if ALL rows can fit together on a single page
+  let totalAllRowsHeight = 0;
+  for (let i = 0; i < allRows.length; i++) {
+    const row = allRows[i];
+    const descFmt = cellFormats ? cellFormats[`${i}_0`] : undefined;
+    const fontSize = descFmt?.fontSize || 8.5;
+    const lines = calculateItemVisualLines(row.desc, descColWidth, fontSize);
+    totalAllRowsHeight += getItemRowHeight(lines, fontSize);
+  }
+
+  if (totalAllRowsHeight <= LAST_PAGE_BUDGET) {
+    return [{
+      rows: allRows,
+      startSlIndex: 1,
+      isLastPage: true,
+    }];
+  }
 
   const chunks: ExcelPageChunk[] = [];
   let currentChunk: QuotationRow[] = [];
@@ -669,11 +705,8 @@ export const paginateRowsForExcel = (
     const lines = calculateItemVisualLines(row.desc, descColWidth, fontSize);
     const rowHeight = getItemRowHeight(lines, fontSize);
 
-    const isPotentialLastItem = i === allRows.length - 1;
-    const budgetForCurrentPage = isPotentialLastItem ? LAST_PAGE_BUDGET : REGULAR_PAGE_BUDGET;
-
-    // Check if adding this item exceeds the maximum A4 vertical budget
-    if (currentChunk.length > 0 && currentHeight + rowHeight > budgetForCurrentPage) {
+    // Check if adding this item exceeds the regular page budget
+    if (currentChunk.length > 0 && currentHeight + rowHeight > REGULAR_PAGE_BUDGET) {
       chunks.push({
         rows: currentChunk,
         startSlIndex: currentSl,
@@ -691,7 +724,7 @@ export const paginateRowsForExcel = (
   if (currentChunk.length > 0) {
     // If the last page exceeds the LAST_PAGE_BUDGET (which includes totals & signatures),
     // cleanly split the overflow items to the next page
-    if (!isChallan && currentHeight > LAST_PAGE_BUDGET && currentChunk.length > 1) {
+    if (currentHeight > LAST_PAGE_BUDGET && currentChunk.length > 1) {
       let splitIdx = currentChunk.length - 1;
       let remHeight = currentHeight;
       while (splitIdx > 0 && remHeight > LAST_PAGE_BUDGET) {
@@ -772,7 +805,8 @@ const buildDocumentWorksheet = (
   discountType: "percentage" | "fixed" = "percentage",
   discountValue: number = 0,
   discountAmount: number = 0,
-  companyName: string = "Comilla Traders"
+  companyName: string = "Comilla Traders",
+  metaOptions?: ExcelMetadataOptions
 ) => {
   // Page Setup: Fit to 1 Page Wide and 1 Page Tall on standard A4 portrait
   worksheet.pageSetup = {
@@ -857,6 +891,11 @@ const buildDocumentWorksheet = (
   // 2. METADATA BOXES (ROWS 12 TO 16) - EXACT PRINT FORMAT ALIGNMENT
   // =========================================================================
   
+  const hasVessel = Boolean(metaOptions?.includeVesselName && metaOptions?.vesselName?.trim());
+  const hasPort = Boolean(metaOptions?.includePortBerth && metaOptions?.portBerth?.trim());
+  const vesselText = metaOptions?.vesselName?.trim() || "";
+  const portText = metaOptions?.portBerth?.trim() || "";
+
   // Dynamic height calculation for Messers and Address so cell size expands to fit content
   const messersLines = calculateItemVisualLines(messers || "", isChallan ? 40 : 35, 8.5);
   worksheet.getRow(12).height = 13.5;
@@ -904,39 +943,89 @@ const buildDocumentWorksheet = (
   messersCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
   messersCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
-  worksheet.mergeCells("A14:B14");
-  const addrLbl = worksheet.getCell("A14");
-  addrLbl.value = "ADDRESS:";
-  addrLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
-  addrLbl.alignment = { vertical: "middle", horizontal: "left" };
-  addrLbl.fill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FFF8FAFC" },
-  };
+  if (hasVessel || hasPort) {
+    // Row 14: Vessel / Berth information
+    worksheet.mergeCells("A14:B14");
+    const vesselCell = worksheet.getCell("A14");
+    const vesselParts = [
+      hasVessel ? `VESSEL: ${vesselText}` : "",
+      hasPort ? `BERTH: ${portText}` : ""
+    ].filter(Boolean);
+    vesselCell.value = vesselParts.join(" | ");
+    vesselCell.font = { name: "Arial", size: 8.0, bold: true, color: { argb: "FF000000" } };
+    vesselCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    vesselCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
-  worksheet.mergeCells("A15:B16");
-  const addrCell = worksheet.getCell("A15");
-  const addrParsed = parseHtmlToExcelRuns(address || "", {
-    name: "Arial",
-    size: 8.0,
-    color: { argb: "FF000000" },
-  });
-  if (addrParsed.hasFormatting && addrParsed.richText.length > 0) {
-    addrCell.value = { richText: addrParsed.richText };
-  } else {
-    addrCell.value = addrParsed.plainText;
-    addrCell.font = { name: "Arial", size: 8.0, color: { argb: "FF000000" } };
-  }
-  if (addrParsed.highlightColor) {
-    addrCell.fill = {
+    // Row 15: Address Label
+    worksheet.mergeCells("A15:B15");
+    const addrLbl = worksheet.getCell("A15");
+    addrLbl.value = "ADDRESS:";
+    addrLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    addrLbl.alignment = { vertical: "middle", horizontal: "left" };
+    addrLbl.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: addrParsed.highlightColor },
+      fgColor: { argb: "FFF8FAFC" },
     };
+
+    // Row 16: Address value
+    worksheet.mergeCells("A16:B16");
+    const addrCell = worksheet.getCell("A16");
+    const addrParsed = parseHtmlToExcelRuns(address || "", {
+      name: "Arial",
+      size: 8.0,
+      color: { argb: "FF000000" },
+    });
+    if (addrParsed.hasFormatting && addrParsed.richText.length > 0) {
+      addrCell.value = { richText: addrParsed.richText };
+    } else {
+      addrCell.value = addrParsed.plainText;
+      addrCell.font = { name: "Arial", size: 8.0, color: { argb: "FF000000" } };
+    }
+    if (addrParsed.highlightColor) {
+      addrCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: addrParsed.highlightColor },
+      };
+    }
+    addrCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    addrCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
+  } else {
+    worksheet.mergeCells("A14:B14");
+    const addrLbl = worksheet.getCell("A14");
+    addrLbl.value = "ADDRESS:";
+    addrLbl.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "475569" } };
+    addrLbl.alignment = { vertical: "middle", horizontal: "left" };
+    addrLbl.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFF8FAFC" },
+    };
+
+    worksheet.mergeCells("A15:B16");
+    const addrCell = worksheet.getCell("A15");
+    const addrParsed = parseHtmlToExcelRuns(address || "", {
+      name: "Arial",
+      size: 8.0,
+      color: { argb: "FF000000" },
+    });
+    if (addrParsed.hasFormatting && addrParsed.richText.length > 0) {
+      addrCell.value = { richText: addrParsed.richText };
+    } else {
+      addrCell.value = addrParsed.plainText;
+      addrCell.font = { name: "Arial", size: 8.0, color: { argb: "FF000000" } };
+    }
+    if (addrParsed.highlightColor) {
+      addrCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: addrParsed.highlightColor },
+      };
+    }
+    addrCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    addrCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
   }
-  addrCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-  addrCell.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
 
   // Left Box outer borders (Rows 12 to 16)
   for (let r = 12; r <= 16; r++) {
@@ -978,7 +1067,7 @@ const buildDocumentWorksheet = (
 
     worksheet.mergeCells("E13:F13");
     const iVal = worksheet.getCell("E13");
-    iVal.value = invoiceNo || "";
+    iVal.value = metaOptions?.includeInvoiceNo !== false ? (invoiceNo || "") : "";
     iVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     iVal.alignment = { vertical: "middle", horizontal: "left" };
     iVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -993,7 +1082,7 @@ const buildDocumentWorksheet = (
 
     worksheet.mergeCells("E14:F14");
     const cVal = worksheet.getCell("E14");
-    cVal.value = challanNo || "";
+    cVal.value = metaOptions?.includeChallanNo !== false ? (challanNo || "") : "";
     cVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     cVal.alignment = { vertical: "middle", horizontal: "left" };
     cVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1008,7 +1097,7 @@ const buildDocumentWorksheet = (
 
     worksheet.mergeCells("E15:F15");
     const rVal = worksheet.getCell("E15");
-    rVal.value = requisitionNo || "";
+    rVal.value = metaOptions?.includeRequisitionNo !== false ? (requisitionNo || "") : "";
     rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1023,7 +1112,7 @@ const buildDocumentWorksheet = (
 
     worksheet.mergeCells("E16:F16");
     const pVal = worksheet.getCell("E16");
-    pVal.value = poNumber || "";
+    pVal.value = metaOptions?.includePoNumber !== false ? (poNumber || "") : "";
     pVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     pVal.alignment = { vertical: "middle", horizontal: "left" };
     pVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1049,7 +1138,7 @@ const buildDocumentWorksheet = (
     cLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
     const cVal = worksheet.getCell("D13");
-    cVal.value = challanNo || "";
+    cVal.value = metaOptions?.includeChallanNo !== false ? (challanNo || "") : "";
     cVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     cVal.alignment = { vertical: "middle", horizontal: "left" };
     cVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1062,7 +1151,7 @@ const buildDocumentWorksheet = (
     rLbl.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
 
     const rVal = worksheet.getCell("D14");
-    rVal.value = requisitionNo || "";
+    rVal.value = metaOptions?.includeRequisitionNo !== false ? (requisitionNo || "") : "";
     rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1097,7 +1186,7 @@ const buildDocumentWorksheet = (
 
     worksheet.mergeCells("E13:F13");
     const rVal = worksheet.getCell("E13");
-    rVal.value = requisitionNo || "";
+    rVal.value = metaOptions?.includeRequisitionNo !== false ? (requisitionNo || "") : "";
     rVal.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "000000" } };
     rVal.alignment = { vertical: "middle", horizontal: "left" };
     rVal.border = { bottom: { style: "dotted", color: { argb: "64748B" } } };
@@ -1337,15 +1426,25 @@ const buildDocumentWorksheet = (
       isNumeric: isNumericQty,
       numericVal: typeof qtyVal === "number" ? qtyVal : undefined,
     });
-    if (isNumericQty) {
-      cellQty.numFmt = "#,##0.00";
+    if (isNumericQty && typeof qtyVal === "number") {
+      cellQty.numFmt = Number.isInteger(qtyVal) ? "#,##0" : "#,##0.##";
     }
+    cellQty.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
 
     // Col 4: Unit
     const cellUnit = r.getCell(4);
     applyCellFormatToExcel(cellUnit, itemRowIdx, 2, "center", rawUnit, {
       isLastRow: isLastItemRow,
     });
+    cellUnit.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
 
     // Cols 5 & 6: Price & Amount for Quotation / Invoice
     if (!isChallan) {
@@ -1358,6 +1457,11 @@ const buildDocumentWorksheet = (
       if (isNumericPrice) {
         cellPrice.numFmt = "#,##0.00";
       }
+      cellPrice.alignment = {
+        vertical: "middle",
+        horizontal: "right",
+        wrapText: true,
+      };
 
       const cellAmount = r.getCell(6);
       const hasContent = rowData && (htmlToPlainText(rawDesc).trim() || cleanQtyStr || cleanPriceStr);
@@ -1370,6 +1474,11 @@ const buildDocumentWorksheet = (
         formula: amountFormula,
       });
       cellAmount.numFmt = "#,##0.00";
+      cellAmount.alignment = {
+        vertical: "middle",
+        horizontal: "right",
+        wrapText: true,
+      };
     }
 
     currentRowNum++;
@@ -1689,7 +1798,8 @@ export const generateExcelWorkbook = async (
   discountType?: "percentage" | "fixed",
   discountValue?: number,
   discountAmount?: number,
-  companyId: "comilla" | "zainee" = "comilla"
+  companyId: "comilla" | "zainee" = "comilla",
+  metaOptions?: ExcelMetadataOptions
 ): Promise<ExcelJS.Workbook> => {
   const isZainee = companyId === "zainee";
   const companyName = isZainee ? "Zainee Enterprise" : "Comilla Traders";
@@ -1788,7 +1898,8 @@ export const generateExcelWorkbook = async (
       discountType || "percentage",
       discountValue || 0,
       discountAmount || 0,
-      companyName
+      companyName,
+      metaOptions
     );
   });
 

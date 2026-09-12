@@ -4,6 +4,7 @@ import {
   Save, 
   Printer, 
   Download, 
+  FileSpreadsheet,
   RefreshCw, 
   FolderKanban,
   Laptop
@@ -97,15 +98,15 @@ export default function ErpTopNav({
               id="topnav-btn-export-excel"
               onClick={onExportExcel}
               disabled={isGeneratingExcel}
-              className="h-8 px-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
-              title="Download clean formatted Excel file"
+              className="h-8 px-2.5 bg-white hover:bg-emerald-50/80 text-slate-700 hover:text-emerald-800 border border-slate-300 hover:border-emerald-400 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+              title="Download clean formatted Excel file (.xlsx)"
             >
               {isGeneratingExcel ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-slate-500" />
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-emerald-600" />
               ) : (
-                <Download className="h-3.5 w-3.5 text-slate-600" />
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
               )}
-              <span className="hidden xl:inline">Excel</span>
+              <span>Excel</span>
             </button>
 
             {/* Print / Save PDF */}
