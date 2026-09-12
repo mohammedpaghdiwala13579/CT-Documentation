@@ -328,7 +328,7 @@ export default function QuotationBuilder() {
       setIncludePoNumber(targetDraft.includePoNumber !== undefined ? Boolean(targetDraft.includePoNumber) : true);
       setRows(targetDraft.rows && targetDraft.rows.length > 0 ? targetDraft.rows.map((r: any) => ({ ...r })) : (() => {
         const initRows: QuotationRow[] = [];
-        for (let i = 1; i <= 28; i++) {
+        for (let i = 1; i <= 35; i++) {
           initRows.push({ sl: i, desc: "", qty: "", unit: "", price: "", amount: 0 });
         }
         return initRows;
@@ -370,13 +370,13 @@ export default function QuotationBuilder() {
     }, 3500);
   };
 
-  // Grid rows: starts with saved draft rows or 28 blank rows by default
+  // Grid rows: starts with saved draft rows or 35 blank rows by default
   const [rows, setRows] = useState<QuotationRow[]>(() => {
     if (initialDraft?.rows && Array.isArray(initialDraft.rows) && initialDraft.rows.length > 0) {
       return initialDraft.rows;
     }
     const initialRows: QuotationRow[] = [];
-    for (let i = 1; i <= 28; i++) {
+    for (let i = 1; i <= 35; i++) {
       initialRows.push({
         sl: i,
         desc: "",
@@ -825,7 +825,7 @@ export default function QuotationBuilder() {
     setTransportationFee("0");
     
     const initialRows: QuotationRow[] = [];
-    for (let i = 1; i <= 28; i++) {
+    for (let i = 1; i <= 35; i++) {
       initialRows.push({
         sl: i,
         desc: "",
