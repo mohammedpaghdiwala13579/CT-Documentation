@@ -87,9 +87,10 @@ function mergeAndStyleRange(
   }
 }
 
-// Calculate dynamic row height for description column so no text is hidden
-function calculateDescriptionRowHeight(text: string, colWidthChars: number = 48): number {
-  if (!text || text.trim() === "") return 20;
+// Calculate dynamic row height strictly according to actual text content
+// Single-line text is compacted to 18pt, multi-line calculates visual wrap lines
+export function calculateDescriptionRowHeight(text: string, colWidthChars: number = 48): number {
+  if (!text || text.trim() === "") return 18;
 
   const lines = text.split(/\r\n|\r|\n/);
   let totalVisualLines = 0;
@@ -99,13 +100,129 @@ function calculateDescriptionRowHeight(text: string, colWidthChars: number = 48)
     totalVisualLines += visual;
   }
 
-  // Single line description is vertically compacted to 20pt
+  // Single-line items are vertically compacted to 18pt (clean, crisp, no empty space)
   if (totalVisualLines <= 1) {
-    return 20;
+    return 18;
   }
 
-  // Multi-line expands neatly so text is never truncated
-  return Math.min(150, Math.max(20, totalVisualLines * 16 + 4));
+  // Multi-line expands tightly according to content: ~14.5pt per line + 4pt padding
+  return Math.min(140, Math.max(18, Math.round(totalVisualLines * 14.5 + 4)));
+}
+
+// Fixed heights (in points) of sections according to the exact layout format:
+// Top row (title): 24pt
+// Rows 2-11 (letterhead padding): 10 rows * 13pt = 130pt
+// Metadata boxes (Rows 12-14): ~64pt
+// Spacer row 15: 6pt
+// Table header row: 22pt
+// Total fixed header space = 246pt
+const FIXED_HEADER_SPACE_PT = 246;
+
+// Fixed Signature Block on EVERY page:
+// Spacer before sig: 8pt
+// "For <Company>" (in quotation/invoice): 16pt (0pt in challan)
+// Signature line (Receiver & Authorized Signature): 36pt
+// Spacer: 4pt
+// Non-returnable notice: 14pt
+// Total fixed signature space = ~78pt (62pt for challan)
+const FIXED_SIGNATURE_SPACE_PT_QUOTATION = 78;
+const FIXED_SIGNATURE_SPACE_PT_CHALLAN = 62;
+
+// Totals section space (on final page for quotation/invoice):
+// Quotation: 1 row = 22pt
+// Invoice: 4 to 5 rows = 4 * 18 + 22 = 94pt to 112pt
+// Challan: 0pt (no prices/totals)
+// Intermediate page subtotal row: 20pt
+
+// Usable printable vertical points on an A4 sheet with 0.25in margins:
+// A4 height = 842 pt. Printable area = 842 - 36 (margins) ≈ 790 pt.
+// Available space for items + totals on a page = 790 - FIXED_HEADER_SPACE_PT - FIXED_SIGNATURE_SPACE_PT ≈ 466 pt (Quotation) / 482 pt (Challan).
+const TOTAL_PAGE_USABLE_PT = 765;
+
+export interface PageItemSlice {
+  startIndex: number;
+  endIndex: number;
+  items: QuotationRow[];
+}
+
+// Dynamic capacity-based placement: calculates the available vertical space on each page
+// and packs the maximum possible items without exceeding page limit or splitting items.
+export function partitionItemsByPageCapacity(
+  items: QuotationRow[],
+  docType: "quotation" | "challan" | "invoice",
+  includeDiscount: boolean = false
+): PageItemSlice[] {
+  if (items.length === 0) {
+    return [{ startIndex: 0, endIndex: 0, items: [] }];
+  }
+
+  const isChallan = docType === "challan";
+  const sigSpace = isChallan ? FIXED_SIGNATURE_SPACE_PT_CHALLAN : FIXED_SIGNATURE_SPACE_PT_QUOTATION;
+  const colWidth = isChallan ? 62 : 48;
+
+  // Space reserved for totals on the LAST page:
+  const lastPageTotalsSpace = isChallan
+    ? 0
+    : docType === "invoice"
+    ? includeDiscount ? 104 : 86
+    : 24;
+
+  // Space reserved for page subtotal on INTERMEDIATE pages:
+  const intermediateTotalsSpace = isChallan ? 0 : 20;
+
+  const pages: PageItemSlice[] = [];
+  let itemIdx = 0;
+  const totalItems = items.length;
+
+  while (itemIdx < totalItems) {
+    // Check if remaining items can all fit onto this page as the last page
+    let testH = FIXED_HEADER_SPACE_PT + sigSpace + lastPageTotalsSpace;
+    let canFitAllRemaining = true;
+    let tempIdx = itemIdx;
+
+    while (tempIdx < totalItems) {
+      const h = calculateDescriptionRowHeight(stripHtml(items[tempIdx].desc || ""), colWidth);
+      if (testH + h <= TOTAL_PAGE_USABLE_PT) {
+        testH += h;
+        tempIdx++;
+      } else {
+        canFitAllRemaining = false;
+        break;
+      }
+    }
+
+    if (canFitAllRemaining) {
+      // All remaining fit neatly onto this final page!
+      pages.push({
+        startIndex: itemIdx,
+        endIndex: totalItems,
+        items: items.slice(itemIdx, totalItems),
+      });
+      break;
+    }
+
+    // Otherwise, this is an intermediate page: pack maximum possible items
+    let pageH = FIXED_HEADER_SPACE_PT + sigSpace + intermediateTotalsSpace;
+    const startOfPage = itemIdx;
+
+    while (itemIdx < totalItems) {
+      const h = calculateDescriptionRowHeight(stripHtml(items[itemIdx].desc || ""), colWidth);
+      // If adding this item exceeds the page limit, stop here and move the entire item to the next page
+      if (pageH + h > TOTAL_PAGE_USABLE_PT && itemIdx > startOfPage) {
+        break;
+      }
+      pageH += h;
+      itemIdx++;
+    }
+
+    pages.push({
+      startIndex: startOfPage,
+      endIndex: itemIdx,
+      items: items.slice(startOfPage, itemIdx),
+    });
+  }
+
+  return pages;
 }
 
 export function generateExcelWorkbook(options: ExcelGeneratorOptions): Uint8Array {
@@ -183,8 +300,28 @@ export function generateExcelWorkbook(options: ExcelGeneratorOptions): Uint8Arra
   const parsedTransportationFee = docType === "invoice" ? parseNumericInput(transportationFee) : 0;
   const grandTotal = Math.max(0, rowsTotal - discountAmount + vatAmount + parsedTransportationFee);
 
-  // Pagination calculation: each page must be filled before heading to the next
-  const totalPages = Math.max(1, Math.ceil(activeRows.length / rowsPerPage));
+  // Automatic Capacity-Based Pagination vs Fixed Rows Per Page:
+  // If rowsPerPage is 0 or negative, use dynamic capacity placement to maximize items per sheet cleanly.
+  // Otherwise, if a positive rowsPerPage is provided, partition according to that count while still
+  // respecting page boundaries and moving entire items without cutting them.
+  let pageSlices: PageItemSlice[] = [];
+  if (!rowsPerPage || rowsPerPage <= 0) {
+    pageSlices = partitionItemsByPageCapacity(activeRows, docType, includeDiscount);
+  } else {
+    // Fixed partition mode
+    const totalPagesFixed = Math.max(1, Math.ceil(activeRows.length / rowsPerPage));
+    for (let p = 0; p < totalPagesFixed; p++) {
+      const s = p * rowsPerPage;
+      const e = Math.min(activeRows.length, (p + 1) * rowsPerPage);
+      pageSlices.push({
+        startIndex: s,
+        endIndex: e,
+        items: activeRows.slice(s, e),
+      });
+    }
+  }
+
+  const totalPages = pageSlices.length;
 
   const wb = XLSX.utils.book_new();
 
@@ -564,9 +701,9 @@ export function generateExcelWorkbook(options: ExcelGeneratorOptions): Uint8Arra
     // ==========================================
     // 5. TABLE DATA ROWS FOR THIS PAGE
     // ==========================================
-    const startIndex = (pageNum - 1) * rowsPerPage;
-    const endIndex = Math.min(activeRows.length, pageNum * rowsPerPage);
-    const pageItems = activeRows.slice(startIndex, endIndex);
+    const currentSlice = pageSlices[pageNum - 1] || { startIndex: 0, endIndex: 0, items: [] };
+    const startIndex = currentSlice.startIndex;
+    const pageItems = currentSlice.items;
 
     let currentRow = tableHeaderRowIndex + 1;
     let pageItemsSubtotal = 0;
@@ -641,8 +778,8 @@ export function generateExcelWorkbook(options: ExcelGeneratorOptions): Uint8Arra
       currentRow++;
     }
 
-    // Pad empty rows if requested so every page is filled to its capacity
-    if (padEmptyRows && pageItems.length < rowsPerPage) {
+    // Pad empty rows if requested and fixed rowsPerPage is enabled so every page is filled to its capacity
+    if (padEmptyRows && rowsPerPage > 0 && pageItems.length < rowsPerPage) {
       const neededPadding = rowsPerPage - pageItems.length;
       for (let pad = 0; pad < neededPadding; pad++) {
         const slNumber = startIndex + pageItems.length + pad + 1;
@@ -661,7 +798,7 @@ export function generateExcelWorkbook(options: ExcelGeneratorOptions): Uint8Arra
           setCell(ws, currentRow, 5, "", { border: thinBorder });
         }
 
-        rowHeights[currentRow] = { hpt: 20 };
+        rowHeights[currentRow] = { hpt: 18 };
         currentRow++;
       }
     }

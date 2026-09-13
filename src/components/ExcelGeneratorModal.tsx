@@ -10,7 +10,7 @@ import {
   Printer
 } from "lucide-react";
 import { QuotationRow, CompanyProfile } from "../types";
-import { generateExcelWorkbook, downloadExcelFile } from "../utils/excelGenerator";
+import { generateExcelWorkbook, downloadExcelFile, partitionItemsByPageCapacity } from "../utils/excelGenerator";
 import { stripHtml } from "../utils/textFormatter";
 
 export interface ExcelGeneratorModalProps {
@@ -74,7 +74,7 @@ export default function ExcelGeneratorModal({
   discountType = "percentage",
   discountValue = "0",
 }: ExcelGeneratorModalProps) {
-  const [rowsPerPage, setRowsPerPage] = useState<number>(20);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(0); // 0 = Auto Capacity (dynamic based on available page space)
   const [padEmptyRows, setPadEmptyRows] = useState<boolean>(true);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isGenerated, setIsGenerated] = useState<boolean>(false);
@@ -96,8 +96,14 @@ export default function ExcelGeneratorModal({
     }
   }
 
-  const activeCount = lastNonEmptyIndex >= 0 ? lastNonEmptyIndex + 1 : 1;
-  const totalSheets = Math.max(1, Math.ceil(activeCount / rowsPerPage));
+  const activeRows = lastNonEmptyIndex >= 0 ? rows.slice(0, lastNonEmptyIndex + 1) : rows.slice(0, 1);
+  const activeCount = activeRows.length;
+
+  // Calculate pages based on selected mode (Auto Capacity vs fixed)
+  const autoSlices = partitionItemsByPageCapacity(activeRows, docType, includeDiscount);
+  const totalSheets = rowsPerPage === 0 
+    ? autoSlices.length 
+    : Math.max(1, Math.ceil(activeCount / rowsPerPage));
 
   // Default filename
   const formatName = docType.toUpperCase();
@@ -244,9 +250,21 @@ export default function ExcelGeneratorModal({
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-blue-600" />
-                <span>Items Per Page (Sheet Capacity)</span>
+                <span>Page Capacity & Sheet Layout</span>
               </label>
               <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setRowsPerPage(0)}
+                  title="Automatically packs maximum items per sheet according to text heights"
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md border transition-colors cursor-pointer ${
+                    rowsPerPage === 0
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs font-bold"
+                      : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  ⚡ Auto Fit
+                </button>
                 {[15, 18, 20, 25].map((val) => (
                   <button
                     key={val}
@@ -254,7 +272,7 @@ export default function ExcelGeneratorModal({
                     onClick={() => setRowsPerPage(val)}
                     className={`px-2.5 py-1 text-xs font-semibold rounded-md border transition-colors cursor-pointer ${
                       rowsPerPage === val
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs font-bold"
                         : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -273,34 +291,55 @@ export default function ExcelGeneratorModal({
                 </span>
               </div>
               <div className="text-[11px] text-emerald-800 space-y-0.5 mt-1.5">
-                {Array.from({ length: totalSheets }, (_, idx) => {
-                  const pNum = idx + 1;
-                  const startItem = idx * rowsPerPage + 1;
-                  const endItem = Math.min(activeCount, pNum * rowsPerPage);
-                  return (
-                    <div key={pNum} className="flex items-center justify-between">
-                      <span className="font-semibold">
-                        Sheet {pNum} (&quot;Page {pNum}&quot;):
-                      </span>
-                      <span>
-                        Items {startItem}–{endItem} {pNum === totalSheets ? "+ Grand Total & Signatures" : "+ Page Total & Signatures"}
-                      </span>
-                    </div>
-                  );
-                })}
+                {rowsPerPage === 0 ? (
+                  autoSlices.map((slice, idx) => {
+                    const pNum = idx + 1;
+                    const startItem = slice.startIndex + 1;
+                    const endItem = slice.endIndex;
+                    const isLast = pNum === autoSlices.length;
+                    return (
+                      <div key={pNum} className="flex items-center justify-between">
+                        <span className="font-semibold">
+                          Sheet {pNum} (&quot;Page {pNum}&quot;):
+                        </span>
+                        <span>
+                          Items {startItem}–{endItem} ({slice.items.length} items) {isLast ? "+ Totals & Signatures" : "+ Page Subtotal & Signatures"}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  Array.from({ length: totalSheets }, (_, idx) => {
+                    const pNum = idx + 1;
+                    const startItem = idx * rowsPerPage + 1;
+                    const endItem = Math.min(activeCount, pNum * rowsPerPage);
+                    return (
+                      <div key={pNum} className="flex items-center justify-between">
+                        <span className="font-semibold">
+                          Sheet {pNum} (&quot;Page {pNum}&quot;):
+                        </span>
+                        <span>
+                          Items {startItem}–{endItem} {pNum === totalSheets ? "+ Grand Total & Signatures" : "+ Page Total & Signatures"}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            {/* Pad empty rows option */}
-            <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer pt-1">
-              <input
-                type="checkbox"
-                checked={padEmptyRows}
-                onChange={(e) => setPadEmptyRows(e.target.checked)}
-                className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <span>Fill table rows on final page to maintain uniform format height</span>
-            </label>
+            {/* Pad empty rows option (only relevant when fixed rowsPerPage is selected) */}
+            {rowsPerPage > 0 && (
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={padEmptyRows}
+                  onChange={(e) => setPadEmptyRows(e.target.checked)}
+                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span>Fill empty rows on final page to maintain uniform table size</span>
+              </label>
+            )}
           </div>
 
           {/* Filename Preview */}
