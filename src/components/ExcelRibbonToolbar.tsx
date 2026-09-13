@@ -2,21 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { 
   ChevronDown, 
   Check, 
-  Palette, 
   Plus, 
-  Copy, 
-  Trash2, 
-  Save, 
-  RefreshCw, 
-  FileSpreadsheet, 
-  Download, 
-  Printer, 
+  Palette,
   X,
-  Sparkles,
-  Bot,
   Undo2,
-  Redo2,
-  FolderOpen
+  Redo2
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
@@ -354,79 +344,6 @@ export default function ExcelRibbonToolbar({
             <Plus className="h-3.5 w-3.5 text-blue-600" />
             <span className="hidden sm:inline">New</span>
           </button>
-
-          {/* Duplicate */}
-          {currentDocId && onDuplicateDoc && (
-            <button
-              type="button"
-              id="btn-duplicate-doc"
-              onClick={onDuplicateDoc}
-              className="h-7 px-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-md border border-slate-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
-              title="Duplicate Sheet"
-            >
-              <Copy className="h-3.5 w-3.5 text-slate-500" />
-              <span className="hidden md:inline">Duplicate</span>
-            </button>
-          )}
-
-          {/* Delete */}
-          {currentDocId && onDeleteDoc && (
-            <button
-              type="button"
-              id="btn-delete-doc"
-              onClick={onDeleteDoc}
-              className="h-7 px-2 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 rounded-md border border-rose-200 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
-              title="Delete Sheet"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-              <span className="hidden md:inline">Delete</span>
-            </button>
-          )}
-
-          {/* Export to Excel */}
-          {onDownloadExcel && (
-            <button
-              type="button"
-              id="btn-ribbon-excel"
-              onClick={onDownloadExcel}
-              disabled={isGeneratingExcel}
-              className="h-7 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 hover:text-emerald-900 rounded-md border border-emerald-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold disabled:opacity-50"
-              title="Export to Excel Spreadsheet (.xlsx) exactly as PDF"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
-              <span>{isGeneratingExcel ? "Exporting..." : "Excel"}</span>
-            </button>
-          )}
-
-          {/* Direct PDF Download */}
-          {onDownloadPDF && (
-            <button
-              type="button"
-              id="btn-ribbon-pdf"
-              onClick={onDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="h-7 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-800 hover:text-rose-900 rounded-md border border-rose-200 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold disabled:opacity-50"
-              title="Download PDF Document (.pdf)"
-            >
-              <Download className="h-3.5 w-3.5 text-rose-600" />
-              <span>{isGeneratingPDF ? "Generating..." : "PDF"}</span>
-            </button>
-          )}
-
-          {/* Print */}
-          {onPrint && (
-            <button
-              type="button"
-              id="btn-ribbon-print"
-              onClick={onPrint}
-              className="h-7 px-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-md border border-slate-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
-              title="Print Document (Ctrl+P)"
-            >
-              <Printer className="h-3.5 w-3.5 text-slate-600" />
-              <span className="hidden sm:inline">Print</span>
-            </button>
-          )}
-
         </div>
       </div>
 
