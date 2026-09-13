@@ -33,6 +33,294 @@ export interface ExcelGeneratorOptions {
 }
 
 /**
+ * Converts standard CSS color (rgb, rgba, hex, named) into 8-character ARGB hex for ExcelJS.
+ */
+function cssColorToArgb(colorStr: string): string | null {
+  if (!colorStr) return null;
+  const s = colorStr.trim().toLowerCase();
+  if (s === "transparent" || s === "inherit" || s === "initial" || s === "none") return null;
+
+  // #RGB or #RRGGBB
+  if (s.startsWith("#")) {
+    const hex = s.slice(1);
+    if (hex.length === 3) {
+      const r = hex[0] + hex[0];
+      const g = hex[1] + hex[1];
+      const b = hex[2] + hex[2];
+      return `FF${r}${g}${b}`.toUpperCase();
+    }
+    if (hex.length === 6) {
+      return `FF${hex}`.toUpperCase();
+    }
+    if (hex.length === 8) {
+      return hex.toUpperCase();
+    }
+  }
+
+  // rgb(r, g, b) or rgba(r, g, b, a)
+  const rgbMatch = s.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
+  if (rgbMatch) {
+    const r = Math.min(255, parseInt(rgbMatch[1], 10)).toString(16).padStart(2, "0");
+    const g = Math.min(255, parseInt(rgbMatch[2], 10)).toString(16).padStart(2, "0");
+    const b = Math.min(255, parseInt(rgbMatch[3], 10)).toString(16).padStart(2, "0");
+    const a = rgbMatch[4] !== undefined
+      ? Math.round(Math.min(1, parseFloat(rgbMatch[4])) * 255).toString(16).padStart(2, "0")
+      : "FF";
+    return `${a}${r}${g}${b}`.toUpperCase();
+  }
+
+  // Named CSS colors map
+  const NAMED_COLORS: Record<string, string> = {
+    black: "FF000000",
+    white: "FFFFFFFF",
+    red: "FFFF0000",
+    green: "FF008000",
+    blue: "FF0000FF",
+    yellow: "FFFFFF00",
+    cyan: "FF00FFFF",
+    magenta: "FFFF00FF",
+    gray: "FF808080",
+    grey: "FF808080",
+    orange: "FFFFA500",
+    purple: "FF800080",
+    gold: "FFFFD700",
+    silver: "FFC0C0C0",
+    navy: "FF000080",
+    teal: "FF008080",
+    maroon: "FF800000",
+    olive: "FF808000",
+    lime: "FF00FF00",
+  };
+
+  if (NAMED_COLORS[s]) {
+    return NAMED_COLORS[s];
+  }
+
+  return null;
+}
+
+/**
+ * Parses font size string (e.g., '14pt', '16px', '1.2em') into Excel point number.
+ */
+function parseFontSizeToPt(sizeStr: string): number | null {
+  if (!sizeStr) return null;
+  const s = sizeStr.trim().toLowerCase();
+  const num = parseFloat(s);
+  if (isNaN(num) || num <= 0) return null;
+
+  if (s.endsWith("pt")) return Math.round(num * 10) / 10;
+  if (s.endsWith("px")) return Math.round((num * 0.75) * 10) / 10;
+  if (s.endsWith("em") || s.endsWith("rem")) return Math.round((num * 8) * 10) / 10;
+
+  return Math.round(num * 10) / 10;
+}
+
+interface InlineStyleContext {
+  color?: string; // ARGB
+  bgColor?: string; // ARGB (highlight)
+  size?: number; // pt
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean | "double";
+  strike?: boolean;
+  fontFamily?: string;
+}
+
+/**
+ * Parses an HTML string (from rich text editor) into an ExcelJS RichText array
+ * and extracts any dominant background highlight color for cell filling.
+ */
+export function parseHtmlToRichText(
+  html: string,
+  defaultFontName = "Arial",
+  defaultSize = 7.5
+): { richText: ExcelJS.RichText[]; cellBgColor: string | null; plainText: string } {
+  if (!html) {
+    return { richText: [], cellBgColor: null, plainText: "" };
+  }
+
+  // Fast path if purely plain text (no tags or entities)
+  if (!/<[a-z][\s\S]*>/i.test(html) && !/&[a-z0-9#]+;/i.test(html)) {
+    const text = html.replace(/\r\n/g, "\n");
+    return {
+      richText: [
+        {
+          text,
+          font: { name: defaultFontName, size: defaultSize, color: { argb: "FF000000" } },
+        },
+      ],
+      cellBgColor: null,
+      plainText: text,
+    };
+  }
+
+  // In browser environments, use DOMParser for accurate HTML tree traversal
+  if (typeof DOMParser !== "undefined") {
+    try {
+      const parser = new DOMParser();
+      // Normalize line-breaking elements
+      const preparedHtml = html
+        .replace(/<br\s*[\/]?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<\/div>/gi, "\n")
+        .replace(/<li>/gi, "• ")
+        .replace(/<\/li>/gi, "\n");
+
+      const doc = parser.parseFromString(`<body>${preparedHtml}</body>`, "text/html");
+      const richText: ExcelJS.RichText[] = [];
+      let dominantCellBgColor: string | null = null;
+      let totalPlainText = "";
+
+      function traverse(node: Node, ctx: InlineStyleContext) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const rawText = node.textContent || "";
+          if (!rawText) return;
+
+          totalPlainText += rawText;
+
+          // Build ExcelJS Font object
+          const font: Partial<ExcelJS.Font> = {
+            name: ctx.fontFamily || defaultFontName,
+            size: ctx.size || defaultSize,
+            bold: !!ctx.bold,
+            italic: !!ctx.italic,
+            underline: ctx.underline === "double" ? "double" : !!ctx.underline,
+            strike: !!ctx.strike,
+            color: ctx.color ? { argb: ctx.color } : { argb: "FF000000" },
+          };
+
+          richText.push({ text: rawText, font });
+
+          if (ctx.bgColor && !dominantCellBgColor) {
+            dominantCellBgColor = ctx.bgColor;
+          }
+          return;
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const tagName = el.tagName.toLowerCase();
+
+          // Inherit previous context
+          const nextCtx: InlineStyleContext = { ...ctx };
+
+          // HTML Tag-based formatting
+          if (tagName === "b" || tagName === "strong") nextCtx.bold = true;
+          if (tagName === "i" || tagName === "em") nextCtx.italic = true;
+          if (tagName === "u" || tagName === "ins") nextCtx.underline = true;
+          if (tagName === "s" || tagName === "strike" || tagName === "del") nextCtx.strike = true;
+
+          // Inline style attributes
+          const style = el.style;
+          if (style) {
+            if (style.color) {
+              const argb = cssColorToArgb(style.color);
+              if (argb) nextCtx.color = argb;
+            }
+
+            // Highlighting / Background color
+            const bg = style.backgroundColor || style.background;
+            if (bg) {
+              const bgArgb = cssColorToArgb(bg);
+              if (bgArgb) nextCtx.bgColor = bgArgb;
+            }
+
+            // Font size
+            if (style.fontSize) {
+              const pt = parseFontSizeToPt(style.fontSize);
+              if (pt) nextCtx.size = pt;
+            }
+
+            // Font weight
+            if (style.fontWeight) {
+              const fw = style.fontWeight.toLowerCase();
+              if (fw === "bold" || fw === "700" || fw === "800" || fw === "900") {
+                nextCtx.bold = true;
+              } else if (fw === "normal" || fw === "400") {
+                nextCtx.bold = false;
+              }
+            }
+
+            // Font style
+            if (style.fontStyle) {
+              if (style.fontStyle.toLowerCase() === "italic") nextCtx.italic = true;
+              else if (style.fontStyle.toLowerCase() === "normal") nextCtx.italic = false;
+            }
+
+            // Text decoration
+            if (style.textDecoration || (style as any).textDecorationLine) {
+              const deco = (style.textDecoration || (style as any).textDecorationLine).toLowerCase();
+              if (deco.includes("underline")) {
+                nextCtx.underline = (style as any).textDecorationStyle === "double" ? "double" : true;
+              }
+              if (deco.includes("line-through")) {
+                nextCtx.strike = true;
+              }
+              if (deco.includes("none")) {
+                nextCtx.underline = false;
+                nextCtx.strike = false;
+              }
+            }
+
+            // Font family
+            if (style.fontFamily) {
+              const cleanFamily = style.fontFamily.split(",")[0].replace(/['"]/g, "").trim();
+              if (cleanFamily) nextCtx.fontFamily = cleanFamily;
+            }
+          }
+
+          // HTML font tag attributes (legacy)
+          if (tagName === "font") {
+            const fontColor = el.getAttribute("color");
+            if (fontColor) {
+              const argb = cssColorToArgb(fontColor);
+              if (argb) nextCtx.color = argb;
+            }
+            const fontFace = el.getAttribute("face");
+            if (fontFace) nextCtx.fontFamily = fontFace;
+          }
+
+          // HTML mark tag (highlight)
+          if (tagName === "mark") {
+            nextCtx.bgColor = "FFFFFF00"; // default yellow highlight
+          }
+
+          Array.from(node.childNodes).forEach((child) => traverse(child, nextCtx));
+        }
+      }
+
+      Array.from(doc.body.childNodes).forEach((child) => traverse(child, {}));
+
+      // If richText is empty, provide fallback
+      if (richText.length === 0) {
+        const clean = cleanHtmlText(html);
+        return {
+          richText: [{ text: clean, font: { name: defaultFontName, size: defaultSize, color: { argb: "FF000000" } } }],
+          cellBgColor: null,
+          plainText: clean,
+        };
+      }
+
+      return {
+        richText,
+        cellBgColor: dominantCellBgColor,
+        plainText: totalPlainText.trim(),
+      };
+    } catch (e) {
+      console.warn("DOMParser rich text parse error, falling back:", e);
+    }
+  }
+
+  // Regex fallback
+  const clean = cleanHtmlText(html);
+  return {
+    richText: [{ text: clean, font: { name: defaultFontName, size: defaultSize, color: { argb: "FF000000" } } }],
+    cellBgColor: null,
+    plainText: clean,
+  };
+}
+
+/**
  * Strips HTML tags, decodes standard HTML entities, and normalizes line breaks
  * so multi-line text wraps cleanly in Excel cells.
  */
@@ -93,6 +381,8 @@ interface PreparedItem {
   row: QuotationRow;
   originalIndex: number;
   cleanDesc: string;
+  richDesc: ExcelJS.RichText[];
+  cellBgColor: string | null;
   height: number;
 }
 
@@ -105,9 +395,10 @@ interface PageData {
 
 /**
  * Generates an Excel document (.xlsx) with:
- * - Row 1: Document format title (e.g. "QUOTATION", "DELIVERY CHALLAN", "INVOICE") with NO BORDERS and clean transparent background
+ * - Row 1: Document format title with NO BORDERS and clean transparent background
  * - Rows 2 to 12: 11 blank rows for pre-printed company letterhead stationery
  * - Utilizes the FULL printable height of A4 paper (~800pt) exclusively to fit maximum items per page
+ * - Preserves all user formatting: text colors, font size changes, highlights/background fills, bold, italic, underline
  * - Stamp image placed ABOVE the Authorized Signature text line for Comilla Traders (matching PDF)
  * - Signature section present on EVERY single page according to the format
  * - Dynamic pagination dividing items when the A4 printable area is full across worksheets
@@ -164,15 +455,26 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   // Compact height per item to utilize the whole page exclusively and maximize item count
   // Standard single line: 13.5pt. Each wrapped line adds ~9.5pt.
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
-    const cleanDesc = cleanHtmlText(r.desc);
+    // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
+    const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
+    const cleanDesc = plainText || cleanHtmlText(r.desc);
     const lineBreaks = (cleanDesc.match(/\n/g) || []).length + 1;
     const charWrapLines = Math.ceil(cleanDesc.length / (isChallan ? 58 : 46));
     const lines = Math.max(lineBreaks, charWrapLines, 1);
-    const height = lines === 1 ? 13.5 : Math.max(13.5, lines * 9.5 + 2);
+    
+    // Check if any rich text fragment has enlarged font size > 9pt
+    const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
+    const fontMultiplier = maxFontSize > 9 ? maxFontSize / 7.5 : 1;
+
+    const baseItemHeight = lines === 1 ? 13.5 : Math.max(13.5, lines * 9.5 + 2);
+    const height = Math.round(baseItemHeight * fontMultiplier * 10) / 10;
+
     return {
       row: r,
       originalIndex: idx + 1,
       cleanDesc,
+      richDesc: richText,
+      cellBgColor,
       height,
     };
   });
@@ -249,14 +551,12 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_11_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT; // ~202pt
   const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_11_ROWS_HEIGHT + TABLE_HEADER_HEIGHT + 3; // ~165pt
 
-  // Signature block is now present on EVERY page!
-  // Top gap (4) + For Company (12.5) + Stamp clearance (3 * 13 = 39) + Sig lines (13) + Notice gap (3) + Notice (11) = 82.5pt
+  // Signature block is present on EVERY page according to format
   const SIGNATURE_BLOCK_HEIGHT = 82.5;
 
   // Summary block (Subtotal, VAT, Grand Total) is placed on the final page
   const SUMMARY_BLOCK_HEIGHT = isChallan ? 0 : (summaryRowsCount * 13 + 5);
 
-  // Every page reserves room for the signature block
   const INTERMEDIATE_FOOTER_HEIGHT = SIGNATURE_BLOCK_HEIGHT;
   const FINAL_FOOTER_HEIGHT = SUMMARY_BLOCK_HEIGHT + SIGNATURE_BLOCK_HEIGHT;
 
@@ -528,7 +828,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     currentRow++;
 
     // =========================================================================
-    // TABLE ITEMS (Compact vertical cell height)
+    // TABLE ITEMS (Preserving Text Color, Font Size, Highlights, Bold, Italic)
     // =========================================================================
     page.items.forEach((item) => {
       const r = item.row;
@@ -540,14 +840,14 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       if (isChallan) {
         rowData = [
           item.originalIndex,
-          item.cleanDesc,
+          "", // description cell populated with RichText below
           qtyVal > 0 ? qtyVal : (r.qty || ""),
           r.unit || "",
         ];
       } else {
         rowData = [
           item.originalIndex,
-          item.cleanDesc,
+          "", // description cell populated with RichText below
           qtyVal > 0 ? qtyVal : (r.qty || ""),
           r.unit || "",
           priceVal > 0 ? priceVal : "",
@@ -558,27 +858,49 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       const row = ws.addRow(rowData);
       row.height = item.height;
 
+      // Description Cell (Col 2): Apply richText formatting & highlight fill
+      const descCell = row.getCell(2);
+      if (item.richDesc && item.richDesc.length > 0) {
+        descCell.value = { richText: item.richDesc };
+      } else {
+        descCell.value = item.cleanDesc;
+        descCell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
+      }
+
+      // If user applied a background highlight/fill color, reflect it in Excel cell fill
+      if (item.cellBgColor) {
+        descCell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: item.cellBgColor },
+        };
+      }
+
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
         cell.border = THIN_BORDER;
-        cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
 
         if (colNumber === 1) {
+          cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else if (colNumber === 2) {
           cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
         } else if (colNumber === 3) {
+          cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
           cell.alignment = { horizontal: "center", vertical: "middle" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.##";
           }
         } else if (colNumber === 4) {
+          cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else if (colNumber === 5) {
+          cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
           cell.alignment = { horizontal: "right", vertical: "middle" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
           }
         } else if (colNumber === 6) {
+          cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
           cell.alignment = { horizontal: "right", vertical: "middle" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
@@ -710,7 +1032,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     }
 
     // =========================================================================
-    // SIGNATURES & STAMP SECTION (Now present on EVERY PAGE according to format)
+    // SIGNATURES & STAMP SECTION (Present on EVERY PAGE according to format)
     // =========================================================================
     // Top spacing above signature block
     const sigGap = ws.addRow([]);
@@ -740,7 +1062,6 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
     // Embed Stamp Image for Comilla Traders ABOVE the "Authorized Signature" text line
     if (isComilla && stampImageId !== null && !isChallan) {
-      // Anchored inside the 3 spacer rows directly above the signature line (rows stampStartRowIndex to currentRow-1)
       const startCol = isChallan ? 2.3 : 4.3;
       ws.addImage(stampImageId, {
         tl: { col: startCol, row: stampStartRowIndex - 1.2 },
