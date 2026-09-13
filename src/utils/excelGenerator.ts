@@ -464,15 +464,15 @@ export function estimateTextLines(text: string, colCharCap: number): number {
 
 /**
  * Calculates exact row height (in pt) for Excel strictly using the formula:
- * Every cell must be +1.5pt than the lines:
- * - 1 line: 11 * 1 + 1.5 = 12.5pt (11 + 1.5)
- * - 2 lines: 11 * 2 + 1.5 = 23.5pt (11 * 2 + 1.5)
- * - 3 lines: 11 * 3 + 1.5 = 34.5pt (11 * 3 + 1.5)
- * - N lines: lines * 11 + 1.5 pt
+ * Every cell has text height of 11 pt plus 1 pt fixed height:
+ * - 1 line: 11 * 1 + 1 = 12pt (11 + 1)
+ * - 2 lines: 11 * 2 + 1 = 23pt (22 + 1)
+ * - 3 lines: 11 * 3 + 1 = 34pt (33 + 1)
+ * - N lines: lines * 11 + 1 pt
  */
 export function calculateCompactRowHeight(lines: number, _maxFontSize = 7.5): number {
   const count = Math.max(1, lines);
-  return count * 11 + 1.5;
+  return count * 11 + 1;
 }
 
 /**
@@ -583,11 +583,11 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
   const rowsToExport = activeRows.length > 0 ? activeRows : rows.slice(0, 10);
 
-  // Exact cell height formula per lines: lines * 11 + 1.5 pt:
-  // - 1 line: 11 * 1 + 1.5 = 12.5pt (11 + 1.5)
-  // - 2 lines: 11 * 2 + 1.5 = 23.5pt (11 * 2 + 1.5)
-  // - 3 lines: 11 * 3 + 1.5 = 34.5pt (11 * 3 + 1.5)
-  // - N lines: lines * 11 + 1.5 pt
+  // Exact cell height formula per lines: lines * 11 + 1 pt:
+  // - 1 line: 11 * 1 + 1 = 12pt (11 + 1)
+  // - 2 lines: 11 * 2 + 1 = 23pt (22 + 1)
+  // - 3 lines: 11 * 3 + 1 = 34pt (33 + 1)
+  // - N lines: lines * 11 + 1 pt
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
@@ -685,7 +685,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     const lLines = estimateTextLines(lText, isChallan ? 58 : 56);
     const rLines = estimateTextLines(rText, isChallan ? 26 : 32);
     const metaLines = Math.max(1, lLines, rLines);
-    calculatedMetaBoxHeight += metaLines * 11 + 1.5;
+    calculatedMetaBoxHeight += calculateCompactRowHeight(metaLines);
   }
 
   // FULL PAGE USAGE IN EXCEL (A4 height with 0.2in margins = ~800pt printable)
@@ -900,7 +900,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
         const metaLines = Math.max(1, lLines, rLines);
 
         const row = ws.addRow([]);
-        row.height = metaLines * 11 + 1.5;
+        row.height = calculateCompactRowHeight(metaLines);
 
         // Left Box
         if (lItem) {
