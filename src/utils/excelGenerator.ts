@@ -474,6 +474,154 @@ export function estimateTextLines(text: string, colCharCap: number): number {
 }
 
 /**
+ * Accurately determines the line-wrapped structure and row height for an Excel cell containing
+ * rich text (or plain text), accounting for:
+ * 1. Column character capacity at base font size (Arial 7.5pt):
+ *    - Challan description (col 63): ~64 chars
+ *    - Quotation description (col 53): ~56 chars
+ *    - Remarks (col 18): ~19 chars
+ * 2. Mixed font sizes (e.g. 7.5pt body with 12pt/14pt highlight phrase):
+ *    - Wider font sizes take proportionally more horizontal space per character
+ *    - Line height is calculated based ONLY on the maximum font size on THAT specific line,
+ *      NEVER multiplying an entire cell's height by a single large word's font size!
+ * 3. Explicit newlines (\n)
+ * 4. Snug inter-line spacing and clean vertical cell padding
+ */
+export function calculateAccurateCellLinesAndHeight(
+  richText: ExcelJS.RichText[] | null | undefined,
+  plainTextFallback: string,
+  colCharCap: number,
+  defaultFontSize = 7.5
+): { lines: number; height: number } {
+  const tokens: { text: string; size: number; isSpace: boolean; isNewline: boolean }[] = [];
+
+  if (richText && richText.length > 0) {
+    for (const rt of richText) {
+      const txt = rt.text || "";
+      const size = rt.font?.size || defaultFontSize;
+      const subLines = txt.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+      for (let i = 0; i < subLines.length; i++) {
+        if (i > 0) {
+          tokens.push({ text: "\n", size, isSpace: false, isNewline: true });
+        }
+        const line = subLines[i];
+        if (!line) continue;
+        const matches = line.match(/\S+|\s+/g) || [];
+        for (const m of matches) {
+          tokens.push({ text: m, size, isSpace: /^\s+$/.test(m), isNewline: false });
+        }
+      }
+    }
+  } else {
+    const txt = plainTextFallback || "";
+    const subLines = txt.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+    for (let i = 0; i < subLines.length; i++) {
+      if (i > 0) {
+        tokens.push({ text: "\n", size: defaultFontSize, isSpace: false, isNewline: true });
+      }
+      const line = subLines[i];
+      if (!line) continue;
+      const matches = line.match(/\S+|\s+/g) || [];
+      for (const m of matches) {
+        tokens.push({ text: m, size: defaultFontSize, isSpace: /^\s+$/.test(m), isNewline: false });
+      }
+    }
+  }
+
+  if (tokens.length === 0) {
+    return { lines: 1, height: 12 };
+  }
+
+  const lines: { text: string; size: number }[][] = [];
+  let currentLine: { text: string; size: number }[] = [];
+  let currentUnits = 0;
+
+  for (const tok of tokens) {
+    if (tok.isNewline) {
+      lines.push(currentLine);
+      currentLine = [];
+      currentUnits = 0;
+      continue;
+    }
+
+    const charUnit = tok.size / defaultFontSize;
+    const tokUnits = tok.text.length * charUnit;
+
+    if (currentLine.length === 0) {
+      if (tok.isSpace) continue; // skip leading space
+      if (tokUnits > colCharCap) {
+        let remText = tok.text;
+        while (remText.length > 0) {
+          const fitChars = Math.max(1, Math.floor(colCharCap / charUnit));
+          const chunk = remText.slice(0, fitChars);
+          remText = remText.slice(fitChars);
+          lines.push([{ text: chunk, size: tok.size }]);
+        }
+        currentLine = [];
+        currentUnits = 0;
+      } else {
+        currentLine.push({ text: tok.text, size: tok.size });
+        currentUnits = tokUnits;
+      }
+    } else if (currentUnits + tokUnits <= colCharCap) {
+      currentLine.push({ text: tok.text, size: tok.size });
+      currentUnits += tokUnits;
+    } else {
+      lines.push(currentLine);
+      if (tok.isSpace) {
+        currentLine = [];
+        currentUnits = 0;
+      } else if (tokUnits > colCharCap) {
+        let remText = tok.text;
+        while (remText.length > 0) {
+          const fitChars = Math.max(1, Math.floor(colCharCap / charUnit));
+          const chunk = remText.slice(0, fitChars);
+          remText = remText.slice(fitChars);
+          lines.push([{ text: chunk, size: tok.size }]);
+        }
+        currentLine = [];
+        currentUnits = 0;
+      } else {
+        currentLine = [{ text: tok.text, size: tok.size }];
+        currentUnits = tokUnits;
+      }
+    }
+  }
+
+  if (currentLine.length > 0) {
+    lines.push(currentLine);
+  }
+
+  const validLines = lines.filter((l) => l.length > 0);
+  const lineCount = Math.max(1, validLines.length);
+
+  let totalHeight = 2.0; // Top cell padding (pt)
+  for (let i = 0; i < validLines.length; i++) {
+    const lineTokens = validLines[i];
+    let lineMaxSize = defaultFontSize;
+    for (const t of lineTokens) {
+      if (t.size > lineMaxSize) {
+        lineMaxSize = t.size;
+      }
+    }
+    const linePitch = lineMaxSize <= 8.5 ? 9.2 : Math.max(9.2, lineMaxSize * 1.12);
+    totalHeight += linePitch;
+  }
+  totalHeight += 1.5; // Bottom cell padding (pt)
+
+  if (lineCount === 1) {
+    let singleMaxSize = defaultFontSize;
+    for (const t of validLines[0] || []) {
+      if (t.size > singleMaxSize) singleMaxSize = t.size;
+    }
+    const singleHeight = singleMaxSize <= 8.5 ? 12 : Math.max(12, singleMaxSize * 1.35);
+    return { lines: 1, height: singleHeight };
+  }
+
+  return { lines: lineCount, height: Math.round(totalHeight * 10) / 10 };
+}
+
+/**
  * Calculates compact, line-accurate row height (in pt) for Excel:
  * - 1 line: 12 pt (clean, comfortable, perfectly readable Arial 7.5pt with ~2.25pt padding top/bottom)
  * - Additional lines: +9 pt per extra line (minimal, snug inter-line space without clipping)
@@ -594,27 +742,28 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
   const rowsToExport = activeRows.length > 0 ? activeRows : rows.slice(0, 10);
 
-  // Exact compact cell height formula:
-  // - 1 line: 12pt (clean, comfortable, perfectly legible Arial 7.5pt with balanced padding)
-  // - 2 lines: 21pt (+9pt snug line pitch, minimal space between lines)
-  // - 3 lines: 30pt
-  // - N lines: 12 + (lines - 1) * 9 pt
+  // Accurately compute lines and row height using calculateAccurateCellLinesAndHeight
+  // so that mixed font sizes (e.g. standard 7.5pt with highlighted 14pt phrase) and natural
+  // column wrap capacities are calculated with zero excess vertical whitespace.
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
     const cleanDesc = (plainText || cleanHtmlText(r.desc)).trim();
     
-    // In Arial 7.5pt, Excel column width 53 accommodates ~46 characters per line before word wrapping.
-    // Challan column width 63 accommodates ~55 characters per line.
-    // Challan remarks column width 18 accommodates ~16 characters per line.
-    const descCharCap = isChallan ? 55 : 46;
-    const descLines = estimateTextLines(cleanDesc, descCharCap);
-    const remarksLines = isChallan ? estimateTextLines(cleanHtmlText(r.unit || ""), 16) : 1;
-    const lines = Math.max(1, descLines, remarksLines);
+    // In Arial 7.5pt:
+    // - Challan column width 63 fits ~64 characters per line
+    // - Quotation/Invoice column width 53 fits ~56 characters per line
+    const descCharCap = isChallan ? 64 : 56;
+    const descResult = calculateAccurateCellLinesAndHeight(richText, cleanDesc, descCharCap, 7.5);
 
-    // Calculate line-height considering maximum font size present in this cell
-    const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
-    const height = calculateCompactRowHeight(lines, maxFontSize);
+    let remarksResult = { lines: 1, height: 12 };
+    if (isChallan && r.unit) {
+      const { richText: remRich, plainText: remPlain } = parseHtmlToRichText(r.unit || "", "Arial", 7.5);
+      remarksResult = calculateAccurateCellLinesAndHeight(remRich, remPlain || cleanHtmlText(r.unit), 19, 7.5);
+    }
+
+    const lines = Math.max(1, descResult.lines, remarksResult.lines);
+    const height = Math.max(12, descResult.height, remarksResult.height);
 
     return {
       row: r,
