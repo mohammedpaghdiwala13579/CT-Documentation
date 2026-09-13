@@ -340,10 +340,22 @@ export function parseHtmlToRichText(
         }
       }
 
-      // Collapse excessive consecutive newlines inside elements
+      // Collapse consecutive newlines inside elements so line spacing is tight and uniform
       cleanedRichText.forEach((rt) => {
-        rt.text = rt.text.replace(/\n{3,}/g, "\n\n");
+        rt.text = rt.text.replace(/\r?\n\s*\r?\n/g, "\n").replace(/\n{2,}/g, "\n");
+        // Ensure any newline character has a compact font size (max 7.5pt) so Excel does not stretch line spacing
+        if (rt.text === "\n" && rt.font && rt.font.size && rt.font.size > 7.5) {
+          rt.font.size = 7.5;
+        }
       });
+
+      // Also collapse newlines across adjacent elements
+      for (let i = 0; i < cleanedRichText.length - 1; i++) {
+        if (cleanedRichText[i].text.endsWith("\n") && cleanedRichText[i + 1].text.startsWith("\n")) {
+          cleanedRichText[i + 1].text = cleanedRichText[i + 1].text.replace(/^\n+/, "");
+        }
+      }
+      cleanedRichText = cleanedRichText.filter((rt) => rt.text.length > 0);
 
       // If richText is empty, provide fallback
       if (cleanedRichText.length === 0) {
@@ -398,17 +410,20 @@ export function cleanHtmlText(html: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
 
+  // Collapse duplicate line breaks so text lines sit together without blank gaps
+  text = text.replace(/\r?\n\s*\r?\n/g, "\n").replace(/\n{2,}/g, "\n");
+
   return text.trim();
 }
 
 /**
  * Accurately estimates rendered lines of text inside an Excel cell considering:
- * 1) Explicit newlines (\n, \r\n) from user pressing enter
+ * 1) Explicit newlines (\n, \r\n) from user pressing enter (collapsed to prevent blank gaps)
  * 2) Natural word-wrapping ONLY when text exceeds the column width
  */
 export function estimateTextLines(text: string, colCharCap: number): number {
   if (!text) return 1;
-  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/\n{2,}/g, "\n").trim();
   if (!normalized) return 1;
 
   const paragraphs = normalized.split("\n");
@@ -416,11 +431,7 @@ export function estimateTextLines(text: string, colCharCap: number): number {
 
   for (const para of paragraphs) {
     const trimmed = para.trim();
-    // If empty line from deliberate double enter, count 1 line
-    if (!trimmed) {
-      totalLines += 1;
-      continue;
-    }
+    if (!trimmed) continue;
 
     // If paragraph fits completely within the column capacity, it is strictly 1 line!
     if (trimmed.length <= colCharCap) {
@@ -463,16 +474,16 @@ export function estimateTextLines(text: string, colCharCap: number): number {
 }
 
 /**
- * Calculates exact row height (in pt) for Excel strictly using the formula:
- * Every cell has text height of 11 pt plus 1 pt fixed height:
- * - 1 line: 11 * 1 + 1 = 12pt (11 + 1)
- * - 2 lines: 11 * 2 + 1 = 23pt (22 + 1)
- * - 3 lines: 11 * 3 + 1 = 34pt (33 + 1)
- * - N lines: lines * 11 + 1 pt
+ * Calculates compact, line-accurate row height (in pt) for Excel:
+ * - 1 line: 12 pt (clean, comfortable, perfectly readable Arial 7.5pt with ~2.25pt padding top/bottom)
+ * - Additional lines: +9 pt per extra line (minimal, snug inter-line space without clipping)
+ * - Proportional scaling if custom enlarged font size is applied
  */
-export function calculateCompactRowHeight(lines: number, _maxFontSize = 7.5): number {
+export function calculateCompactRowHeight(lines: number, maxFontSize = 7.5): number {
   const count = Math.max(1, lines);
-  return count * 11 + 1;
+  const baseLineRate = maxFontSize > 7.5 ? Math.max(9, maxFontSize * 1.15) : 9;
+  const firstLineHeight = maxFontSize > 7.5 ? Math.max(12, maxFontSize * 1.45) : 12;
+  return count === 1 ? firstLineHeight : firstLineHeight + (count - 1) * baseLineRate;
 }
 
 /**
@@ -583,11 +594,11 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
   const rowsToExport = activeRows.length > 0 ? activeRows : rows.slice(0, 10);
 
-  // Exact cell height formula per lines: lines * 11 + 1 pt:
-  // - 1 line: 11 * 1 + 1 = 12pt (11 + 1)
-  // - 2 lines: 11 * 2 + 1 = 23pt (22 + 1)
-  // - 3 lines: 11 * 3 + 1 = 34pt (33 + 1)
-  // - N lines: lines * 11 + 1 pt
+  // Exact compact cell height formula:
+  // - 1 line: 12pt (clean, comfortable, perfectly legible Arial 7.5pt with balanced padding)
+  // - 2 lines: 21pt (+9pt snug line pitch, minimal space between lines)
+  // - 3 lines: 30pt
+  // - N lines: 12 + (lines - 1) * 9 pt
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);

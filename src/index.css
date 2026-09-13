@@ -32,6 +32,29 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Ensure contenteditable cells and table cells have tight, uniform line spacing without blank paragraph gaps */
+.main-table td,
+.main-table th,
+.sheet td,
+.sheet th,
+[contenteditable],
+[data-sync-id] {
+  line-height: 1.15;
+}
+
+.main-table td p,
+.main-table td div,
+.sheet td p,
+.sheet td div,
+[contenteditable] p,
+[contenteditable] div,
+[data-sync-id] p,
+[data-sync-id] div {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.15 !important;
+}
+
 /* Print Styling Configuration */
 @media print {
   /* Set standard A4 page size with consistent page margins so every page has identical bottom spacing */
@@ -294,14 +317,18 @@ input[type="number"] {
     border: 1px solid #000000 !important;
     padding: 1px 3px !important; /* tight vertical fit so 35+ items comfortably fit on page 1 */
     font-size: 8pt !important;
-    line-height: 1.2 !important;
+    line-height: 1.15 !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
     vertical-align: middle !important;
   }
 
-  .main-table td * {
-    line-height: 1.2 !important;
+  .main-table td *,
+  .main-table td p,
+  .main-table td div {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.15 !important;
     overflow: visible !important;
   }
 
