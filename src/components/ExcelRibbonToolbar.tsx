@@ -112,7 +112,6 @@ export interface ExcelRibbonToolbarProps {
 
   // Actions
   onOpenExcelModal: () => void;
-  onOpenExcelGenerator?: () => void;
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
@@ -152,7 +151,6 @@ export default function ExcelRibbonToolbar({
   onSaveDoc,
   saveStatus,
   onOpenExcelModal,
-  onOpenExcelGenerator,
   onPrint,
   onDownloadPDF,
   isGeneratingPDF,
@@ -364,34 +362,6 @@ export default function ExcelRibbonToolbar({
             >
               <Copy className="h-3.5 w-3.5 text-slate-500" />
               <span className="hidden md:inline">Duplicate</span>
-            </button>
-          )}
-
-          {/* Excel Generator */}
-          {onOpenExcelGenerator && (
-            <button
-              type="button"
-              id="btn-ribbon-excel-generator"
-              onClick={onOpenExcelGenerator}
-              className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-              title="Generate Formatted Excel (.xlsx) per Document Layout"
-            >
-              <FileSpreadsheet className="h-3.5 w-3.5" />
-              <span>Excel Generator</span>
-            </button>
-          )}
-
-          {/* Paste / Import Excel */}
-          {onOpenExcelModal && (
-            <button
-              type="button"
-              id="btn-ribbon-paste-excel"
-              onClick={onOpenExcelModal}
-              className="h-7 px-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-md border border-slate-300 shadow-2xs transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
-              title="Import or Paste Items from Excel"
-            >
-              <Download className="h-3 w-3 text-slate-500" />
-              <span className="hidden md:inline">Paste Excel</span>
             </button>
           )}
 
