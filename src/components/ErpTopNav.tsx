@@ -5,7 +5,8 @@ import {
   Printer, 
   Download, 
   FolderKanban,
-  Laptop
+  Laptop,
+  FileSpreadsheet
 } from "lucide-react";
 import { CompanyId } from "../types";
 
@@ -20,6 +21,8 @@ export interface ErpTopNavProps {
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
+  onDownloadExcel?: () => void;
+  isGeneratingExcel?: boolean;
   onOpenExcelModal?: () => void;
   onToggleMobileSidebar: () => void;
   isInstallable?: boolean;
@@ -39,6 +42,10 @@ export default function ErpTopNav({
   lastSavedTime,
   onSaveDoc,
   onPrint,
+  onDownloadPDF,
+  isGeneratingPDF = false,
+  onDownloadExcel,
+  isGeneratingExcel = false,
   onOpenExcelModal,
   onToggleMobileSidebar,
   isInstallable,
@@ -86,6 +93,36 @@ export default function ErpTopNav({
         {/* Editor Action Buttons */}
         {activeView === "editor" && (
           <div className="flex items-center gap-1">
+            {/* Download Excel (.xlsx) */}
+            {onDownloadExcel && (
+              <button
+                type="button"
+                id="topnav-btn-excel"
+                onClick={onDownloadExcel}
+                disabled={isGeneratingExcel}
+                className="h-8 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 hover:text-emerald-900 border border-emerald-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                title="Generate and download Excel (.xlsx) exactly as PDF"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
+                <span>{isGeneratingExcel ? "Exporting..." : "Excel"}</span>
+              </button>
+            )}
+
+            {/* Direct PDF Download */}
+            {onDownloadPDF && (
+              <button
+                type="button"
+                id="topnav-btn-pdf"
+                onClick={onDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="h-8 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-800 hover:text-rose-900 border border-rose-200 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                title="Download PDF Document"
+              >
+                <Download className="h-3.5 w-3.5 text-rose-600" />
+                <span className="hidden sm:inline">{isGeneratingPDF ? "Generating..." : "PDF"}</span>
+              </button>
+            )}
+
             {/* Print / Save PDF */}
             <button
               type="button"
@@ -95,7 +132,7 @@ export default function ErpTopNav({
               title="Print Document or Save as PDF (Ctrl+P)"
             >
               <Printer className="h-3.5 w-3.5 text-slate-700" />
-              <span className="hidden sm:inline">Print / PDF</span>
+              <span className="hidden sm:inline">Print</span>
             </button>
 
             {/* Save to Cloud Button */}

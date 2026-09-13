@@ -11,9 +11,12 @@ import {
   FileEdit,
   ArrowUpRight,
   Ship,
-  Building2
+  Building2,
+  FileSpreadsheet
 } from "lucide-react";
 import { SavedDocument, CompanyId } from "../types";
+import { COMPANY_PROFILES } from "../utils/companyProfiles";
+import { generateExcelDocument } from "../utils/excelGenerator";
 
 export interface SavedDocumentsPanelProps {
   savedDocs: SavedDocument[];
@@ -80,6 +83,49 @@ export default function SavedDocumentsPanel({
   onSelectCompany,
 }: SavedDocumentsPanelProps) {
   const [companyFilter, setCompanyFilter] = useState<"all" | CompanyId>("all");
+  const [exportingDocId, setExportingDocId] = useState<string | null>(null);
+
+  const handleExportDocToExcel = async (doc: SavedDocument, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExportingDocId(doc.id);
+    try {
+      const compId: CompanyId = doc.companyId || (doc.id.startsWith("ze-") ? "zainee" : "comilla");
+      const company = COMPANY_PROFILES[compId];
+      await generateExcelDocument({
+        currentCompany: company,
+        docType: doc.docType,
+        messers: doc.messers || "",
+        address: doc.address || "",
+        vesselName: doc.vesselName || "",
+        portBerth: doc.portBerth || "",
+        includeVesselName: doc.includeVesselName !== undefined ? doc.includeVesselName : true,
+        includePortBerth: doc.includePortBerth !== undefined ? doc.includePortBerth : true,
+        invoiceNo: doc.invoiceNo || "",
+        challanNo: doc.challanNo || "",
+        quotationNo: doc.quotationNo || "",
+        requisitionNo: doc.requisitionNo || "",
+        poNumber: doc.poNumber || "",
+        includeInvoiceNo: doc.includeInvoiceNo !== undefined ? doc.includeInvoiceNo : true,
+        includeChallanNo: doc.includeChallanNo !== undefined ? doc.includeChallanNo : true,
+        includeQuotationNo: doc.includeQuotationNo !== undefined ? doc.includeQuotationNo : true,
+        includeRequisitionNo: doc.includeRequisitionNo !== undefined ? doc.includeRequisitionNo : true,
+        includePoNumber: doc.includePoNumber !== undefined ? doc.includePoNumber : true,
+        dateVal: doc.dateVal || "",
+        rows: doc.rows || [],
+        includeDiscount: doc.includeDiscount,
+        discountType: doc.discountType,
+        discountValue: doc.discountValue ?? doc.discountPercent ?? 0,
+        vatPercent: doc.vatPercent ?? 0,
+        transportationFee: doc.transportationFee ?? 0,
+        currency: doc.currency || "BDT",
+        currencySymbol: doc.currencySymbol || "Tk",
+      });
+    } catch (err) {
+      console.error("Direct Excel export error:", err);
+    } finally {
+      setExportingDocId(null);
+    }
+  };
 
   // Filter documents by company, search and document type
   const filteredDocs = savedDocs.filter((doc) => {
@@ -407,6 +453,19 @@ export default function SavedDocumentsPanel({
                         >
                           <FileEdit className="h-3 w-3" />
                           <span>Open</span>
+                        </button>
+
+                        {/* Export to Excel */}
+                        <button
+                          type="button"
+                          id={`btn-export-excel-${doc.id}`}
+                          onClick={(e) => handleExportDocToExcel(doc, e)}
+                          disabled={exportingDocId === doc.id}
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 px-2 py-1 rounded transition-colors cursor-pointer disabled:opacity-50"
+                          title="Export directly to Excel (.xlsx)"
+                        >
+                          <FileSpreadsheet className="h-3 w-3 text-emerald-600" />
+                          <span>{exportingDocId === doc.id ? "Exporting..." : "Excel"}</span>
                         </button>
 
                         {/* Rename */}

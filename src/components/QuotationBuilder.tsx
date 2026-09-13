@@ -13,6 +13,7 @@ import ErpSidebar from "./ErpSidebar";
 import ErpTopNav from "./ErpTopNav";
 import ErpDashboard from "./ErpDashboard";
 import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelectionInEditable } from "../utils/textFormatter";
+import { generateExcelDocument } from "../utils/excelGenerator";
 
 // Lazy-loaded secondary components for instant initial app startup
 const SavedDocumentsPanel = React.lazy(() => import("./SavedDocumentsPanel"));
@@ -214,6 +215,7 @@ export default function QuotationBuilder() {
     return "0";
   });
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
 
   // In-app storage & Auto-Save states
   const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
@@ -2799,6 +2801,51 @@ export default function QuotationBuilder() {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    syncAllEditableFields();
+    setIsGeneratingExcel(true);
+    try {
+      await generateExcelDocument({
+        currentCompany: COMPANY_PROFILES[activeCompany],
+        docType,
+        messers,
+        address,
+        vesselName,
+        portBerth,
+        includeVesselName,
+        includePortBerth,
+        invoiceNo,
+        challanNo,
+        quotationNo,
+        requisitionNo,
+        poNumber,
+        includeInvoiceNo,
+        includeChallanNo,
+        includeQuotationNo,
+        includeRequisitionNo,
+        includePoNumber,
+        dateVal,
+        rows,
+        includeDiscount,
+        discountType,
+        discountValue,
+        vatPercent,
+        transportationFee,
+        currency,
+        currencySymbol: currency === "USD" ? "$" : "Tk",
+      });
+      showToast("Excel spreadsheet generated successfully!");
+    } catch (err: any) {
+      console.error("Excel generation error:", err);
+      showToast("Failed to generate Excel spreadsheet", "info");
+    } finally {
+      setIsGeneratingExcel(false);
+    }
+  };
+
   const safeSelectedRowIndex = Math.max(0, Math.min(selectedRowIndex, rows.length - 1));
   const GRID_COLUMNS = docType === "challan" ? [-1, 0, 1, 2] : [-1, 0, 1, 2, 3, 4];
 
@@ -2887,6 +2934,8 @@ export default function QuotationBuilder() {
             onPrint={handlePrint}
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
+            onDownloadExcel={handleDownloadExcel}
+            isGeneratingExcel={isGeneratingExcel}
             onOpenExcelModal={() => setIsExcelModalOpen(true)}
             onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             onNavigateToArchive={() => setActiveView(activeView === "saved-docs" ? "editor" : "saved-docs")}
@@ -2974,6 +3023,8 @@ export default function QuotationBuilder() {
               onPrint={handlePrint}
               onDownloadPDF={handleDownloadPDF}
               isGeneratingPDF={isGeneratingPDF}
+              onDownloadExcel={handleDownloadExcel}
+              isGeneratingExcel={isGeneratingExcel}
               includeDiscount={includeDiscount}
               onToggleDiscount={(val) => setIncludeDiscount(val)}
             />
