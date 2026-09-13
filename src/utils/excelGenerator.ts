@@ -1111,23 +1111,40 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       currentRow++;
     }
 
-    // Embed Stamp Image for Comilla Traders centered perfectly over the "Authorized Signature" block
+    // Embed Stamp Image for Comilla Traders centered perfectly between "For [Company]" and "Authorized Signature"
     if (isComilla && stampImageId !== null && !isChallan) {
+      // NOTE: ExcelJS has an internal bug when passing fractional `col` in `tl: { col, row }`:
+      // it calculates `nativeColOff = (col - Math.floor(col)) * (width * 10000)`, under-scaling EMUs by ~10x
+      // (which leaves the image stuck on the far left).
+      // By supplying OpenXML EMUs directly via nativeCol and nativeColOff (1 px = 9525 EMUs):
+      //
       // In invoice/quotation:
-      // Col E (width 14, ~110px) + Col F (width 16.5, ~129px) = total width ~239px.
-      // Block center is 119.5px from left edge of Col E.
-      // For stamp width 82px (half-width 41px), left edge must sit at: 119.5 - 41 = 78.5px into Col E.
-      // 78.5 / 110 = 0.714 of Col E width -> col: 4.71 (0-indexed Col E + 0.71).
-      // Left margin = 78.5px, Right margin = 78.5px -> mathematically symmetrical and perfectly centered.
-      // For challan (Cols C+D): Col C width 12 (~95px) + Col D width 18 (~140px) = 235px. Center = 117.5px.
-      // Left edge: 117.5 - 41 = 76.5px -> 76.5 / 95 = 0.805 -> col: 2.81.
-      const stampWidth = 82;
-      const stampHeight = 82;
-      const startCol = isChallan ? 2.81 : 4.71;
-      const startRow = stampStartRowIndex - 0.85;
+      // Signature box spans Column E (width 14, 110px = 1,047,750 EMUs) and Column F (width 16.5, 129px = 1,228,725 EMUs).
+      // Total box width = 2,276,475 EMUs (239px). Center = 1,138,238 EMUs.
+      // Stamp size = 76px x 76px (723,900 EMUs). Half width = 361,950 EMUs.
+      // Left offset from left edge of Col E = 1,138,238 - 361,950 = 776,288 EMUs (81.5px).
+      // Left margin in Col E = 776,288 EMUs; Right margin in Col F = 776,287 EMUs. Perfectly centered!
+      //
+      // For Challan (Cols C+D, total 2,238,375 EMUs, center 1,119,188 EMUs):
+      // Left offset = 1,119,188 - 361,950 = 757,238 EMUs from left edge of Col C (index 2).
+      const stampWidth = 76;
+      const stampHeight = 76;
+      const nativeCol = isChallan ? 2 : 4;
+      const nativeColOff = isChallan ? 757238 : 776288;
+
+      // Vertical placement: 0-based row of Spacer 1 is `stampStartRowIndex - 1`.
+      // An offset of 38,100 EMUs (3pt / ~4px) places the stamp cleanly below "For [Company Name]",
+      // centering it gracefully in the signature space over the signature line and title.
+      const nativeRow = stampStartRowIndex - 1;
+      const nativeRowOff = 38100;
 
       ws.addImage(stampImageId, {
-        tl: { col: startCol, row: startRow },
+        tl: {
+          nativeCol,
+          nativeColOff,
+          nativeRow,
+          nativeRowOff,
+        } as any,
         ext: { width: stampWidth, height: stampHeight },
       });
     }
