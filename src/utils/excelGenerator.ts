@@ -1130,13 +1130,13 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       const stampWidth = 76;
       const stampHeight = 76;
       const nativeCol = isChallan ? 2 : 4;
-      const nativeColOff = isChallan ? 757238 : 776288;
+      // Shift slightly to the left from center (~14px / 136,000 EMUs)
+      const nativeColOff = isChallan ? 620000 : 640000;
 
-      // Vertical placement: 0-based row of Spacer 1 is `stampStartRowIndex - 1`.
-      // An offset of 38,100 EMUs (3pt / ~4px) places the stamp cleanly below "For [Company Name]",
-      // centering it gracefully in the signature space over the signature line and title.
-      const nativeRow = stampStartRowIndex - 1;
-      const nativeRowOff = 38100;
+      // Vertical placement: positioned slightly higher (starting just beneath "For [Company Name]")
+      // Row `stampStartRowIndex - 2` is `forCompRow`, offset by 95,250 EMUs (~10px) to sit cleanly below the text
+      const nativeRow = stampStartRowIndex - 2;
+      const nativeRowOff = 95250;
 
       ws.addImage(stampImageId, {
         tl: {
