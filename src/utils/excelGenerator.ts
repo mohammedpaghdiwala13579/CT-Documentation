@@ -291,8 +291,37 @@ export function parseHtmlToRichText(
 
       Array.from(doc.body.childNodes).forEach((child) => traverse(child, {}));
 
+      // Sanitize richText: filter empty elements and strip leading/trailing blank lines
+      let cleanedRichText = richText.filter((rt) => rt.text && rt.text.length > 0);
+
+      // Strip leading whitespace and newlines from the start of richText
+      while (cleanedRichText.length > 0 && /^[\r\n\s]/.test(cleanedRichText[0].text)) {
+        cleanedRichText[0].text = cleanedRichText[0].text.replace(/^[\r\n\s]+/, "");
+        if (!cleanedRichText[0].text) {
+          cleanedRichText.shift();
+        } else {
+          break;
+        }
+      }
+
+      // Strip trailing whitespace and newlines from the end of richText
+      while (cleanedRichText.length > 0 && /[\r\n\s]$/.test(cleanedRichText[cleanedRichText.length - 1].text)) {
+        const lastIdx = cleanedRichText.length - 1;
+        cleanedRichText[lastIdx].text = cleanedRichText[lastIdx].text.replace(/[\r\n\s]+$/, "");
+        if (!cleanedRichText[lastIdx].text) {
+          cleanedRichText.pop();
+        } else {
+          break;
+        }
+      }
+
+      // Collapse excessive consecutive newlines inside elements
+      cleanedRichText.forEach((rt) => {
+        rt.text = rt.text.replace(/\n{3,}/g, "\n\n");
+      });
+
       // If richText is empty, provide fallback
-      if (richText.length === 0) {
+      if (cleanedRichText.length === 0) {
         const clean = cleanHtmlText(html);
         return {
           richText: [{ text: clean, font: { name: defaultFontName, size: defaultSize, color: { argb: "FF000000" } } }],
@@ -301,10 +330,12 @@ export function parseHtmlToRichText(
         };
       }
 
+      const cleanText = cleanedRichText.map((rt) => rt.text).join("");
+
       return {
-        richText,
+        richText: cleanedRichText,
         cellBgColor: dominantCellBgColor,
-        plainText: totalPlainText.trim(),
+        plainText: cleanText,
       };
     } catch (e) {
       console.warn("DOMParser rich text parse error, falling back:", e);
@@ -384,6 +415,7 @@ interface PreparedItem {
   richDesc: ExcelJS.RichText[];
   cellBgColor: string | null;
   height: number;
+  lines: number;
 }
 
 interface PageData {
@@ -457,32 +489,31 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
-    const cleanDesc = plainText || cleanHtmlText(r.desc);
+    const cleanDesc = (plainText || cleanHtmlText(r.desc)).trim();
     
-    // Calculate actual line wrap per line segment based on column char capacity
-    // Description column width is 53 in invoice/quotation (~48-52 chars per line), 63 in challan (~60-64 chars)
-    const colCharCap = isChallan ? 62 : 50;
-    const paragraphs = cleanDesc.split(/\r?\n/);
+    // In Arial 7.5pt, Excel column width 53 accommodates ~72-76 characters per line.
+    // Challan column width 63 accommodates ~84-88 characters per line.
+    const colCharCap = isChallan ? 85 : 72;
+    const paragraphs = cleanDesc.split(/\r?\n/).filter((p) => p.trim().length > 0);
     let totalEstimatedLines = 0;
-    for (const para of paragraphs) {
-      const len = para.length;
-      if (len === 0) {
-        totalEstimatedLines += 1;
-      } else {
-        totalEstimatedLines += Math.max(1, Math.ceil(len / colCharCap));
+    if (paragraphs.length === 0) {
+      totalEstimatedLines = 1;
+    } else {
+      for (const para of paragraphs) {
+        totalEstimatedLines += Math.max(1, Math.ceil(para.length / colCharCap));
       }
     }
     const lines = Math.max(1, totalEstimatedLines);
 
     // Calculate line-height considering maximum font size present in this cell
     const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
-    // Line height proportional to font size (e.g. 7.5pt font -> ~10pt line, 11pt font -> ~14pt line)
-    const perLinePt = maxFontSize > 8 ? Math.max(10, maxFontSize * 1.25) : 10;
+    const baseLinePt = 9.8;
+    const extraFontPt = maxFontSize > 8 ? (maxFontSize - 7.5) * 1.1 : 0;
     
-    // Base height: 13.5pt minimum, or lines * perLinePt + small padding
+    // Accurate height for page-filling pagination calculation
     const height = lines === 1 
-      ? Math.max(13.5, maxFontSize * 1.35)
-      : Math.max(13.5, Math.round((lines * perLinePt + 3) * 10) / 10);
+      ? Math.max(13.5, maxFontSize > 8 ? maxFontSize * 1.3 : 13.5)
+      : Math.max(13.5, Math.round((lines * baseLinePt + extraFontPt + 2) * 10) / 10);
 
     return {
       row: r,
@@ -491,6 +522,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       richDesc: richText,
       cellBgColor,
       height,
+      lines,
     };
   });
 
@@ -559,12 +591,12 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   // FULL PAGE USAGE IN EXCEL (A4 height with 0.2in margins = ~800pt printable)
   const PAGE_LIMIT = 800;
   const ROW1_TITLE_HEIGHT = 16;
-  const BLANK_11_ROWS_HEIGHT = 11 * 12; // 132pt (11 blank rows at 12pt each)
+  const BLANK_ROWS_HEIGHT = 10 * 15; // 150pt (10 blank rows: rows 2 to 11 at 15pt normal Excel row height)
   const META_BOX_HEIGHT = maxMetaRows * 12.5 + 3; // ~40-52pt
   const TABLE_HEADER_HEIGHT = 14;
 
-  const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_11_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT; // ~202pt
-  const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_11_ROWS_HEIGHT + TABLE_HEADER_HEIGHT + 3; // ~165pt
+  const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
+  const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + TABLE_HEADER_HEIGHT + 3;
 
   // Signature block is present on EVERY page according to format
   const SIGNATURE_BLOCK_HEIGHT = 82.5;
@@ -744,14 +776,14 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     }
 
     // =========================================================================
-    // ROWS 2 TO 12: 11 BLANK ROWS (For pre-printed letterhead stationery)
+    // ROWS 2 TO 11: BLANK ROWS (For pre-printed letterhead stationery, normal Excel size 15pt)
     // =========================================================================
-    for (let r = 2; r <= 12; r++) {
+    for (let r = 2; r <= 11; r++) {
       const blankRow = ws.addRow([]);
-      blankRow.height = 12;
+      blankRow.height = 15; // Normal Excel default row height (15pt)
     }
 
-    let currentRow = 13;
+    let currentRow = 12;
 
     // =========================================================================
     // METADATA BOXES (Page 1 Only)
@@ -871,7 +903,12 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       }
 
       const row = ws.addRow(rowData);
-      row.height = item.height;
+      // For single-line rows, set clean 13.5pt height.
+      // For multiline rows, leave row.height undefined so Microsoft Excel and other spreadsheet viewers
+      // automatically and natively auto-fit the row height to the text without leaving any extra space.
+      if (item.lines <= 1) {
+        row.height = 13.5;
+      }
 
       // Description Cell (Col 2): Apply richText formatting & highlight fill
       const descCell = row.getCell(2);
@@ -896,27 +933,27 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
         if (colNumber === 1) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.alignment = { horizontal: "center", vertical: "top" };
         } else if (colNumber === 2) {
-          cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+          cell.alignment = { horizontal: "left", vertical: "top", wrapText: true };
         } else if (colNumber === 3) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.alignment = { horizontal: "center", vertical: "top" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.##";
           }
         } else if (colNumber === 4) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.alignment = { horizontal: "center", vertical: "top" };
         } else if (colNumber === 5) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "right", vertical: "middle" };
+          cell.alignment = { horizontal: "right", vertical: "top" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
           }
         } else if (colNumber === 6) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "right", vertical: "middle" };
+          cell.alignment = { horizontal: "right", vertical: "top" };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
           }
@@ -1074,12 +1111,24 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       currentRow++;
     }
 
-    // Embed Stamp Image for Comilla Traders ABOVE the "Authorized Signature" text line
+    // Embed Stamp Image for Comilla Traders centered perfectly over the "Authorized Signature" block
     if (isComilla && stampImageId !== null && !isChallan) {
-      const startCol = isChallan ? 2.3 : 4.3;
+      // In invoice/quotation:
+      // Col E (width 14, ~110px) + Col F (width 16.5, ~129px) = total width ~239px.
+      // Block center is 119.5px from left edge of Col E.
+      // For stamp width 82px (half-width 41px), left edge must sit at: 119.5 - 41 = 78.5px into Col E.
+      // 78.5 / 110 = 0.714 of Col E width -> col: 4.71 (0-indexed Col E + 0.71).
+      // Left margin = 78.5px, Right margin = 78.5px -> mathematically symmetrical and perfectly centered.
+      // For challan (Cols C+D): Col C width 12 (~95px) + Col D width 18 (~140px) = 235px. Center = 117.5px.
+      // Left edge: 117.5 - 41 = 76.5px -> 76.5 / 95 = 0.805 -> col: 2.81.
+      const stampWidth = 82;
+      const stampHeight = 82;
+      const startCol = isChallan ? 2.81 : 4.71;
+      const startRow = stampStartRowIndex - 0.85;
+
       ws.addImage(stampImageId, {
-        tl: { col: startCol, row: stampStartRowIndex - 1.2 },
-        ext: { width: 85, height: 85 },
+        tl: { col: startCol, row: startRow },
+        ext: { width: stampWidth, height: stampHeight },
       });
     }
 
