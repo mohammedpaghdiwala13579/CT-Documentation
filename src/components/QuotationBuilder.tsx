@@ -213,7 +213,6 @@ export default function QuotationBuilder() {
     if (initialDraft?.discountPercent !== undefined) return String(initialDraft.discountPercent);
     return "0";
   });
-  const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // In-app storage & Auto-Save states
@@ -2632,101 +2631,6 @@ export default function QuotationBuilder() {
     }
   };
 
-  const handleDownloadExcel = async () => {
-    try {
-      setIsGeneratingExcel(true);
-      const { generateExcelWorkbook } = await import("../utils/excelGenerator");
-      const workbook = await generateExcelWorkbook(
-        docType,
-        messers,
-        address,
-        challanNo,
-        dateVal,
-        requisitionNo,
-        rows,
-        mergedRegions,
-        invoiceNo,
-        poNumber,
-        parseNumericInput(vatPercent),
-        parseNumericInput(transportationFee),
-        cellFormats,
-        includeDiscount,
-        discountType,
-        parsedDiscountValue,
-        discountAmount,
-        activeCompany,
-        {
-          vesselName,
-          portBerth,
-          includeVesselName,
-          includePortBerth,
-          includeInvoiceNo,
-          includeChallanNo,
-          includeRequisitionNo,
-          includePoNumber,
-        }
-      );
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
-      const compPrefix = activeCompany === "zainee" ? "ZE" : "CT";
-      const filePrefix = docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation";
-      const identifier = docType === "challan" ? (challanNo || "NEW") : docType === "invoice" ? (invoiceNo || "NEW") : (requisitionNo || "NEW");
-      const defaultFileName = `${compPrefix}_${filePrefix}_${identifier.replace(/[\/\\?%*:|"<>\s]/g, "_")}.xlsx`;
-
-      // 1. Try modern File System Access API first (highly supported on Desktop browsers like Chrome, Edge, Opera)
-      // This allows selecting directory, browsing existing files, renaming, or choosing paths dynamically.
-      if ('showSaveFilePicker' in window) {
-        try {
-          const handle = await (window as any).showSaveFilePicker({
-            suggestedName: defaultFileName,
-            types: [{
-              description: 'Excel Spreadsheet',
-              accept: {
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-              }
-            }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(blob);
-          await writable.close();
-          return; // Done successfully
-        } catch (err: any) {
-          if (err.name === 'AbortError') {
-            // User cancelled the native save picker - abort nicely without showing error/fallback
-            return;
-          }
-          console.warn("showSaveFilePicker failed or was blocked, falling back to prompt method:", err);
-        }
-      }
-
-      // 2. Fallback: Prompt the user to customize the filename, then run standard Anchor download
-      const userFileName = prompt("Enter a filename to save:", defaultFileName);
-      if (userFileName === null) {
-        // User clicked Cancel
-        return;
-      }
-
-      const finalFileName = userFileName.trim()
-        ? (userFileName.toLowerCase().endsWith(".xlsx") ? userFileName.trim() : `${userFileName.trim()}.xlsx`)
-        : defaultFileName;
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = finalFileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      console.error("Excel download error:", err);
-      alert("Error generating Excel: " + err.message);
-    } finally {
-      setIsGeneratingExcel(false);
-    }
-  };
-
   const syncAllEditableFields = () => {
     if (typeof document === "undefined") return;
     const editables = document.querySelectorAll<HTMLElement>("[data-sync-id]");
@@ -2980,8 +2884,6 @@ export default function QuotationBuilder() {
             saveStatus={saveStatus}
             lastSavedTime={lastSavedTime}
             onSaveDoc={() => saveCurrentDocToApp()}
-            onExportExcel={handleDownloadExcel}
-            isGeneratingExcel={isGeneratingExcel}
             onPrint={handlePrint}
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
@@ -3069,8 +2971,6 @@ export default function QuotationBuilder() {
               onSaveDoc={() => saveCurrentDocToApp()}
               saveStatus={saveStatus}
               onOpenExcelModal={() => setIsExcelModalOpen(true)}
-              onExportExcel={handleDownloadExcel}
-              isGeneratingExcel={isGeneratingExcel}
               onPrint={handlePrint}
               onDownloadPDF={handleDownloadPDF}
               isGeneratingPDF={isGeneratingPDF}

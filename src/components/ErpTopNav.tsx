@@ -4,8 +4,6 @@ import {
   Save, 
   Printer, 
   Download, 
-  FileSpreadsheet,
-  RefreshCw, 
   FolderKanban,
   Laptop
 } from "lucide-react";
@@ -19,8 +17,6 @@ export interface ErpTopNavProps {
   saveStatus?: "idle" | "saving" | "saved" | "error";
   lastSavedTime?: string | null;
   onSaveDoc: () => void;
-  onExportExcel: () => void;
-  isGeneratingExcel: boolean;
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
@@ -42,8 +38,6 @@ export default function ErpTopNav({
   saveStatus,
   lastSavedTime,
   onSaveDoc,
-  onExportExcel,
-  isGeneratingExcel,
   onPrint,
   onOpenExcelModal,
   onToggleMobileSidebar,
@@ -92,23 +86,6 @@ export default function ErpTopNav({
         {/* Editor Action Buttons */}
         {activeView === "editor" && (
           <div className="flex items-center gap-1">
-            {/* Export Excel (.xlsx) */}
-            <button
-              type="button"
-              id="topnav-btn-export-excel"
-              onClick={onExportExcel}
-              disabled={isGeneratingExcel}
-              className="h-8 px-2.5 bg-white hover:bg-emerald-50/80 text-slate-700 hover:text-emerald-800 border border-slate-300 hover:border-emerald-400 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-              title="Download clean formatted Excel file (.xlsx)"
-            >
-              {isGeneratingExcel ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-emerald-600" />
-              ) : (
-                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-              )}
-              <span>Excel</span>
-            </button>
-
             {/* Print / Save PDF */}
             <button
               type="button"

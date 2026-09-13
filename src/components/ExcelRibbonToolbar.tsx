@@ -112,8 +112,6 @@ export interface ExcelRibbonToolbarProps {
 
   // Actions
   onOpenExcelModal: () => void;
-  onExportExcel: () => void;
-  isGeneratingExcel: boolean;
   onPrint: () => void;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
@@ -153,8 +151,6 @@ export default function ExcelRibbonToolbar({
   onSaveDoc,
   saveStatus,
   onOpenExcelModal,
-  onExportExcel,
-  isGeneratingExcel,
   onPrint,
   onDownloadPDF,
   isGeneratingPDF,
