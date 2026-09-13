@@ -3915,9 +3915,9 @@ export default function QuotationBuilder() {
                                             <X className="w-3 h-3 stroke-[2.5]" />
                                           </button>
                                         </div>
-                                        {/* Print: Whole word "DISCOUNT" */}
+                                        {/* Print: Whole word "DISCOUNT" without disclosing percentage */}
                                         <span className="hidden print:inline font-bold uppercase tracking-wider text-[7.5pt] text-black">
-                                          DISCOUNT{discountType === "percentage" && parsedDiscountValue > 0 ? ` (${parsedDiscountValue}%)` : ""}
+                                          DISCOUNT
                                         </span>
                                         <span className="font-bold text-[8pt] text-slate-900 ml-0.5 shrink-0">=</span>
                                       </div>
@@ -3949,7 +3949,6 @@ export default function QuotationBuilder() {
                                         />
                                         <span className="text-[7pt] font-bold text-slate-700">%</span>
                                       </div>
-                                      <span className="hidden print:inline">({parsedVatPercent}%)</span>
                                       <span className="font-bold text-[8pt] shrink-0">=</span>
                                     </div>
                                   </div>

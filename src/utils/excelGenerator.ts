@@ -452,22 +452,37 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
   const rowsToExport = activeRows.length > 0 ? activeRows : rows.slice(0, 10);
 
-  // Compact height per item to utilize the whole page exclusively and maximize item count
-  // Standard single line: 13.5pt. Each wrapped line adds ~9.5pt.
+  // Accurate height per item to utilize the whole page exclusively without leaving huge spaces in cells
+  // Standard single line: 13.5pt.
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
     const cleanDesc = plainText || cleanHtmlText(r.desc);
-    const lineBreaks = (cleanDesc.match(/\n/g) || []).length + 1;
-    const charWrapLines = Math.ceil(cleanDesc.length / (isChallan ? 58 : 46));
-    const lines = Math.max(lineBreaks, charWrapLines, 1);
     
-    // Check if any rich text fragment has enlarged font size > 9pt
-    const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
-    const fontMultiplier = maxFontSize > 9 ? maxFontSize / 7.5 : 1;
+    // Calculate actual line wrap per line segment based on column char capacity
+    // Description column width is 53 in invoice/quotation (~48-52 chars per line), 63 in challan (~60-64 chars)
+    const colCharCap = isChallan ? 62 : 50;
+    const paragraphs = cleanDesc.split(/\r?\n/);
+    let totalEstimatedLines = 0;
+    for (const para of paragraphs) {
+      const len = para.length;
+      if (len === 0) {
+        totalEstimatedLines += 1;
+      } else {
+        totalEstimatedLines += Math.max(1, Math.ceil(len / colCharCap));
+      }
+    }
+    const lines = Math.max(1, totalEstimatedLines);
 
-    const baseItemHeight = lines === 1 ? 13.5 : Math.max(13.5, lines * 9.5 + 2);
-    const height = Math.round(baseItemHeight * fontMultiplier * 10) / 10;
+    // Calculate line-height considering maximum font size present in this cell
+    const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
+    // Line height proportional to font size (e.g. 7.5pt font -> ~10pt line, 11pt font -> ~14pt line)
+    const perLinePt = maxFontSize > 8 ? Math.max(10, maxFontSize * 1.25) : 10;
+    
+    // Base height: 13.5pt minimum, or lines * perLinePt + small padding
+    const height = lines === 1 
+      ? Math.max(13.5, maxFontSize * 1.35)
+      : Math.max(13.5, Math.round((lines * perLinePt + 3) * 10) / 10);
 
     return {
       row: r,
@@ -936,15 +951,14 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
       // Discount (if any)
       if (isInvoice && includeDiscount && discountAmount > 0) {
-        const discLabel = discountType === "percentage" ? `Less Discount (${discountValue}%):` : "Less Discount:";
-        const discRow = ws.addRow(["", "", "", "", discLabel, -discountAmount]);
+        const discRow = ws.addRow(["", "", "", "", "Discount:", -discountAmount]);
         discRow.height = 13;
         currentRow++;
       }
 
       // VAT (if any)
       if (isInvoice && vatAmount > 0) {
-        const vatRow = ws.addRow(["", "", "", "", `Add VAT (${vatPercent}%):`, vatAmount]);
+        const vatRow = ws.addRow(["", "", "", "", "VAT:", vatAmount]);
         vatRow.height = 13;
         currentRow++;
       }
