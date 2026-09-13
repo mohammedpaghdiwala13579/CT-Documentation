@@ -17,6 +17,7 @@ import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelection
 // Lazy-loaded secondary components for instant initial app startup
 const SavedDocumentsPanel = React.lazy(() => import("./SavedDocumentsPanel"));
 const ExcelPasteModal = React.lazy(() => import("./ExcelPasteModal"));
+const ExcelGeneratorModal = React.lazy(() => import("./ExcelGeneratorModal"));
 
 enum OperationType {
   CREATE = 'create',
@@ -357,6 +358,7 @@ export default function QuotationBuilder() {
 
   // Excel Paste Modal and Batch Row Adder states
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+  const [isExcelGeneratorOpen, setIsExcelGeneratorOpen] = useState(false);
   const [customRowCountInput, setCustomRowCountInput] = useState<string>("10");
   const [customSubtractCountInput, setCustomSubtractCountInput] = useState<string>("10");
   const [targetTotalRowCountInput, setTargetTotalRowCountInput] = useState<string>("");
@@ -2888,6 +2890,7 @@ export default function QuotationBuilder() {
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
             onOpenExcelModal={() => setIsExcelModalOpen(true)}
+            onOpenExcelGenerator={() => setIsExcelGeneratorOpen(true)}
             onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             onNavigateToArchive={() => setActiveView(activeView === "saved-docs" ? "editor" : "saved-docs")}
             savedDocsCount={savedDocs.length}
@@ -2971,6 +2974,7 @@ export default function QuotationBuilder() {
               onSaveDoc={() => saveCurrentDocToApp()}
               saveStatus={saveStatus}
               onOpenExcelModal={() => setIsExcelModalOpen(true)}
+              onOpenExcelGenerator={() => setIsExcelGeneratorOpen(true)}
               onPrint={handlePrint}
               onDownloadPDF={handleDownloadPDF}
               isGeneratingPDF={isGeneratingPDF}
@@ -4207,6 +4211,42 @@ export default function QuotationBuilder() {
             selectedRowIndex={safeSelectedRowIndex}
             totalCurrentRows={rows.length}
             docType={docType}
+          />
+        </React.Suspense>
+      )}
+
+      {/* Excel Format Generator Modal */}
+      {isExcelGeneratorOpen && (
+        <React.Suspense fallback={null}>
+          <ExcelGeneratorModal
+            isOpen={isExcelGeneratorOpen}
+            onClose={() => setIsExcelGeneratorOpen(false)}
+            docType={docType}
+            companyProfile={currentCompany}
+            dateVal={dateVal}
+            messers={messers}
+            address={address}
+            vesselName={vesselName}
+            portBerth={portBerth}
+            includeVesselName={includeVesselName}
+            includePortBerth={includePortBerth}
+            quotationNo={quotationNo}
+            challanNo={challanNo}
+            invoiceNo={invoiceNo}
+            requisitionNo={requisitionNo}
+            poNumber={poNumber}
+            includeInvoiceNo={includeInvoiceNo}
+            includeChallanNo={includeChallanNo}
+            includeQuotationNo={includeQuotationNo}
+            includeRequisitionNo={includeRequisitionNo}
+            includePoNumber={includePoNumber}
+            rows={rows}
+            currency={currency}
+            vatPercent={vatPercent}
+            transportationFee={transportationFee}
+            includeDiscount={includeDiscount}
+            discountType={discountType}
+            discountValue={discountValue}
           />
         </React.Suspense>
       )}

@@ -5,7 +5,8 @@ import {
   Printer, 
   Download, 
   FolderKanban,
-  Laptop
+  Laptop,
+  FileSpreadsheet
 } from "lucide-react";
 import { CompanyId } from "../types";
 
@@ -21,6 +22,7 @@ export interface ErpTopNavProps {
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
   onOpenExcelModal?: () => void;
+  onOpenExcelGenerator?: () => void;
   onToggleMobileSidebar: () => void;
   isInstallable?: boolean;
   onInstallClick?: () => void;
@@ -40,6 +42,7 @@ export default function ErpTopNav({
   onSaveDoc,
   onPrint,
   onOpenExcelModal,
+  onOpenExcelGenerator,
   onToggleMobileSidebar,
   isInstallable,
   onInstallClick,
@@ -97,6 +100,20 @@ export default function ErpTopNav({
               <Printer className="h-3.5 w-3.5 text-slate-700" />
               <span className="hidden sm:inline">Print / PDF</span>
             </button>
+
+            {/* Excel Generator */}
+            {onOpenExcelGenerator && (
+              <button
+                type="button"
+                id="topnav-btn-excel-generator"
+                onClick={onOpenExcelGenerator}
+                className="h-8 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 hover:text-emerald-950 border border-emerald-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                title="Generate Formatted Excel Workbook (.xlsx)"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
+                <span className="hidden sm:inline">Excel</span>
+              </button>
+            )}
 
             {/* Save to Cloud Button */}
             <button
