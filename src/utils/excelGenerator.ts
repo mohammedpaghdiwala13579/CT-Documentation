@@ -1127,16 +1127,16 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       //
       // For Challan (Cols C+D, total 2,238,375 EMUs, center 1,119,188 EMUs):
       // Left offset = 1,119,188 - 361,950 = 757,238 EMUs from left edge of Col C (index 2).
-      const stampWidth = 76;
-      const stampHeight = 76;
+      const stampWidth = 88;
+      const stampHeight = 88;
       const nativeCol = isChallan ? 2 : 4;
-      // Shift slightly to the left from center (~14px / 136,000 EMUs)
-      const nativeColOff = isChallan ? 620000 : 640000;
+      // Position slightly to the left from center
+      const nativeColOff = isChallan ? 600000 : 620000;
 
-      // Vertical placement: positioned slightly higher (starting just beneath "For [Company Name]")
-      // Row `stampStartRowIndex - 2` is `forCompRow`, offset by 95,250 EMUs (~10px) to sit cleanly below the text
+      // Vertical placement: positioned higher up into the signature gap
+      // Row `stampStartRowIndex - 2` is `forCompRow`, offset by 47,625 EMUs (~5px)
       const nativeRow = stampStartRowIndex - 2;
-      const nativeRowOff = 95250;
+      const nativeRowOff = 47625;
 
       ws.addImage(stampImageId, {
         tl: {
