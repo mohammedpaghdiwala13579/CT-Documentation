@@ -13,7 +13,6 @@ import ErpSidebar from "./ErpSidebar";
 import ErpTopNav from "./ErpTopNav";
 import ErpDashboard from "./ErpDashboard";
 import { stripHtml, parseNumericInput, applyInlineFormatting, hasActiveSelectionInEditable } from "../utils/textFormatter";
-import { generateExcelDocument } from "../utils/excelGenerator";
 
 // Lazy-loaded secondary components for instant initial app startup
 const SavedDocumentsPanel = React.lazy(() => import("./SavedDocumentsPanel"));
@@ -215,7 +214,6 @@ export default function QuotationBuilder() {
     return "0";
   });
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
 
   // In-app storage & Auto-Save states
   const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
@@ -2801,57 +2799,6 @@ export default function QuotationBuilder() {
     }
   };
 
-  const handleDownloadExcel = async () => {
-    try {
-      setIsGeneratingExcel(true);
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-      syncAllEditableFields();
-
-      await generateExcelDocument({
-        docType,
-        companyName: currentCompany.name,
-        includeVesselName,
-        includePortBerth,
-        includeInvoiceNo,
-        includeChallanNo,
-        includeRequisitionNo,
-        includePoNumber,
-        includeDiscount,
-        messers,
-        vesselName,
-        portBerth,
-        address,
-        invoiceNo,
-        challanNo,
-        dateVal,
-        requisitionNo,
-        poNumber,
-        rows: rows.map((r) => ({
-          desc: r.desc,
-          qty: r.qty,
-          unit: r.unit,
-          price: r.price,
-          amount: r.amount,
-        })),
-        currency,
-        discountType,
-        discountValue,
-        discountAmount,
-        vatPercent,
-        vatAmount,
-        transportationFee,
-        rowsTotal,
-        grandTotal,
-      });
-    } catch (err: any) {
-      console.error("Excel generation error:", err);
-    } finally {
-      setIsGeneratingExcel(false);
-    }
-  };
-
   const safeSelectedRowIndex = Math.max(0, Math.min(selectedRowIndex, rows.length - 1));
   const GRID_COLUMNS = docType === "challan" ? [-1, 0, 1, 2] : [-1, 0, 1, 2, 3, 4];
 
@@ -2940,8 +2887,6 @@ export default function QuotationBuilder() {
             onPrint={handlePrint}
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
-            onExportExcel={handleDownloadExcel}
-            isGeneratingExcel={isGeneratingExcel}
             onOpenExcelModal={() => setIsExcelModalOpen(true)}
             onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             onNavigateToArchive={() => setActiveView(activeView === "saved-docs" ? "editor" : "saved-docs")}
