@@ -158,18 +158,13 @@ export function parseHtmlToRichText(
   if (typeof DOMParser !== "undefined") {
     try {
       const parser = new DOMParser();
-      // Normalize line-breaking elements
-      const preparedHtml = html
-        .replace(/<br\s*[\/]?>/gi, "\n")
-        .replace(/<\/p>/gi, "\n")
-        .replace(/<\/div>/gi, "\n")
-        .replace(/<li>/gi, "• ")
-        .replace(/<\/li>/gi, "\n");
-
-      const doc = parser.parseFromString(`<body>${preparedHtml}</body>`, "text/html");
+      // Parse clean HTML directly without preemptive regex that creates fake trailing newlines
+      const doc = parser.parseFromString(`<body>${html}</body>`, "text/html");
       const richText: ExcelJS.RichText[] = [];
       let dominantCellBgColor: string | null = null;
       let totalPlainText = "";
+
+      const BLOCK_TAGS = new Set(["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"]);
 
       function traverse(node: Node, ctx: InlineStyleContext) {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -200,6 +195,36 @@ export function parseHtmlToRichText(
         if (node.nodeType === Node.ELEMENT_NODE) {
           const el = node as HTMLElement;
           const tagName = el.tagName.toLowerCase();
+
+          // If entering a block element and we already have text from a previous block, insert a newline separator
+          if (BLOCK_TAGS.has(tagName) && richText.length > 0) {
+            const lastItem = richText[richText.length - 1];
+            if (lastItem && !lastItem.text.endsWith("\n")) {
+              richText.push({
+                text: "\n",
+                font: { name: defaultFontName, size: defaultSize, color: { argb: "FF000000" } },
+              });
+              totalPlainText += "\n";
+            }
+          }
+
+          // Line break tag (<br>)
+          if (tagName === "br") {
+            // Ignore browser contenteditable trailing placeholder <br> (when it is the last child of a block)
+            const isTrailingDummyBr = !el.nextSibling && !!el.parentElement && BLOCK_TAGS.has(el.parentElement.tagName.toLowerCase());
+            if (!isTrailingDummyBr) {
+              totalPlainText += "\n";
+              richText.push({
+                text: "\n",
+                font: {
+                  name: ctx.fontFamily || defaultFontName,
+                  size: ctx.size || defaultSize,
+                  color: ctx.color ? { argb: ctx.color } : { argb: "FF000000" },
+                },
+              });
+            }
+            return;
+          }
 
           // Inherit previous context
           const nextCtx: InlineStyleContext = { ...ctx };
@@ -377,6 +402,80 @@ export function cleanHtmlText(html: string): string {
 }
 
 /**
+ * Accurately estimates rendered lines of text inside an Excel cell considering:
+ * 1) Explicit newlines (\n, \r\n) from user pressing enter
+ * 2) Natural word-wrapping ONLY when text exceeds the column width
+ */
+export function estimateTextLines(text: string, colCharCap: number): number {
+  if (!text) return 1;
+  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+  if (!normalized) return 1;
+
+  const paragraphs = normalized.split("\n");
+  let totalLines = 0;
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim();
+    // If empty line from deliberate double enter, count 1 line
+    if (!trimmed) {
+      totalLines += 1;
+      continue;
+    }
+
+    // If paragraph fits completely within the column capacity, it is strictly 1 line!
+    if (trimmed.length <= colCharCap) {
+      totalLines += 1;
+      continue;
+    }
+
+    // Paragraph exceeds column width: simulate natural word wrapping
+    const words = trimmed.split(/\s+/);
+    let currentLineLen = 0;
+    let paraLines = 1;
+
+    for (const word of words) {
+      const wordLen = word.length;
+      if (wordLen === 0) continue;
+
+      if (currentLineLen === 0) {
+        if (wordLen > colCharCap) {
+          paraLines += Math.floor((wordLen - 1) / colCharCap);
+          currentLineLen = wordLen % colCharCap || colCharCap;
+        } else {
+          currentLineLen = wordLen;
+        }
+      } else if (currentLineLen + 1 + wordLen <= colCharCap) {
+        currentLineLen += 1 + wordLen;
+      } else {
+        paraLines += 1;
+        if (wordLen > colCharCap) {
+          paraLines += Math.floor((wordLen - 1) / colCharCap);
+          currentLineLen = wordLen % colCharCap || colCharCap;
+        } else {
+          currentLineLen = wordLen;
+        }
+      }
+    }
+    totalLines += paraLines;
+  }
+
+  return Math.max(1, totalLines);
+}
+
+/**
+ * Calculates exact row height (in pt) for Excel strictly using the formula:
+ * Every cell must be +1.5pt than the lines:
+ * - 1 line: 11 * 1 + 1.5 = 12.5pt (11 + 1.5)
+ * - 2 lines: 11 * 2 + 1.5 = 23.5pt (11 * 2 + 1.5)
+ * - 3 lines: 11 * 3 + 1.5 = 34.5pt (11 * 3 + 1.5)
+ * - N lines: lines * 11 + 1.5 pt
+ */
+export function calculateCompactRowHeight(lines: number, _maxFontSize = 7.5): number {
+  const count = Math.max(1, lines);
+  return count * 11 + 1.5;
+}
+
+/**
  * Safely parses a numeric input string or number
  */
 function parseNum(val: string | number | undefined): number {
@@ -484,36 +583,27 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
   const rowsToExport = activeRows.length > 0 ? activeRows : rows.slice(0, 10);
 
-  // Accurate height per item to utilize the whole page exclusively without leaving huge spaces in cells
-  // Standard single line: 13.5pt.
+  // Exact cell height formula per lines: lines * 11 + 1.5 pt:
+  // - 1 line: 11 * 1 + 1.5 = 12.5pt (11 + 1.5)
+  // - 2 lines: 11 * 2 + 1.5 = 23.5pt (11 * 2 + 1.5)
+  // - 3 lines: 11 * 3 + 1.5 = 34.5pt (11 * 3 + 1.5)
+  // - N lines: lines * 11 + 1.5 pt
   const preparedItems: PreparedItem[] = rowsToExport.map((r, idx) => {
     // Parse HTML to rich text with colors, font sizes, highlighting, bold, italic, underline
     const { richText, cellBgColor, plainText } = parseHtmlToRichText(r.desc || "", "Arial", 7.5);
     const cleanDesc = (plainText || cleanHtmlText(r.desc)).trim();
     
-    // In Arial 7.5pt, Excel column width 53 accommodates ~72-76 characters per line.
-    // Challan column width 63 accommodates ~84-88 characters per line.
-    const colCharCap = isChallan ? 85 : 72;
-    const paragraphs = cleanDesc.split(/\r?\n/).filter((p) => p.trim().length > 0);
-    let totalEstimatedLines = 0;
-    if (paragraphs.length === 0) {
-      totalEstimatedLines = 1;
-    } else {
-      for (const para of paragraphs) {
-        totalEstimatedLines += Math.max(1, Math.ceil(para.length / colCharCap));
-      }
-    }
-    const lines = Math.max(1, totalEstimatedLines);
+    // In Arial 7.5pt, Excel column width 53 accommodates ~46 characters per line before word wrapping.
+    // Challan column width 63 accommodates ~55 characters per line.
+    // Challan remarks column width 18 accommodates ~16 characters per line.
+    const descCharCap = isChallan ? 55 : 46;
+    const descLines = estimateTextLines(cleanDesc, descCharCap);
+    const remarksLines = isChallan ? estimateTextLines(cleanHtmlText(r.unit || ""), 16) : 1;
+    const lines = Math.max(1, descLines, remarksLines);
 
     // Calculate line-height considering maximum font size present in this cell
     const maxFontSize = richText.reduce((max, rt) => Math.max(max, rt.font?.size || 7.5), 7.5);
-    const baseLinePt = 9.8;
-    const extraFontPt = maxFontSize > 8 ? (maxFontSize - 7.5) * 1.1 : 0;
-    
-    // Accurate height for page-filling pagination calculation
-    const height = lines === 1 
-      ? Math.max(13.5, maxFontSize > 8 ? maxFontSize * 1.3 : 13.5)
-      : Math.max(13.5, Math.round((lines * baseLinePt + extraFontPt + 2) * 10) / 10);
+    const height = calculateCompactRowHeight(lines, maxFontSize);
 
     return {
       row: r,
@@ -588,12 +678,22 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   if (isInvoice && vatAmount > 0) summaryRowsCount++;
   if (isInvoice && parsedTransport > 0) summaryRowsCount++;
 
+  let calculatedMetaBoxHeight = 0;
+  for (let i = 0; i < maxMetaRows; i++) {
+    const lText = leftLines[i] ? `${leftLines[i].label} ${leftLines[i].value}` : "";
+    const rText = rightLines[i] ? `${rightLines[i].label} ${rightLines[i].value}` : "";
+    const lLines = estimateTextLines(lText, isChallan ? 58 : 56);
+    const rLines = estimateTextLines(rText, isChallan ? 26 : 32);
+    const metaLines = Math.max(1, lLines, rLines);
+    calculatedMetaBoxHeight += metaLines * 11 + 1.5;
+  }
+
   // FULL PAGE USAGE IN EXCEL (A4 height with 0.2in margins = ~800pt printable)
   const PAGE_LIMIT = 800;
   const ROW1_TITLE_HEIGHT = 16;
   const BLANK_ROWS_HEIGHT = 10 * 15; // 150pt (10 blank rows: rows 2 to 11 at 15pt normal Excel row height)
-  const META_BOX_HEIGHT = maxMetaRows * 12.5 + 3; // ~40-52pt
-  const TABLE_HEADER_HEIGHT = 14;
+  const META_BOX_HEIGHT = calculatedMetaBoxHeight + 3; // ~40-52pt exact metadata box height + gap
+  const TABLE_HEADER_HEIGHT = 15;
 
   const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
   const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + TABLE_HEADER_HEIGHT + 3;
@@ -793,8 +893,14 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
         const lItem = leftLines[i];
         const rItem = rightLines[i];
 
+        const lText = lItem ? `${lItem.label} ${lItem.value}` : "";
+        const rText = rItem ? `${rItem.label} ${rItem.value}` : "";
+        const lLines = estimateTextLines(lText, isChallan ? 58 : 56);
+        const rLines = estimateTextLines(rText, isChallan ? 26 : 32);
+        const metaLines = Math.max(1, lLines, rLines);
+
         const row = ws.addRow([]);
-        row.height = 12.5;
+        row.height = metaLines * 11 + 1.5;
 
         // Left Box
         if (lItem) {
@@ -903,12 +1009,10 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       }
 
       const row = ws.addRow(rowData);
-      // For single-line rows, set clean 13.5pt height.
-      // For multiline rows, leave row.height undefined so Microsoft Excel and other spreadsheet viewers
-      // automatically and natively auto-fit the row height to the text without leaving any extra space.
-      if (item.lines <= 1) {
-        row.height = 13.5;
-      }
+      // Explicitly set compact, line-accurate row height for every row so that line 2, line 3, etc.
+      // are ALWAYS fully visible without being clipped or hidden behind cell borders in Microsoft Excel,
+      // while keeping the layout sleek, compact, and strictly up to professional standards.
+      row.height = item.height;
 
       // Description Cell (Col 2): Apply richText formatting & highlight fill
       const descCell = row.getCell(2);
@@ -928,32 +1032,34 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
         };
       }
 
+      const vAlign = "middle";
+
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
         cell.border = THIN_BORDER;
 
         if (colNumber === 1) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "top" };
+          cell.alignment = { horizontal: "center", vertical: vAlign };
         } else if (colNumber === 2) {
-          cell.alignment = { horizontal: "left", vertical: "top", wrapText: true };
+          cell.alignment = { horizontal: "left", vertical: vAlign, wrapText: true };
         } else if (colNumber === 3) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "top" };
+          cell.alignment = { horizontal: "center", vertical: vAlign };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.##";
           }
         } else if (colNumber === 4) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "center", vertical: "top" };
+          cell.alignment = { horizontal: isChallan ? "left" : "center", vertical: vAlign, wrapText: true };
         } else if (colNumber === 5) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "right", vertical: "top" };
+          cell.alignment = { horizontal: "right", vertical: vAlign };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
           }
         } else if (colNumber === 6) {
           cell.font = { name: "Arial", size: 7.5, color: { argb: "FF000000" } };
-          cell.alignment = { horizontal: "right", vertical: "top" };
+          cell.alignment = { horizontal: "right", vertical: vAlign };
           if (typeof cell.value === "number") {
             cell.numFmt = "#,##0.00";
           }
@@ -1158,7 +1264,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     const recCell = ws.getCell(`A${currentRow}`);
     recCell.value = "Receiver's Signature";
     recCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-    recCell.alignment = { horizontal: "center", vertical: "top" };
+    recCell.alignment = { horizontal: "center", vertical: "middle" };
     ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: "FF000000" } } };
     ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: "FF000000" } } };
 
@@ -1169,7 +1275,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       const authCell = ws.getCell(`${rightSigColStart}${currentRow}`);
       authCell.value = "Authorized Signature";
       authCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-      authCell.alignment = { horizontal: "center", vertical: "top" };
+      authCell.alignment = { horizontal: "center", vertical: "middle" };
 
       const startColNum = isChallan ? 3 : 5;
       for (let c = startColNum; c <= colCount; c++) {

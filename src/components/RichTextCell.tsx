@@ -185,8 +185,8 @@ export const RichTextCell: React.FC<RichTextCellProps> = ({
       }}
       style={{
         outline: "none",
-        minHeight: "1.15em",
-        lineHeight: 1.25,
+        minHeight: "1.2em",
+        lineHeight: 1.3,
         wordBreak: "break-word",
         overflowWrap: "break-word",
         whiteSpace: "pre-wrap",
