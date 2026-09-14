@@ -9,13 +9,11 @@ import {
   Layers, 
   Check,
   FileEdit,
-  FileSpreadsheet,
-  Database
+  FileSpreadsheet
 } from "lucide-react";
 import { SavedDocument, CompanyId } from "../types";
 import { COMPANY_PROFILES } from "../utils/companyProfiles";
 import { generateExcelDocument } from "../utils/excelGenerator";
-import firebaseConfig from "../../firebase-applet-config.json";
 
 export interface SavedDocumentsPanelProps {
   savedDocs: SavedDocument[];
@@ -166,17 +164,6 @@ export default function SavedDocumentsPanel({
             <span className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-medium px-2 py-0.5 rounded">
               {filteredDocs.length} {filteredDocs.length === 1 ? "record" : "records"}
             </span>
-            {firebaseConfig.firestoreDatabaseId && (
-              <span 
-                id="badge-firebase-database-id"
-                title={`Connected to Firebase Database: ${firebaseConfig.firestoreDatabaseId}`}
-                className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-[10px] font-mono font-medium px-2 py-0.5 rounded"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <Database className="h-2.5 w-2.5 text-emerald-600 shrink-0" />
-                <span className="truncate max-w-[170px] sm:max-w-[260px]">{firebaseConfig.firestoreDatabaseId}</span>
-              </span>
-            )}
           </div>
         </div>
 
