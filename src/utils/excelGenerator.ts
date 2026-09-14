@@ -856,7 +856,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   const TABLE_HEADER_HEIGHT = 15;
 
   const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
-  const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + TABLE_HEADER_HEIGHT + 3;
+  const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
 
   // Signature block is present on EVERY page according to format
   const SIGNATURE_BLOCK_HEIGHT = 82.5;
@@ -1018,9 +1018,9 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     }
 
     // =========================================================================
-    // ROW 1: FORMAT NAME ON THE FIRST ROW (NO BORDERS, CLEAN DISPLAY)
+    // ROW 1: FORMAT NAME ON THE FIRST ROW (BORDERED HEADER BANNER)
     // =========================================================================
-    const pageFormatTitle = pages.length > 1 && !page.isFirstPage
+    const pageFormatTitle = pages.length > 1
       ? `${docTitleText}  —  PAGE ${page.pageNumber} OF ${pages.length}`
       : docTitleText;
 
@@ -1030,10 +1030,8 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     const row1Cell = ws.getCell("A1");
     row1Cell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FF0F172A" } };
     row1Cell.alignment = { horizontal: "center", vertical: "middle" };
-    // Explicitly remove all borders around row 1 format title as requested
-    for (let c = 1; c <= colCount; c++) {
-      ws.getCell(1, c).border = {};
-    }
+    row1Cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
+    row1Cell.border = THIN_BORDER;
 
     // =========================================================================
     // ROWS 2 TO 11: BLANK ROWS (For pre-printed letterhead stationery, normal Excel size 15pt)
@@ -1046,68 +1044,62 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     let currentRow = 12;
 
     // =========================================================================
-    // METADATA BOXES (Page 1 Only)
+    // METADATA BOXES (Present on EVERY PAGE according to format)
     // =========================================================================
-    if (page.isFirstPage) {
-      for (let i = 0; i < maxMetaRows; i++) {
-        const lItem = leftLines[i];
-        const rItem = rightLines[i];
+    for (let i = 0; i < maxMetaRows; i++) {
+      const lItem = leftLines[i];
+      const rItem = rightLines[i];
 
-        const lText = lItem ? `${lItem.label} ${lItem.value}` : "";
-        const rText = rItem ? `${rItem.label} ${rItem.value}` : "";
-        const lLines = estimateTextLines(lText, isChallan ? 58 : 56);
-        const rLines = estimateTextLines(rText, isChallan ? 26 : 32);
-        const metaLines = Math.max(1, lLines, rLines);
+      const lText = lItem ? `${lItem.label} ${lItem.value}` : "";
+      const rText = rItem ? `${rItem.label} ${rItem.value}` : "";
+      const lLines = estimateTextLines(lText, isChallan ? 58 : 56);
+      const rLines = estimateTextLines(rText, isChallan ? 26 : 32);
+      const metaLines = Math.max(1, lLines, rLines);
 
-        const row = ws.addRow([]);
-        row.height = calculateCompactRowHeight(metaLines);
+      const row = ws.addRow([]);
+      row.height = calculateCompactRowHeight(metaLines);
 
-        // Left Box
-        if (lItem) {
-          const leftCell = ws.getCell(currentRow, 1);
-          leftCell.value = `${lItem.label} ${lItem.value}`;
-          leftCell.font = { name: "Arial", size: 7.5, bold: !!lItem.bold, color: { argb: "FF000000" } };
-          leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-        }
-        ws.mergeCells(currentRow, 1, currentRow, leftColEnd);
-
-        // Right Box
-        if (rItem) {
-          const rightCell = ws.getCell(currentRow, rightColStart);
-          rightCell.value = `${rItem.label} ${rItem.value}`;
-          rightCell.font = { name: "Arial", size: 7.5, bold: !!rItem.bold, color: { argb: "FF000000" } };
-          rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-        }
-        ws.mergeCells(currentRow, rightColStart, currentRow, colCount);
-
-        // Thin borders around metadata boxes
-        for (let c = 1; c <= leftColEnd; c++) {
-          const cCell = ws.getCell(currentRow, c);
-          cCell.border = {
-            top: i === 0 ? { style: "thin" } : undefined,
-            bottom: i === maxMetaRows - 1 ? { style: "thin" } : undefined,
-            left: c === 1 ? { style: "thin" } : undefined,
-            right: c === leftColEnd ? { style: "thin" } : undefined,
-          };
-        }
-        for (let c = rightColStart; c <= colCount; c++) {
-          const cCell = ws.getCell(currentRow, c);
-          cCell.border = {
-            top: i === 0 ? { style: "thin" } : undefined,
-            bottom: i === maxMetaRows - 1 ? { style: "thin" } : undefined,
-            left: c === rightColStart ? { style: "thin" } : undefined,
-            right: c === colCount ? { style: "thin" } : undefined,
-          };
-        }
-
-        currentRow++;
+      // Left Box (Messers, Vessel Name, Port / Berth, Address)
+      const leftCell = ws.getCell(currentRow, 1);
+      if (lItem) {
+        leftCell.value = {
+          richText: [
+            { text: `${lItem.label} `, font: { name: "Arial", size: 7.5, bold: true, color: { argb: "FF0F172A" } } },
+            { text: lItem.value || "", font: { name: "Arial", size: 7.5, bold: !!lItem.bold, color: { argb: "FF000000" } } },
+          ],
+        };
+        leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
+      } else {
+        leftCell.value = "";
       }
+      ws.mergeCells(currentRow, 1, currentRow, leftColEnd);
+      leftCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+      leftCell.border = THIN_BORDER;
 
-      // Compact gap before table
-      const gapRow = ws.addRow([]);
-      gapRow.height = 3;
+      // Right Box (Invoice / Challan / Quotation No, Date, Requisition No, PO Number)
+      const rightCell = ws.getCell(currentRow, rightColStart);
+      if (rItem) {
+        rightCell.value = {
+          richText: [
+            { text: `${rItem.label} `, font: { name: "Arial", size: 7.5, bold: true, color: { argb: "FF0F172A" } } },
+            { text: rItem.value || "", font: { name: "Arial", size: 7.5, bold: !!rItem.bold, color: { argb: "FF000000" } } },
+          ],
+        };
+        rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
+      } else {
+        rightCell.value = "";
+      }
+      ws.mergeCells(currentRow, rightColStart, currentRow, colCount);
+      rightCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+      rightCell.border = THIN_BORDER;
+
       currentRow++;
     }
+
+    // Compact gap before table
+    const gapRow = ws.addRow([]);
+    gapRow.height = 3;
+    currentRow++;
 
     // =========================================================================
     // TABLE HEADERS (Compact height)
@@ -1289,19 +1281,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       wordsCell.font = { name: "Arial", size: 7.5, bold: true, italic: true, color: { argb: "FF0F172A" } };
       wordsCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
       wordsCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
-
-      // Apply borders to the In Words merged block
-      for (let r = summaryStartRow; r <= summaryEndRow; r++) {
-        for (let c = 1; c <= 4; c++) {
-          const cell = ws.getCell(r, c);
-          cell.border = {
-            top: r === summaryStartRow ? { style: "thin" } : undefined,
-            bottom: r === summaryEndRow ? { style: "thin" } : undefined,
-            left: c === 1 ? { style: "thin" } : undefined,
-            right: c === 4 ? { style: "thin" } : undefined,
-          };
-        }
-      }
+      wordsCell.border = THIN_BORDER;
 
       // Style totals cells (Columns E & F)
       for (let r = summaryStartRow; r <= summaryEndRow; r++) {

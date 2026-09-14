@@ -4037,16 +4037,16 @@ export default function QuotationBuilder() {
             <tr>
               <td className="border-none p-0 m-0">
                 {/* Signatures & Stamps section - repeated on every page while printing */}
-                <div className="sig-section mt-2.5 pt-0.5 flex flex-row justify-between gap-6 sm:gap-10">
-                  <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-end h-[65px]">
-                    <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold text-black">
+                <div className="sig-section mt-8 sm:mt-10 pt-2.5 flex flex-row justify-between gap-8 sm:gap-14">
+                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[65px]">
+                    <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8pt] font-bold text-black">
                       Receiver's Signature
                     </div>
                   </div>
                   
                   {/* Authorized signature block - stamps removed for Zainee Enterprise */}
                   {docType !== "challan" && (
-                    <div className="sig-box w-full sm:w-[200px] print:w-[200px] text-center flex flex-col justify-between h-[65px] relative">
+                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[65px] relative">
                       <div className="sig-title text-[8pt] font-bold text-black">For {currentCompany.name}</div>
                       
                       {currentCompany.hasStamp && currentCompany.stampUrl && (
@@ -4061,7 +4061,7 @@ export default function QuotationBuilder() {
                         </div>
                       )}
 
-                      <div className="sig-line border-t-[1.5px] border-black pt-0.5 text-[8pt] font-bold relative z-20 text-black">
+                      <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8pt] font-bold relative z-20 text-black">
                         Authorized Signature
                       </div>
                     </div>
@@ -4069,7 +4069,7 @@ export default function QuotationBuilder() {
                 </div>
 
                 {/* Non-returnable & non-exchangeable notice */}
-                <div className="doc-footer-notice text-center mt-1.5 pt-0.5 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
+                <div className="doc-footer-notice text-center mt-2 pt-1 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
                   ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
                 </div>
 

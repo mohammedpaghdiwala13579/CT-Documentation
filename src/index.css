@@ -288,7 +288,13 @@ input[type="number"] {
     page-break-after: avoid !important;
   }
 
-  table.print-outer-layout-table > thead > tr > td,
+  table.print-outer-layout-table > thead > tr > td {
+    position: static !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   table.print-outer-layout-table > tfoot > tr > td {
     position: static !important;
     border: none !important;
@@ -354,7 +360,12 @@ input[type="number"] {
   .sig-section {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 8px !important; /* compact vertical gap to save page space */
+    margin-top: 32px !important; /* moderately separated and slightly lower from the amount section */
+  }
+
+  .doc-footer-notice {
+    margin-top: 6px !important;
+    padding-top: 2px !important;
   }
 
   /* Remove any cell outlines, focus borders, and selection highlights on print */
