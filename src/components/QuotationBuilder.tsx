@@ -120,17 +120,11 @@ function replaceOklchInCss(cssText: string): string {
   });
 }
 
-const getDraftStorageKey = (company: CompanyId) => `${company}_active_draft_v2`;
+const getDraftStorageKey = (company: CompanyId = "comilla") => `${company}_active_draft_v2`;
 
-const getInitialCompany = (): CompanyId => {
-  if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("active_company_id");
-    if (stored === "zainee" || stored === "comilla") return stored;
-  }
-  return "comilla";
-};
+const getInitialCompany = (): CompanyId => "comilla";
 
-const loadInitialDraft = (company: CompanyId) => {
+const loadInitialDraft = (company: CompanyId = "comilla") => {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(getDraftStorageKey(company));
@@ -142,11 +136,11 @@ const loadInitialDraft = (company: CompanyId) => {
 };
 
 export default function QuotationBuilder() {
-  const initialCompany = useRef(getInitialCompany()).current;
+  const initialCompany = "comilla";
   const initialDraft = useRef(loadInitialDraft(initialCompany)).current;
 
-  // Business Branding & Entity state ("comilla" | "zainee")
-  const [activeCompany, setActiveCompany] = useState<CompanyId>(initialCompany);
+  // Business Branding & Entity state
+  const [activeCompany, setActiveCompany] = useState<CompanyId>("comilla");
 
   const [docType, setDocType] = useState<"quotation" | "challan" | "invoice">(() => initialDraft?.docType || "quotation");
   const [dateVal, setDateVal] = useState(() => {
@@ -222,14 +216,8 @@ export default function QuotationBuilder() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<"all" | "quotation" | "challan" | "invoice">("all");
   
-  // Guard currentDocId to match initialCompany's prefix
-  const [currentDocId, setCurrentDocId] = useState<string | null>(() => {
-    const rawId = initialDraft?.currentDocId || null;
-    if (!rawId) return null;
-    if (initialCompany === "zainee" && rawId.startsWith("ze-")) return rawId;
-    if (initialCompany === "comilla" && !rawId.startsWith("ze-")) return rawId;
-    return null;
-  });
+  // Guard currentDocId
+  const [currentDocId, setCurrentDocId] = useState<string | null>(() => initialDraft?.currentDocId || null);
   const [autoSaveEnabled] = useState<boolean>(true);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -239,122 +227,10 @@ export default function QuotationBuilder() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
-  const currentCompany = COMPANY_PROFILES[activeCompany] || COMPANY_PROFILES.comilla;
-  const isZainee = activeCompany === "zainee";
+  const currentCompany = COMPANY_PROFILES.comilla;
 
-  const handleSwitchCompany = (newCompany: CompanyId) => {
-    if (newCompany === activeCompany) return;
-
-    // 1. Cancel pending auto-save to avoid saving previous company data into new company
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-      autoSaveTimerRef.current = null;
-    }
-
-    // 2. Persist leaving company draft safely to its own dedicated storage key
-    try {
-      const leavingDraft = {
-        docType,
-        dateVal,
-        messers,
-        address,
-        vesselName,
-        portBerth,
-        includeVesselName,
-        includePortBerth,
-        currency,
-        includeDiscount,
-        discountType,
-        discountValue,
-        discountPercent: discountType === "percentage" ? (parseFloat(discountValue) || 0) : 0,
-        challanNo,
-        requisitionNo,
-        invoiceNo,
-        poNumber,
-        quotationNo,
-        includeInvoiceNo,
-        includeChallanNo,
-        includeQuotationNo,
-        includeRequisitionNo,
-        includePoNumber,
-        vatPercent,
-        transportationFee,
-        currentDocId: (currentDocId && (
-          (activeCompany === "zainee" && currentDocId.startsWith("ze-")) ||
-          (activeCompany === "comilla" && !currentDocId.startsWith("ze-"))
-        )) ? currentDocId : null,
-        rows,
-        mergedRegions,
-        cellFormats
-      };
-      localStorage.setItem(getDraftStorageKey(activeCompany), JSON.stringify(leavingDraft));
-    } catch (e) {}
-
-    // 3. Switch active company
-    setActiveCompany(newCompany);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("active_company_id", newCompany);
-    }
-
-    // 4. Load incoming company's draft or initialize clean sheet
-    const targetDraft = loadInitialDraft(newCompany);
-    if (targetDraft) {
-      setDocType(targetDraft.docType || "quotation");
-      setDateVal(targetDraft.dateVal || (() => {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, "0");
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const yyyy = today.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      })());
-      setMessers(targetDraft.messers || "");
-      setAddress(targetDraft.address || "");
-      setVesselName(targetDraft.vesselName || "");
-      setPortBerth(targetDraft.portBerth || "");
-      setIncludeVesselName(targetDraft.includeVesselName !== undefined ? Boolean(targetDraft.includeVesselName) : true);
-      setIncludePortBerth(targetDraft.includePortBerth !== undefined ? Boolean(targetDraft.includePortBerth) : true);
-      setCurrency(targetDraft.currency === "USD" || !targetDraft.currency ? "Taka" : targetDraft.currency);
-      setIncludeDiscount(Boolean(targetDraft.includeDiscount));
-      setDiscountType(targetDraft.discountType === "fixed" ? "fixed" : "percentage");
-      setDiscountValue(targetDraft.discountValue !== undefined ? String(targetDraft.discountValue) : "0");
-      setChallanNo(targetDraft.challanNo || "");
-      setRequisitionNo(targetDraft.requisitionNo || "");
-      setInvoiceNo(targetDraft.invoiceNo || "");
-      setPoNumber(targetDraft.poNumber || "");
-      setQuotationNo(targetDraft.quotationNo || "");
-      setIncludeInvoiceNo(targetDraft.includeInvoiceNo !== undefined ? Boolean(targetDraft.includeInvoiceNo) : true);
-      setIncludeChallanNo(targetDraft.includeChallanNo !== undefined ? Boolean(targetDraft.includeChallanNo) : true);
-      setIncludeQuotationNo(targetDraft.includeQuotationNo !== undefined ? Boolean(targetDraft.includeQuotationNo) : true);
-      setIncludeRequisitionNo(targetDraft.includeRequisitionNo !== undefined ? Boolean(targetDraft.includeRequisitionNo) : true);
-      setIncludePoNumber(targetDraft.includePoNumber !== undefined ? Boolean(targetDraft.includePoNumber) : true);
-      setRows(targetDraft.rows && targetDraft.rows.length > 0 ? targetDraft.rows.map((r: any) => ({ ...r })) : (() => {
-        const initRows: QuotationRow[] = [];
-        for (let i = 1; i <= 35; i++) {
-          initRows.push({ sl: i, desc: "", qty: "", unit: "", price: "", amount: 0 });
-        }
-        return initRows;
-      })());
-      setMergedRegions((targetDraft.mergedRegions || []).map((m: any) => ({ ...m })));
-      setCellFormats(targetDraft.cellFormats ? { ...targetDraft.cellFormats } : {});
-      setVatPercent(targetDraft.vatPercent !== undefined ? String(targetDraft.vatPercent) : "0");
-      setTransportationFee(targetDraft.transportationFee !== undefined ? String(targetDraft.transportationFee) : "0");
-      
-      const validDocId = targetDraft.currentDocId && (
-        (newCompany === "zainee" && targetDraft.currentDocId.startsWith("ze-")) ||
-        (newCompany === "comilla" && !targetDraft.currentDocId.startsWith("ze-"))
-      ) ? targetDraft.currentDocId : null;
-      setCurrentDocId(validDocId);
-    } else {
-      // Clean sheet for new entity
-      resetSheetFields(newCompany);
-    }
-
-    undoStackRef.current = [];
-    redoStackRef.current = [];
-    setLastSavedTime(null);
-    setSaveStatus("idle");
-
-    showToast(`Switched business entity to ${COMPANY_PROFILES[newCompany].name}`, "info");
+  const handleSwitchCompany = (_newCompany: CompanyId) => {
+    // Single company mode: Comilla Traders
   };
 
   // Excel Paste Modal and Batch Row Adder states
@@ -599,19 +475,9 @@ export default function QuotationBuilder() {
     setDateVal(`${dd}/${mm}/${yyyy}`);
   };
 
-  // Listen to Firestore documents from both "documents" (Comilla Traders) and "zainee_documents" (Zainee Enterprise)
+  // Listen to Firestore documents from "documents" (Comilla Traders)
   useEffect(() => {
-    let comillaDocs: SavedDocument[] = [];
-    let zaineeDocs: SavedDocument[] = [];
-
-    const updateAllDocs = () => {
-      const combined = [...comillaDocs, ...zaineeDocs].sort((a, b) => 
-        new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
-      );
-      setSavedDocs(combined);
-    };
-
-    const parseDocSnapshot = (docSnap: any, defaultCompanyId: CompanyId): SavedDocument => {
+    const parseDocSnapshot = (docSnap: any): SavedDocument => {
       const data = docSnap.data();
       const docRows = (data.rows || []).map((r: any) => ({
         sl: Number(r.sl) || 0,
@@ -632,12 +498,10 @@ export default function QuotationBuilder() {
           }))
         : [];
 
-      const companyId: CompanyId = data.companyId || (docSnap.id.startsWith("ze-") ? "zainee" : defaultCompanyId);
-
       return {
         id: docSnap.id,
-        companyId,
-        companyName: data.companyName || COMPANY_PROFILES[companyId]?.name,
+        companyId: "comilla",
+        companyName: data.companyName || COMPANY_PROFILES.comilla.name,
         name: data.name || "",
         createdAt: data.createdAt || "",
         updatedAt: data.updatedAt || "",
@@ -664,31 +528,46 @@ export default function QuotationBuilder() {
       };
     };
 
+    let comillaDocs: SavedDocument[] = [];
+    let legacyDocs: SavedDocument[] = [];
+
+    const updateAllDocs = () => {
+      const all = [...comillaDocs, ...legacyDocs].sort((a, b) => 
+        new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
+      );
+      // Deduplicate by ID
+      const uniqueDocs = Array.from(new Map(all.map(d => [d.id, d])).values());
+      setSavedDocs(uniqueDocs);
+    };
+
     const qComilla = query(collection(db, "documents"), orderBy("updatedAt", "desc"));
     const unsubComilla = onSnapshot(qComilla, (snapshot) => {
-      comillaDocs = snapshot.docs.map(d => parseDocSnapshot(d, "comilla"));
+      comillaDocs = snapshot.docs.map(d => parseDocSnapshot(d));
       updateAllDocs();
     }, (error) => {
       console.warn("documents listener notice:", error);
+      onSnapshot(collection(db, "documents"), (fallbackSnapshot) => {
+        comillaDocs = fallbackSnapshot.docs.map(d => parseDocSnapshot(d));
+        updateAllDocs();
+      });
     });
 
-    const qZainee = query(collection(db, "zainee_documents"), orderBy("updatedAt", "desc"));
-    const unsubZainee = onSnapshot(qZainee, (snapshot) => {
-      zaineeDocs = snapshot.docs.map(d => parseDocSnapshot(d, "zainee"));
+    const qLegacy = query(collection(db, "zainee_documents"), orderBy("updatedAt", "desc"));
+    const unsubLegacy = onSnapshot(qLegacy, (snapshot) => {
+      legacyDocs = snapshot.docs.map(d => parseDocSnapshot(d));
       updateAllDocs();
-    }, (error) => {
-      console.warn("zainee_documents listener notice:", error);
+    }, () => {
+      // Ignore if collection does not exist
     });
 
     return () => {
       unsubComilla();
-      unsubZainee();
+      unsubLegacy();
     };
   }, []);
 
-  const generateUUID = (company: CompanyId = activeCompany) => {
-    const prefix = company === "zainee" ? "ze-doc-" : "doc-";
-    return prefix + Math.random().toString(36).substring(2, 11) + '-' + Date.now();
+  const generateUUID = () => {
+    return "doc-" + Math.random().toString(36).substring(2, 11) + '-' + Date.now();
   };
 
   const saveCurrentDocToApp = async (customName?: string) => {
@@ -709,18 +588,8 @@ export default function QuotationBuilder() {
     const defaultName = `${docTypeLabel}${docIdentifier} - ${messers || "Unnamed Client"} (${dateVal})`;
     const nameToUse = customName || savedDocs.find(d => d.id === currentDocId)?.name || defaultName;
 
-    // STRICT MULTI-ENTITY ISOLATION:
-    // Zainee Enterprise files save EXCLUSIVELY to "zainee_documents".
-    // Comilla Traders files save EXCLUSIVELY to "documents".
-    const isZainee = activeCompany === "zainee";
-    const targetCollection = isZainee ? "zainee_documents" : "documents";
-    
-    // Ensure the document ID strictly belongs to the active company
-    const isValidIdForCompany = currentDocId && (
-      (isZainee && currentDocId.startsWith("ze-")) ||
-      (!isZainee && !currentDocId.startsWith("ze-"))
-    );
-    const docId = isValidIdForCompany ? currentDocId : generateUUID(isZainee ? "zainee" : "comilla");
+    const targetCollection = "documents";
+    const docId = currentDocId || generateUUID();
 
     const sanitizedRows = rows.map(r => ({
       sl: Number(r.sl) || 0,
@@ -741,8 +610,8 @@ export default function QuotationBuilder() {
 
     const docData: SavedDocument = {
       id: docId,
-      companyId: isZainee ? "zainee" : "comilla",
-      companyName: isZainee ? "Zainee Enterprise" : "Comilla Traders",
+      companyId: "comilla",
+      companyName: "Comilla Traders",
       name: String(nameToUse || "Unnamed Document"),
       createdAt: String(savedDocs.find(d => d.id === docId)?.createdAt || now),
       updatedAt: String(now),
@@ -786,7 +655,7 @@ export default function QuotationBuilder() {
       setLastSavedTime(timeStr);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 3000);
-      showToast(`Saved to ${isZainee ? "Zainee Enterprise" : "Comilla Traders"} (isolated)`, "success");
+      showToast("Saved to Comilla Traders", "success");
     } catch (e) {
       console.error("Error saving document:", e);
       setSaveStatus("error");
@@ -847,17 +716,6 @@ export default function QuotationBuilder() {
   };
 
   const loadSavedDoc = (doc: SavedDocument) => {
-    // 1. Accurately detect document's company
-    const docCompany: CompanyId = (doc.companyId === "zainee" || doc.id.startsWith("ze-")) ? "zainee" : "comilla";
-
-    // 2. Automatically switch active company to the loaded document's entity if needed
-    if (activeCompany !== docCompany) {
-      setActiveCompany(docCompany);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("active_company_id", docCompany);
-      }
-    }
-
     setDocType(doc.docType);
     setDateVal(doc.dateVal);
     setMessers(doc.messers);
@@ -901,31 +759,20 @@ export default function QuotationBuilder() {
   const deleteSavedDoc = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
-    // Accurately resolve owner company for this document
     const docToDelete = savedDocs.find(d => d.id === id);
-    const isZaineeDoc = docToDelete 
-      ? (docToDelete.companyId === "zainee" || docToDelete.id.startsWith("ze-"))
-      : id.startsWith("ze-");
-      
-    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
-    const entityLabel = isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders";
-    const otherEntityLabel = isZaineeDoc ? "Comilla Traders" : "Zainee Enterprise";
-
-    const confirmMsg = `Delete this document from ${entityLabel}?\n\nThis will ONLY delete the file from ${entityLabel}. All records of ${otherEntityLabel} will remain completely safe and unaffected.`;
+    const confirmMsg = `Delete "${docToDelete?.name || 'this document'}"?`;
 
     if (window.confirm(confirmMsg)) {
       try {
-        // Strictly delete ONLY from the document's own collection
-        await deleteDoc(doc(db, targetCollection, id));
+        await deleteDoc(doc(db, "documents", id));
         
-        // If the document deleted is the one currently loaded in the editor, reset the editor for that company only
         if (currentDocId === id) {
-          resetSheetFields(isZaineeDoc ? "zainee" : "comilla");
+          resetSheetFields("comilla");
         }
-        showToast(`${entityLabel} document deleted. ${otherEntityLabel} files remain unaffected.`, "info");
+        showToast("Document deleted.", "info");
       } catch (e) {
-        console.error(`Error deleting ${entityLabel} document:`, e);
-        handleFirestoreError(e, OperationType.DELETE, `${targetCollection}/${id}`);
+        console.error("Error deleting document:", e);
+        handleFirestoreError(e, OperationType.DELETE, `documents/${id}`);
       }
     }
   };
@@ -934,11 +781,8 @@ export default function QuotationBuilder() {
     e.stopPropagation();
     const documentObj = savedDocs.find(d => d.id === id);
     if (!documentObj) return;
-    const isZaineeDoc = documentObj.companyId === "zainee" || documentObj.id.startsWith("ze-");
-    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
-    const entityLabel = isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders";
 
-    const newName = window.prompt(`Rename this document in ${entityLabel}:`, documentObj.name);
+    const newName = window.prompt("Rename this document:", documentObj.name);
     if (newName && newName.trim() !== "") {
       try {
         const updatedData = {
@@ -946,11 +790,11 @@ export default function QuotationBuilder() {
           name: newName.trim(),
           updatedAt: new Date().toISOString()
         };
-        await setDoc(doc(db, targetCollection, id), updatedData);
-        showToast(`Document renamed in ${entityLabel}`);
+        await setDoc(doc(db, "documents", id), updatedData);
+        showToast("Document renamed");
       } catch (e) {
         console.error("Error renaming document:", e);
-        handleFirestoreError(e, OperationType.WRITE, `${targetCollection}/${id}`);
+        handleFirestoreError(e, OperationType.WRITE, `documents/${id}`);
       }
     }
   };
@@ -965,20 +809,18 @@ export default function QuotationBuilder() {
   };
 
   const duplicateCurrentDoc = async () => {
-    const isZaineeDoc = activeCompany === "zainee";
-    const targetCollection = isZaineeDoc ? "zainee_documents" : "documents";
-    const entityName = isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders";
+    const targetCollection = "documents";
     const defaultName = `Copy of ${messers ? messers.trim() : "Quotation"} (${dateVal})`;
-    const docName = window.prompt(`Enter a name for the duplicated copy in ${entityName}:`, defaultName);
+    const docName = window.prompt("Enter a name for the duplicated copy:", defaultName);
     if (!docName || docName.trim() === "") return;
 
     setSaveStatus("saving");
-    const newId = generateUUID(isZaineeDoc ? "zainee" : "comilla");
+    const newId = generateUUID();
     try {
       const docPayload: SavedDocument = {
         id: newId,
-        companyId: isZaineeDoc ? "zainee" : "comilla",
-        companyName: isZaineeDoc ? "Zainee Enterprise" : "Comilla Traders",
+        companyId: "comilla",
+        companyName: "Comilla Traders",
         name: docName.trim(),
         docType,
         dateVal,
@@ -1016,7 +858,7 @@ export default function QuotationBuilder() {
       setCurrentDocId(newId);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 3000);
-      showToast(`Duplicated into ${entityName} database`, "success");
+      showToast("Document duplicated", "success");
     } catch (err) {
       console.error("Error duplicating document:", err);
       setSaveStatus("error");
@@ -1041,16 +883,8 @@ export default function QuotationBuilder() {
     if (!hasAnyContent) return;
 
     const timer = setTimeout(async () => {
-      // STRICT AUTO-SAVE ISOLATION:
-      // Active company controls collection and ID prefix.
-      const isZainee = activeCompany === "zainee";
-      const targetCollection = isZainee ? "zainee_documents" : "documents";
-      
-      const isValidIdForCompany = currentDocId && (
-        (isZainee && currentDocId.startsWith("ze-")) ||
-        (!isZainee && !currentDocId.startsWith("ze-"))
-      );
-      const docId = isValidIdForCompany ? currentDocId : generateUUID(isZainee ? "zainee" : "comilla");
+      const targetCollection = "documents";
+      const docId = currentDocId || generateUUID();
       const now = new Date().toISOString();
       let docIdentifier = "";
       if (docType === "challan" && challanNo) {
@@ -1082,8 +916,8 @@ export default function QuotationBuilder() {
 
       const docData: SavedDocument = {
         id: docId,
-        companyId: isZainee ? "zainee" : "comilla",
-        companyName: isZainee ? "Zainee Enterprise" : "Comilla Traders",
+        companyId: "comilla",
+        companyName: "Comilla Traders",
         name: String(nameToUse || "Unnamed Document"),
         createdAt: String(savedDocs.find(d => d.id === docId)?.createdAt || now),
         updatedAt: String(now),
@@ -1200,10 +1034,7 @@ export default function QuotationBuilder() {
         includePoNumber,
         vatPercent,
         transportationFee,
-        currentDocId: (currentDocId && (
-          (activeCompany === "zainee" && currentDocId.startsWith("ze-")) ||
-          (activeCompany === "comilla" && !currentDocId.startsWith("ze-"))
-        )) ? currentDocId : null,
+        currentDocId: currentDocId || null,
         rows,
         mergedRegions,
         cellFormats
@@ -3038,10 +2869,10 @@ export default function QuotationBuilder() {
           {/* Anti-slip Background Watermark Asset */}
           <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
             <img 
-              src={isZainee ? currentCompany.logoUrl : "https://i.ibb.co.com/3mNycQXx/1.png"} 
+              src="https://i.ibb.co.com/3mNycQXx/1.png" 
               alt="Watermark background" 
               referrerPolicy="no-referrer"
-              className={`object-contain select-none max-w-[500px] ${isZainee ? "w-[45%] opacity-[0.035]" : "w-[70%] opacity-[0.045]"}`}
+              className="object-contain select-none max-w-[500px] w-[70%] opacity-[0.045]"
               style={{ printColorAdjust: "exact" }}
             />
           </div>
@@ -4044,7 +3875,7 @@ export default function QuotationBuilder() {
                     </div>
                   </div>
                   
-                  {/* Authorized signature block - stamps removed for Zainee Enterprise */}
+                  {/* Authorized signature block */}
                   {docType !== "challan" && (
                     <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[65px] relative">
                       <div className="sig-title text-[8pt] font-bold text-black">For {currentCompany.name}</div>

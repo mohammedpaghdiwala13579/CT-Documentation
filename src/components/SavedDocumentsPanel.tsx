@@ -9,14 +9,13 @@ import {
   Layers, 
   Check,
   FileEdit,
-  ArrowUpRight,
-  Ship,
-  Building2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Database
 } from "lucide-react";
 import { SavedDocument, CompanyId } from "../types";
 import { COMPANY_PROFILES } from "../utils/companyProfiles";
 import { generateExcelDocument } from "../utils/excelGenerator";
+import firebaseConfig from "../../firebase-applet-config.json";
 
 export interface SavedDocumentsPanelProps {
   savedDocs: SavedDocument[];
@@ -82,15 +81,13 @@ export default function SavedDocumentsPanel({
   activeCompany,
   onSelectCompany,
 }: SavedDocumentsPanelProps) {
-  const [companyFilter, setCompanyFilter] = useState<"all" | CompanyId>("all");
   const [exportingDocId, setExportingDocId] = useState<string | null>(null);
 
   const handleExportDocToExcel = async (doc: SavedDocument, e: React.MouseEvent) => {
     e.stopPropagation();
     setExportingDocId(doc.id);
     try {
-      const compId: CompanyId = doc.companyId || (doc.id.startsWith("ze-") ? "zainee" : "comilla");
-      const company = COMPANY_PROFILES[compId];
+      const company = COMPANY_PROFILES.comilla;
       await generateExcelDocument({
         currentCompany: company,
         docType: doc.docType,
@@ -127,12 +124,8 @@ export default function SavedDocumentsPanel({
     }
   };
 
-  // Filter documents by company, search and document type
+  // Filter documents by search and document type
   const filteredDocs = savedDocs.filter((doc) => {
-    const docCompany: CompanyId = doc.companyId || (doc.id.startsWith("ze-") ? "zainee" : "comilla");
-    if (companyFilter !== "all" && docCompany !== companyFilter) {
-      return false;
-    }
     if (selectedTypeFilter !== "all" && doc.docType !== selectedTypeFilter) {
       return false;
     }
@@ -173,33 +166,22 @@ export default function SavedDocumentsPanel({
             <span className="bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-medium px-2 py-0.5 rounded">
               {filteredDocs.length} {filteredDocs.length === 1 ? "record" : "records"}
             </span>
+            {firebaseConfig.firestoreDatabaseId && (
+              <span 
+                id="badge-firebase-database-id"
+                title={`Connected to Firebase Database: ${firebaseConfig.firestoreDatabaseId}`}
+                className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-[10px] font-mono font-medium px-2 py-0.5 rounded"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <Database className="h-2.5 w-2.5 text-emerald-600 shrink-0" />
+                <span className="truncate max-w-[170px] sm:max-w-[260px]">{firebaseConfig.firestoreDatabaseId}</span>
+              </span>
+            )}
           </div>
         </div>
 
         {/* Minimal Actions & Page Navigation Controls */}
-        <div className="flex items-center gap-1.5 text-xs">
-          {onSwitchPage && (
-            <button
-              type="button"
-              id="btn-panel-switch-page"
-              onClick={() => onSwitchPage(isPageMode ? "editor" : "saved-docs")}
-              className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-medium text-[11px] px-2.5 py-1 rounded transition-colors cursor-pointer"
-              title={isPageMode ? "Go back to Document Editor" : "Open full Documents Archive"}
-            >
-              {isPageMode ? (
-                <>
-                  <FileEdit className="h-3 w-3" />
-                  <span>Open Editor</span>
-                </>
-              ) : (
-                <>
-                  <ArrowUpRight className="h-3 w-3" />
-                  <span>Full Archive</span>
-                </>
-              )}
-            </button>
-          )}
-        </div>
+        <div className="flex items-center gap-1.5 text-xs" />
       </div>
 
       {/* Ultra-compact Search Bar & Filters */}
@@ -252,64 +234,6 @@ export default function SavedDocumentsPanel({
               );
             })}
           </div>
-        </div>
-
-        {/* Company Entity Filter Tabs */}
-        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
-          <div className="flex items-center gap-1.5 text-[10.5px] text-slate-500">
-            <Building2 className="h-3 w-3 text-slate-400" />
-            <span className="font-semibold uppercase tracking-wider text-[9.5px]">Business:</span>
-          </div>
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded border border-slate-200">
-            <button
-              type="button"
-              id="btn-filter-company-all"
-              onClick={() => setCompanyFilter("all")}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
-                companyFilter === "all"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              All Entities ({savedDocs.length})
-            </button>
-            <button
-              type="button"
-              id="btn-filter-company-zainee"
-              onClick={() => setCompanyFilter("zainee")}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                companyFilter === "zainee"
-                  ? "bg-emerald-600 text-white shadow-2xs font-bold"
-                  : "text-emerald-700 hover:bg-emerald-50"
-              }`}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Zainee Enterprise ({savedDocs.filter(d => d.companyId === "zainee" || d.id.startsWith("ze-")).length})
-            </button>
-            <button
-              type="button"
-              id="btn-filter-company-comilla"
-              onClick={() => setCompanyFilter("comilla")}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                companyFilter === "comilla"
-                  ? "bg-blue-600 text-white shadow-2xs font-bold"
-                  : "text-blue-700 hover:bg-blue-50"
-              }`}
-            >
-              <Ship className="h-2.5 w-2.5" />
-              Comilla Traders ({savedDocs.filter(d => d.companyId !== "zainee" && !d.id.startsWith("ze-")).length})
-            </button>
-          </div>
-        </div>
-
-        {/* Multi-Entity Isolation Security Badge */}
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded bg-slate-50 border border-slate-200 text-[10.5px] text-slate-500">
-          <div className="flex items-center gap-1.5">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-slate-700">Strict Entity Isolation Active:</span>
-            <span>Saved &amp; deleted files for Zainee Enterprise are completely isolated from Comilla Traders.</span>
-          </div>
-          <span className="font-mono text-[9px] text-slate-400 font-medium">Dual Vault Architecture</span>
         </div>
       </div>
 
@@ -405,31 +329,14 @@ export default function SavedDocumentsPanel({
                             >
                               {doc.docType}
                             </span>
-
-                            {/* Company Identifier Badge */}
-                            {(doc.companyId === "zainee" || doc.id.startsWith("ze-")) ? (
-                              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold bg-emerald-50 border border-emerald-300 text-emerald-800">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                Zainee Enterprise
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold bg-blue-50 border border-blue-200 text-blue-800">
-                                <Ship className="h-2.5 w-2.5 text-blue-600" />
-                                Comilla Traders
-                              </span>
-                            )}
                           </div>
 
-                          {/* Subtle client/date metadata and Firebase ID in Name column */}
-                          <div className="flex items-center gap-2 text-[10.5px] text-slate-500 truncate max-w-[280px] sm:max-w-[380px]">
-                            {(doc.messers || doc.vesselName || doc.dateVal) && (
+                          {/* Client/date metadata in Name column */}
+                          {(doc.messers || doc.vesselName || doc.dateVal) && (
+                            <div className="flex items-center gap-2 text-[10.5px] text-slate-500 truncate max-w-[280px] sm:max-w-[380px]">
                               <span>{[doc.messers, doc.vesselName, doc.dateVal].filter(Boolean).join(" • ")}</span>
-                            )}
-                            <span className="text-slate-300">•</span>
-                            <span className="font-mono text-[9px] text-slate-400 font-medium" title={`Firebase ID: ${doc.id}`}>
-                              {doc.id}
-                            </span>
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </td>
 
@@ -485,7 +392,7 @@ export default function SavedDocumentsPanel({
                           id={`btn-delete-doc-${doc.id}`}
                           onClick={(e) => deleteSavedDoc(doc.id, e)}
                           className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-1.5 py-1 rounded transition-colors cursor-pointer"
-                          title={`Delete from ${doc.companyId === "zainee" || doc.id.startsWith("ze-") ? "Zainee Enterprise" : "Comilla Traders"} (isolated)`}
+                          title="Delete Document"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>

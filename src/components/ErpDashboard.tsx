@@ -44,12 +44,7 @@ export default function ErpDashboard({
   activeCompany = "comilla",
   onSelectCompany,
 }: ErpDashboardProps) {
-  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<"all" | CompanyId>("all");
-
-  const displayedDocs = useMemo(() => {
-    if (selectedCompanyFilter === "all") return savedDocs;
-    return savedDocs.filter(d => (d.companyId || (d.id.startsWith("ze-") ? "zainee" : "comilla")) === selectedCompanyFilter);
-  }, [savedDocs, selectedCompanyFilter]);
+  const displayedDocs = savedDocs;
 
   // Compute Operations KPIs
   const stats = useMemo(() => {
@@ -118,7 +113,7 @@ export default function ErpDashboard({
               Operations & Documentation Overview
             </h1>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Multi-Entity Enterprise Hub • Comilla Traders & Zainee Enterprise
+              Comilla Traders • Maritime Operations &amp; Documentation Hub
             </p>
           </div>
 
@@ -148,70 +143,6 @@ export default function ErpDashboard({
               <span>New Document</span>
             </button>
           </div>
-        </div>
-
-        {/* Multi-Entity Filter Switcher */}
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-              <Building2 className="h-3.5 w-3.5 text-slate-400" />
-              Entity View:
-            </span>
-            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-              <button
-                type="button"
-                id="btn-dash-filter-all"
-                onClick={() => setSelectedCompanyFilter("all")}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                  selectedCompanyFilter === "all"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                All Businesses ({savedDocs.length})
-              </button>
-
-              <button
-                type="button"
-                id="btn-dash-filter-zainee"
-                onClick={() => {
-                  setSelectedCompanyFilter("zainee");
-                  if (onSelectCompany) onSelectCompany("zainee");
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                  selectedCompanyFilter === "zainee"
-                    ? "bg-emerald-600 text-white shadow-2xs font-bold"
-                    : "text-emerald-700 hover:bg-emerald-50"
-                }`}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Zainee Enterprise ({savedDocs.filter(d => d.companyId === "zainee" || d.id.startsWith("ze-")).length})
-              </button>
-
-              <button
-                type="button"
-                id="btn-dash-filter-comilla"
-                onClick={() => {
-                  setSelectedCompanyFilter("comilla");
-                  if (onSelectCompany) onSelectCompany("comilla");
-                }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                  selectedCompanyFilter === "comilla"
-                    ? "bg-blue-600 text-white shadow-2xs font-bold"
-                    : "text-blue-700 hover:bg-blue-50"
-                }`}
-              >
-                <Ship className="h-3 w-3" />
-                Comilla Traders ({savedDocs.filter(d => d.companyId !== "zainee" && !d.id.startsWith("ze-")).length})
-              </button>
-            </div>
-          </div>
-
-          {selectedCompanyFilter !== "all" && (
-            <span className="text-[11px] text-slate-500 hidden sm:inline">
-              Showing analytics specifically for <strong className="text-slate-800">{COMPANY_PROFILES[selectedCompanyFilter].name}</strong>
-            </span>
-          )}
         </div>
       </div>
 
@@ -462,27 +393,11 @@ export default function ErpDashboard({
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                       onClick={() => onOpenDoc(doc)}
                     >
-                      <td className="py-2.5 px-4 font-semibold text-slate-900 flex flex-col gap-0.5">
+                      <td className="py-2.5 px-4 font-semibold text-slate-900">
                         <div className="flex items-center gap-1.5">
                           <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                           <span className="truncate max-w-[200px]" title={doc.name}>
                             {doc.name || "Untitled Document"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 ml-5">
-                          {(doc.companyId === "zainee" || doc.id.startsWith("ze-")) ? (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                              Zainee Enterprise
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                              <Ship className="h-2.5 w-2.5 text-blue-600" />
-                              Comilla Traders
-                            </span>
-                          )}
-                          <span className="font-mono text-[9px] text-slate-400">
-                            {doc.id}
                           </span>
                         </div>
                       </td>

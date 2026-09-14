@@ -55,8 +55,6 @@ export default function ErpTopNav({
   activeCompany = "comilla",
   onSelectCompany,
 }: ErpTopNavProps) {
-  const isZainee = activeCompany === "zainee";
-
   return (
     <header
       id="erp-top-nav"
@@ -75,7 +73,7 @@ export default function ErpTopNav({
 
         <div className="flex items-center gap-2 text-xs truncate">
           <span className="font-semibold text-slate-500 hidden sm:inline">
-            {isZainee ? "Zainee ERP" : "CT Maritime"}
+            CT Maritime
           </span>
           <span className="text-slate-300 hidden sm:inline">/</span>
           <span className="font-bold text-slate-900 truncate">

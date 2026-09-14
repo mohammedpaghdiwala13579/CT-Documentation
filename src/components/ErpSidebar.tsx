@@ -42,8 +42,6 @@ export default function ErpSidebar({
   activeCompany = "comilla",
   onSelectCompany,
 }: ErpSidebarProps) {
-  const isZainee = activeCompany === "zainee";
-
   return (
     <>
       {/* Mobile Backdrop */}
@@ -68,47 +66,29 @@ export default function ErpSidebar({
             {!isCollapsed ? (
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <div className="h-8 w-8 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs">
-                  {isZainee ? (
-                    <img 
-                      src="https://i.ibb.co.com/V8VJdXK/123.png" 
-                      alt="ZE Logo" 
-                      className="h-full w-full object-contain p-0.5" 
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
-                      <Ship className="h-4 w-4" />
-                    </div>
-                  )}
+                  <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
+                    <Ship className="h-4 w-4" />
+                  </div>
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-bold text-white tracking-wider truncate uppercase">
-                    {isZainee ? "Zainee Enterprise" : "Comilla Traders"}
+                    Comilla Traders
                   </span>
                   <span className="text-[10px] text-slate-400 truncate">
-                    {isZainee ? "Hardware & Machineries ERP" : "Maritime Supply ERP"}
+                    Maritime Supply ERP
                   </span>
                 </div>
               </div>
             ) : (
               <div className="mx-auto">
-                <button
-                  type="button"
-                  onClick={() => onSelectCompany && onSelectCompany(isZainee ? "comilla" : "zainee")}
-                  title={`Switch to ${isZainee ? "Comilla Traders" : "Zainee Enterprise"}`}
-                  className="h-8 w-8 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shadow-xs cursor-pointer"
+                <div
+                  title="Comilla Traders"
+                  className="h-8 w-8 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shadow-xs"
                 >
-                  {isZainee ? (
-                    <img 
-                      src="https://i.ibb.co.com/V8VJdXK/123.png" 
-                      alt="ZE Logo" 
-                      className="h-full w-full object-contain p-0.5" 
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
-                      <Ship className="h-4 w-4" />
-                    </div>
-                  )}
-                </button>
+                  <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
+                    <Ship className="h-4 w-4" />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -122,53 +102,6 @@ export default function ErpSidebar({
               <X className="h-4 w-4" />
             </button>
           </div>
-
-          {/* Business Switcher Tabs (Expanded) */}
-          {!isCollapsed && onSelectCompany && (
-            <div className="px-3 pt-3 pb-2 border-b border-slate-800/60">
-              <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5 px-1">
-                Select Business Header
-              </span>
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-900/90 rounded-lg border border-slate-800">
-                <button
-                  type="button"
-                  id="btn-sidebar-company-comilla"
-                  onClick={() => {
-                    onSelectCompany("comilla");
-                    onSelectView("editor");
-                  }}
-                  className={`flex flex-col items-center justify-center py-1.5 px-2 rounded text-[10px] font-semibold transition-all cursor-pointer ${
-                    !isZainee
-                      ? "bg-blue-600 text-white shadow-xs font-bold"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/70"
-                  }`}
-                  title="Comilla Traders Marine Supply Header"
-                >
-                  <span className="truncate">Comilla Traders</span>
-                </button>
-
-                <button
-                  type="button"
-                  id="btn-sidebar-company-zainee"
-                  onClick={() => {
-                    onSelectCompany("zainee");
-                    onSelectView("editor");
-                  }}
-                  className={`flex flex-col items-center justify-center py-1.5 px-2 rounded text-[10px] font-semibold transition-all cursor-pointer relative ${
-                    isZainee
-                      ? "bg-emerald-600 text-white shadow-xs font-bold"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/70"
-                  }`}
-                  title="Zainee Enterprise Hardware & Machineries Header"
-                >
-                  <span className="truncate flex items-center gap-1">
-                    <span>Zainee Ent.</span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Navigation Links */}
           <div className="p-3 space-y-1">
@@ -211,7 +144,7 @@ export default function ErpSidebar({
                 <div className="flex items-center justify-between w-full min-w-0">
                   <span>Document Canvas</span>
                   <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">
-                    {isZainee ? "Zainee" : "Comilla"}
+                    Comilla
                   </span>
                 </div>
               )}
@@ -246,13 +179,11 @@ export default function ErpSidebar({
             </button>
           </div>
 
-
-
           {/* Quick Create Section (Expanded only) */}
           {!isCollapsed && (
             <div className="px-3 pt-3 mt-3 border-t border-slate-800/60">
               <span className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                Quick Create ({isZainee ? "Zainee" : "Comilla"})
+                Quick Create
               </span>
 
               <div className="space-y-0.5">

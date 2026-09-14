@@ -37,7 +37,7 @@ export interface CellFormat {
   borders?: CellBorders;
 }
 
-export type CompanyId = "comilla" | "zainee";
+export type CompanyId = "comilla";
 
 export interface CompanyProfile {
   id: CompanyId;
