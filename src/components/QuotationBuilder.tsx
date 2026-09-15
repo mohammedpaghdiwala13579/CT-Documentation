@@ -2900,14 +2900,14 @@ export default function QuotationBuilder() {
                         />
                       </div>
                       <div>
-                        <h1 className="text-[17pt] sm:text-[20pt] font-black tracking-tight leading-none text-black uppercase">
+                        <h1 className="text-[17pt] sm:text-[20pt] print:text-[18pt] font-black tracking-tight leading-none text-black uppercase">
                           {currentCompany.name}
                         </h1>
-                        <p className="text-[8.5pt] sm:text-[9pt] font-extrabold text-slate-700 tracking-wider uppercase mt-1">
+                        <p className="company-tagline-1 text-[8.5pt] sm:text-[9pt] print:text-[8pt] font-extrabold text-slate-700 tracking-wider print:tracking-[0.01em] uppercase mt-1 whitespace-nowrap">
                           {currentCompany.tagline1}
                         </p>
                         {currentCompany.tagline2 && (
-                          <p className="text-[7.5pt] sm:text-[8pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                          <p className="company-tagline-2 text-[7.5pt] sm:text-[8pt] print:text-[7pt] font-bold text-slate-500 uppercase tracking-widest print:tracking-[0.01em] mt-0.5 whitespace-nowrap">
                             {currentCompany.tagline2}
                           </p>
                         )}

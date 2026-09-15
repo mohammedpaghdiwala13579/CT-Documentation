@@ -1026,7 +1026,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     }
 
     // =========================================================================
-    // ROW 1: FORMAT NAME ON THE FIRST ROW (BORDERED HEADER BANNER)
+    // ROW 1: FORMAT NAME ON THE FIRST ROW (NO BORDERS)
     // =========================================================================
     const pageFormatTitle = pages.length > 1
       ? `${docTitleText}  —  PAGE ${page.pageNumber} OF ${pages.length}`
@@ -1039,7 +1039,11 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     row1Cell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FF0F172A" } };
     row1Cell.alignment = { horizontal: "center", vertical: "middle" };
     row1Cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
-    row1Cell.border = THIN_BORDER;
+    // Remove borders from format name
+    row1Cell.border = {};
+    row1.eachCell({ includeEmpty: true }, (cell) => {
+      cell.border = {};
+    });
 
     // =========================================================================
     // ROWS 2 TO 11: BLANK ROWS (For pre-printed letterhead stationery, normal Excel size 15pt)
