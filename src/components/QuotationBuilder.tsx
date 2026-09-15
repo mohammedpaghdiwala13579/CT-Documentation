@@ -3929,8 +3929,8 @@ export default function QuotationBuilder() {
           <tfoot className="table-footer-group print:table-footer-group">
             <tr>
               <td className="border-none p-0 m-0">
-                {/* Clean, proper signature section */}
-                <div className="sig-section mt-5 sm:mt-6 pt-2 flex flex-row justify-between gap-8 sm:gap-14">
+                {/* Clean, proper signature section with fixed, stable gap from items table */}
+                <div className="sig-section w-full mt-0 pt-7 sm:pt-7 print:mt-0 print:pt-7 flex flex-row justify-between gap-8 sm:gap-14">
                   <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[70px]">
                     <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8.5pt] font-bold text-black">
                       Receiver's Signature
