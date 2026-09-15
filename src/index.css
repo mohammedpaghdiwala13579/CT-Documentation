@@ -164,6 +164,29 @@ input[type="number"] {
     opacity: 0.045 !important;
   }
 
+  /* Top Page Format Header - format written only on the top of the page */
+  .page-format-header {
+    text-align: center !important;
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    clear: both !important;
+    width: 100% !important;
+  }
+
+  .doc-title {
+    font-size: 13pt !important;
+    letter-spacing: 7px !important;
+    text-align: center !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    display: inline-block !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   /* Print optimizations for Comilla Traders letterhead and metadata boxes */
   .business-header {
     display: flex !important;
@@ -175,8 +198,8 @@ input[type="number"] {
     box-sizing: border-box !important;
     border-bottom-width: 2px !important;
     border-bottom-color: #000000 !important;
-    padding-bottom: 4px !important;
-    margin-bottom: 5px !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
     clear: both !important;
     overflow: hidden !important;
   }
@@ -190,26 +213,35 @@ input[type="number"] {
     overflow: hidden !important;
   }
 
+  .business-header h1 {
+    font-size: 21pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .business-header .contact-details {
     display: block !important;
     flex: 0 0 auto !important;
     text-align: right !important;
     white-space: normal !important;
-    max-width: 44% !important;
+    max-width: 42% !important;
     padding-left: 6px !important;
-    font-size: 7.5pt !important;
+    font-size: 7.2pt !important;
     line-height: 1.2 !important;
   }
 
   .logo-container {
-    height: 64px !important;
-    width: 64px !important;
-    min-width: 64px !important;
-    max-width: 64px !important;
+    height: 82px !important;
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-right: 10px !important;
+    margin-right: 12px !important;
     flex-shrink: 0 !important;
   }
 
@@ -229,35 +261,26 @@ input[type="number"] {
   }
 
   .company-tagline-1 {
-    font-size: 7.8pt !important;
+    font-size: 8.2pt !important;
     letter-spacing: 0.01em !important;
     font-weight: 800 !important;
     line-height: 1.15 !important;
   }
 
   .company-tagline-2 {
-    font-size: 6.8pt !important;
+    font-size: 7.2pt !important;
     letter-spacing: 0.01em !important;
     font-weight: 700 !important;
     line-height: 1.15 !important;
   }
 
-  .doc-title {
-    margin-top: 4px !important;
-    margin-bottom: 6px !important;
-    font-size: 11pt !important;
-    letter-spacing: 5px !important;
-    text-align: center !important;
-    clear: both !important;
-  }
-
   .meta-grid {
     display: grid !important;
     grid-template-columns: 1.35fr 1fr !important;
-    gap: 20px !important;
+    gap: 28px !important;
     width: 100% !important;
-    margin-top: 6px !important;
-    margin-bottom: 14px !important;
+    margin-top: 10px !important;
+    margin-bottom: 20px !important;
     clear: both !important;
   }
 
@@ -274,18 +297,25 @@ input[type="number"] {
   .meta-grid .meta-print-field {
     display: flex !important;
     align-items: baseline !important;
-    gap: 6px !important;
-    padding-bottom: 2.5px !important;
-    margin-bottom: 4px !important;
-    border-bottom: 1px dotted rgba(0, 0, 0, 0.35) !important;
-    font-size: 8.5pt !important;
-    line-height: 1.35 !important;
+    gap: 10px !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 7px !important;
+    border-bottom: 1.5px dotted rgba(0, 0, 0, 0.45) !important;
+    font-size: 9.8pt !important;
+    line-height: 1.4 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
 
+  .meta-grid .meta-print-field > span:first-child {
+    font-size: 9.8pt !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+  }
+
   .meta-grid .meta-print-field > span:last-child {
     min-width: 0 !important;
+    font-size: 9.8pt !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
     white-space: pre-wrap !important;

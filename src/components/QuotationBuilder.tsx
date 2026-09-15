@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
@@ -2900,9 +2900,17 @@ export default function QuotationBuilder() {
                   {/* Top blank margin repeating on every printed page */}
                   <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
                   
-                  <div className="business-header border-b-2 border-black pb-2 mb-2 flex flex-row items-center justify-between gap-3 text-black text-left w-full max-w-full overflow-hidden box-border">
-                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                      <div className="logo-container h-16 w-16 sm:h-[68px] sm:w-[68px] print:h-[64px] print:w-[64px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
+                  {/* Format of the Page: Written ONLY on the Top of the Page (No Underline) */}
+                  <div className="page-format-header text-center mb-2 pb-0 border-none">
+                    <span className="doc-title inline-block text-[12pt] sm:text-[14pt] print:text-[13pt] font-black uppercase tracking-[7px] text-black">
+                      {docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation"}
+                    </span>
+                  </div>
+
+                  {/* Enlarged Business Header with Larger Logo and Lower Bottom Line */}
+                  <div className="business-header border-b-2 border-black pb-5 sm:pb-6 mb-5 sm:mb-6 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                      <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
                         <img
                           src={currentCompany.logoUrl}
                           alt={`${currentCompany.name} Logo`}
@@ -2910,21 +2918,21 @@ export default function QuotationBuilder() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h1 className="text-[16pt] sm:text-[18.5pt] print:text-[17pt] font-black tracking-tight leading-none text-black uppercase truncate">
+                        <h1 className="text-[19pt] sm:text-[23pt] print:text-[21pt] font-black tracking-tight leading-none text-black uppercase truncate">
                           {currentCompany.name}
                         </h1>
-                        <p className="company-tagline-1 text-[7.5pt] sm:text-[8pt] print:text-[7.5pt] font-extrabold text-slate-700 tracking-wide uppercase mt-1 leading-tight">
+                        <p className="company-tagline-1 text-[8pt] sm:text-[9pt] print:text-[8.2pt] font-extrabold text-slate-700 tracking-wide uppercase mt-1 leading-tight">
                           {currentCompany.tagline1}
                         </p>
                         {currentCompany.tagline2 && (
-                          <p className="company-tagline-2 text-[7pt] sm:text-[7.5pt] print:text-[7pt] font-bold text-slate-500 uppercase tracking-wide mt-0.5 leading-tight">
+                          <p className="company-tagline-2 text-[7.2pt] sm:text-[8pt] print:text-[7.2pt] font-bold text-slate-500 uppercase tracking-wide mt-0.5 leading-tight">
                             {currentCompany.tagline2}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="contact-details text-right text-[7pt] sm:text-[7.5pt] print:text-[7.2pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block shrink-0 max-w-[44%]">
+                    <div className="contact-details text-right text-[7.2pt] sm:text-[7.8pt] print:text-[7.2pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block shrink-0 max-w-[42%]">
                       <p className="font-bold">
                         Office: <span className="font-medium">{currentCompany.officeAddress}</span>
                       </p>
@@ -2934,7 +2942,7 @@ export default function QuotationBuilder() {
                       <p className="font-bold">
                         Official Email: <span className="font-medium">{currentCompany.email}</span>
                       </p>
-                      <p className="font-bold text-[7pt] tracking-widest text-indigo-700 uppercase">
+                      <p className="font-bold text-[7.5pt] tracking-widest text-indigo-700 uppercase">
                         {currentCompany.locationCity}
                       </p>
                     </div>
@@ -2946,203 +2954,208 @@ export default function QuotationBuilder() {
                     </div>
                   </div>
 
-                {/* Repeating Document Title on multi-page browser printing */}
-                <div className="doc-title text-center text-[11pt] sm:text-[13pt] font-black uppercase tracking-[6px] my-1">
-                  {docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation"}
-                </div>
-
                 {/* ==================================================================== */}
-                {/* 1. DOCUMENT EDITOR METADATA VIEW (Screen Only: Clean Dotted Lines, No Boxes) */}
+                {/* 1. DOCUMENT EDITOR METADATA VIEW (Spacious Dotted Layout, Uniform Height & Perfect Alignment) */}
                 {/* ==================================================================== */}
-                <div className="meta-editor-grid no-print print:hidden grid grid-cols-1 sm:grid-cols-12 gap-5 text-left text-[8.5pt] mb-3 p-2 bg-transparent">
+                <div className="meta-editor-grid no-print print:hidden grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 text-left mb-6 mt-7 sm:mt-8 p-4 sm:p-5 rounded-xl bg-slate-50/70 border border-slate-200/80 shadow-2xs">
                   {/* Left Column: Client & Vessel Information */}
-                  <div className="sm:col-span-7 space-y-2.5">
-                    <div>
-                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                        Messers:
+                  <div className="sm:col-span-7 space-y-3 sm:space-y-3.5">
+                    <div className="h-[40px] flex flex-col justify-between">
+                      <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                        <User className="h-3 w-3 text-slate-600 shrink-0" />
+                        <span>Messers:</span>
                       </label>
                       <RichTextCell
                         value={messers}
                         syncId="messers"
                         onChange={(val) => setMessers(val)}
-                        placeholder="Client / Ship name"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-bold text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px]"
+                        placeholder=""
+                        className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-black text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors overflow-hidden shrink-0"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
-                          <Ship className="h-3 w-3 text-slate-500" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 h-[40px]">
+                      <div className="h-[40px] flex flex-col justify-between">
+                        <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                          <Ship className="h-3 w-3 text-slate-600 shrink-0" />
                           <span>Vessel Name:</span>
                         </label>
                         <input
                           type="text"
                           value={vesselName}
                           onChange={(e) => setVesselName(e.target.value)}
-                          placeholder="M/V or M/T Vessel Name (optional)"
-                          className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-semibold text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
+                          placeholder=""
+                          className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                          Port / Berth:
+                      <div className="h-[40px] flex flex-col justify-between">
+                        <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                          <Anchor className="h-3 w-3 text-slate-600 shrink-0" />
+                          <span>Port / Berth:</span>
                         </label>
                         <input
                           type="text"
                           value={portBerth}
                           onChange={(e) => setPortBerth(e.target.value)}
-                          placeholder="Jetty / Anchorage (optional)"
-                          className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
+                          placeholder=""
+                          className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                         />
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                        Address:
+                    <div className="h-[40px] flex flex-col justify-between">
+                      <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                        <MapPin className="h-3 w-3 text-slate-600 shrink-0" />
+                        <span>Address:</span>
                       </label>
                       <RichTextCell
                         value={address}
                         syncId="address"
                         onChange={(val) => setAddress(val)}
-                        placeholder="Delivery or billing address (optional)"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[8pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px] leading-snug"
+                        placeholder=""
+                        className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6pt] sm:text-[6.3pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors overflow-hidden shrink-0"
                       />
                     </div>
                   </div>
 
-                  {/* Right Column: References & Date - Format on top, then Date */}
-                  <div className="sm:col-span-5 space-y-2.5">
+                  {/* Right Column: References & Date */}
+                  <div className="sm:col-span-5 space-y-3 sm:space-y-3.5">
                     {/* Quotation format: ONLY Requisition No. with Date */}
                     {docType === "quotation" && (
-                      <div className="space-y-2.5">
-                        <div>
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Requisition No.:
+                      <div className="space-y-3 sm:space-y-3.5">
+                        <div className="h-[40px] flex flex-col justify-between">
+                          <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                            <FileText className="h-3 w-3 text-slate-600 shrink-0" />
+                            <span>Requisition No.:</span>
                           </label>
                           <input
                             type="text"
                             value={requisitionNo}
                             onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition No. (e.g. REQ-2026/04)"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
+                            placeholder=""
+                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                           />
                         </div>
 
                         {/* Date field */}
-                        <div className="relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Date:
+                        <div className="relative h-[40px] flex flex-col justify-between w-full min-w-0">
+                          <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                            <Calendar className="h-3 w-3 text-slate-600 shrink-0" />
+                            <span>Date:</span>
                           </label>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 h-[20px] w-full min-w-0">
                             <input
                               type="text"
                               value={dateVal}
                               onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              className="flex-1 min-w-0 h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors"
                             />
                             <button
                               type="button"
                               onClick={triggerDatePicker}
-                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                               title="Open Date Picker"
                             >
-                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                              <Calendar className="h-3 w-3 text-indigo-600" />
                             </button>
                           </div>
                           <input
                             ref={dateRef}
                             type="date"
                             onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
+                            className="absolute right-0 bottom-0 w-[20px] h-[20px] opacity-0 pointer-events-none"
                           />
                         </div>
                       </div>
                     )}
 
-                    {/* Invoice format: Invoice No. & Challan No. on top, then Date */}
+                    {/* Invoice format: Invoice No. & Challan No. on top, then Date, then Requisition No. & PO Number */}
                     {docType === "invoice" && (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Invoice No.:
+                      <div className="space-y-3 sm:space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 h-[40px]">
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <FileText className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>Invoice No.:</span>
                             </label>
                             <input
                               type="text"
                               value={invoiceNo}
                               onChange={(e) => setInvoiceNo(e.target.value)}
-                              placeholder="Invoice No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                             />
                           </div>
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Challan No.:
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <Hash className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>Challan No.:</span>
                             </label>
                             <input
                               type="text"
                               value={challanNo}
                               onChange={(e) => setChallanNo(e.target.value)}
-                              placeholder="Challan No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                             />
                           </div>
                         </div>
 
                         {/* Date field */}
-                        <div className="relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Date:
+                        <div className="relative h-[40px] flex flex-col justify-between w-full min-w-0">
+                          <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                            <Calendar className="h-3 w-3 text-slate-600 shrink-0" />
+                            <span>Date:</span>
                           </label>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 h-[20px] w-full min-w-0">
                             <input
                               type="text"
                               value={dateVal}
                               onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              className="flex-1 min-w-0 h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors"
                             />
                             <button
                               type="button"
                               onClick={triggerDatePicker}
-                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                               title="Open Date Picker"
                             >
-                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                              <Calendar className="h-3 w-3 text-indigo-600" />
                             </button>
                           </div>
                           <input
                             ref={dateRef}
                             type="date"
                             onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
+                            className="absolute right-0 bottom-0 w-[20px] h-[20px] opacity-0 pointer-events-none"
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Requisition No.:
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 h-[40px]">
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <FileText className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>Requisition No.:</span>
                             </label>
                             <input
                               type="text"
                               value={requisitionNo}
                               onChange={(e) => setRequisitionNo(e.target.value)}
-                              placeholder="Requisition No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                             />
                           </div>
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              PO Number:
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <Hash className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>PO Number:</span>
                             </label>
                             <input
                               type="text"
                               value={poNumber}
                               onChange={(e) => setPoNumber(e.target.value)}
-                              placeholder="PO Number (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
                             />
                           </div>
                         </div>
@@ -3151,60 +3164,63 @@ export default function QuotationBuilder() {
 
                     {/* Challan format: ONLY Challan No. and Requisition No. with Date */}
                     {docType === "challan" && (
-                      <div className="space-y-2.5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Challan No.:
+                      <div className="space-y-3 sm:space-y-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 h-[40px]">
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <FileText className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>Challan No.:</span>
                             </label>
                             <input
                               type="text"
                               value={challanNo}
                               onChange={(e) => setChallanNo(e.target.value)}
-                              placeholder="Challan No. (e.g. CH-2026/01)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold shrink-0"
                             />
                           </div>
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Requisition No.:
+                          <div className="h-[40px] flex flex-col justify-between">
+                            <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                              <Hash className="h-3 w-3 text-slate-600 shrink-0" />
+                              <span>Requisition No.:</span>
                             </label>
                             <input
                               type="text"
                               value={requisitionNo}
                               onChange={(e) => setRequisitionNo(e.target.value)}
-                              placeholder="Requisition No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
+                              placeholder=""
+                              className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold shrink-0"
                             />
                           </div>
                         </div>
 
                         {/* Date field */}
-                        <div className="relative">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Date:
+                        <div className="relative h-[40px] flex flex-col justify-between w-full min-w-0">
+                          <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
+                            <Calendar className="h-3 w-3 text-slate-600 shrink-0" />
+                            <span>Date:</span>
                           </label>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 h-[20px] w-full min-w-0">
                             <input
                               type="text"
                               value={dateVal}
                               onChange={(e) => setDateVal(e.target.value)}
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                              className="flex-1 min-w-0 h-[20px] min-h-[20px] max-h-[20px] box-border border-b-2 border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors"
                             />
                             <button
                               type="button"
                               onClick={triggerDatePicker}
-                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                               title="Open Date Picker"
                             >
-                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                              <Calendar className="h-3 w-3 text-indigo-600" />
                             </button>
                           </div>
                           <input
                             ref={dateRef}
                             type="date"
                             onChange={handleDatePickerChange}
-                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
+                            className="absolute right-0 bottom-0 w-[20px] h-[20px] opacity-0 pointer-events-none"
                           />
                         </div>
                       </div>
@@ -3215,38 +3231,38 @@ export default function QuotationBuilder() {
                 {/* ==================================================================== */}
                 {/* 2. PRINT / PDF METADATA VIEW (Clean Dotted Layout, No Boxes) */}
                 {/* ==================================================================== */}
-                <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[8.5pt] mb-3.5 mt-1.5">
+                <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[6pt] sm:text-[6.5pt] mb-4 mt-5">
                   {/* Left Column: Client & Vessel Info (only filled fields appear) */}
-                  <div className="meta-box bg-transparent space-y-1">
+                  <div className="meta-box bg-transparent space-y-1.5">
                     {cleanHtmlText(messers).length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Messers:</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Messers:</span>
                         <span
                           id="print-messers"
-                          className="font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0"
+                          className="font-black text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[7pt]"
                           style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                           dangerouslySetInnerHTML={{ __html: messers }}
                         />
                       </div>
                     )}
                     {vesselName && vesselName.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Vessel Name:</span>
-                        <span className="font-bold text-black break-words flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{vesselName.trim()}</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Vessel Name:</span>
+                        <span className="font-bold text-black break-words flex-grow min-w-0 text-[6.2pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{vesselName.trim()}</span>
                       </div>
                     )}
                     {portBerth && portBerth.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Port / Berth:</span>
-                        <span className="text-black break-words flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{portBerth.trim()}</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Port / Berth:</span>
+                        <span className="text-black break-words flex-grow min-w-0 text-[6.2pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{portBerth.trim()}</span>
                       </div>
                     )}
                     {cleanHtmlText(address).length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Address:</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Address:</span>
                         <span
                           id="print-address"
-                          className="text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0"
+                          className="text-black break-words whitespace-pre-wrap leading-relaxed flex-grow min-w-0 text-[6.2pt]"
                           style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                           dangerouslySetInnerHTML={{ __html: address }}
                         />
@@ -3255,20 +3271,20 @@ export default function QuotationBuilder() {
                   </div>
 
                   {/* Right Column: Specified Format Number always on top, then Date */}
-                  <div className="meta-box bg-transparent space-y-1">
+                  <div className="meta-box bg-transparent space-y-1.5">
                     {/* 1. Format-specific Number on TOP */}
                     {docType === "invoice" && (
                       <>
                         {invoiceNo && invoiceNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Invoice No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{invoiceNo.trim()}</span>
+                          <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Invoice No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{invoiceNo.trim()}</span>
                           </div>
                         )}
                         {challanNo && challanNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Challan No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
+                          <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Challan No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
                           </div>
                         )}
                       </>
@@ -3276,9 +3292,9 @@ export default function QuotationBuilder() {
                     {docType === "challan" && (
                       <>
                         {challanNo && challanNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Challan No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
+                          <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Challan No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
                           </div>
                         )}
                       </>
@@ -3286,33 +3302,33 @@ export default function QuotationBuilder() {
                     {docType === "quotation" && (
                       <>
                         {requisitionNo && requisitionNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Requisition No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
+                          <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Requisition No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
                           </div>
                         )}
                       </>
                     )}
 
                     {/* 2. Date: ALWAYS right after format number */}
-                    <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                      <span className="font-extrabold text-black shrink-0 min-w-[102px]">Date:</span>
-                      <span className="font-mono font-bold text-black flex-grow min-w-0">{dateVal || " "}</span>
+                    <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                      <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Date:</span>
+                      <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]">{dateVal || " "}</span>
                     </div>
 
                     {/* 3. Requisition No. for invoice & challan (for quotation it's already shown on top with date) */}
                     {(docType === "invoice" || docType === "challan") && requisitionNo && requisitionNo.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[102px]">Requisition No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Requisition No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
                       </div>
                     )}
 
                     {/* 4. PO Number: ONLY for invoice */}
                     {docType === "invoice" && poNumber && poNumber.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[102px]">PO Number:</span>
-                        <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{poNumber.trim()}</span>
+                      <div className="meta-print-field border-b-1.5 border-dotted border-black/45 pb-1 mb-1.5 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">PO Number:</span>
+                        <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{poNumber.trim()}</span>
                       </div>
                     )}
                   </div>
