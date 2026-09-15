@@ -866,8 +866,8 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   const P1_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
   const CONT_PRE_HEIGHT = ROW1_TITLE_HEIGHT + BLANK_ROWS_HEIGHT + META_BOX_HEIGHT + TABLE_HEADER_HEIGHT;
 
-  // Signature block is present on EVERY page according to format
-  const SIGNATURE_BLOCK_HEIGHT = 82.5;
+  // Signature block is present on EVERY page according to format (16pt gap + 78.5pt block)
+  const SIGNATURE_BLOCK_HEIGHT = 94.5;
 
   // Summary block (Subtotal, VAT, Grand Total) is placed on the final page
   const SUMMARY_BLOCK_HEIGHT = isChallan ? 0 : (summaryRowsCount * 13 + 5);
@@ -1341,15 +1341,9 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     // =========================================================================
     // SIGNATURES & STAMP SECTION (Present on EVERY PAGE according to format)
     // =========================================================================
-    // Calculate cumulative height so signature block is anchored at the exact bottom of every page
-    let currentSheetHeight = 0;
-    ws.eachRow((r) => {
-      currentSheetHeight += (r.height || 15);
-    });
-    // Signature block takes 78.5pt (12.5 For Comp + 39 stamp area + 13 sig line + 3 gap + 11 notice)
-    const remainingToPageBottom = Math.max(25, PAGE_LIMIT - currentSheetHeight - 78.5);
+    // Clean, proper gap above signature area - compact so more items can be inserted naturally
     const sigGap = ws.addRow([]);
-    sigGap.height = remainingToPageBottom;
+    sigGap.height = 16;
     currentRow++;
 
     // Row 1: "For [Company Name]" above Authorized Signature on the right
