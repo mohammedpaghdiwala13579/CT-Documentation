@@ -2728,6 +2728,48 @@ export default function QuotationBuilder() {
     }
   };
 
+  const renderSignatureBlock = (isPrintFixed: boolean = false) => (
+    <div className={`sig-block-wrapper w-full ${isPrintFixed ? "print-fixed-sig-inner" : "mt-4 pt-2 print:mt-0 print:pt-0"}`}>
+      <div className="sig-section w-full flex flex-row justify-between items-end gap-10 sm:gap-14">
+        {/* Receiver's Signature Block */}
+        <div className="sig-box w-full sm:w-[240px] print:w-[240px] text-center flex flex-col justify-between h-[80px] print:h-[80px]">
+          <div className="h-4 invisible select-none" aria-hidden="true">&nbsp;</div>
+          <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold text-black tracking-wide">
+            Receiver's Signature
+          </div>
+        </div>
+        
+        {/* Authorized Signature Block (Consistent across all document types) */}
+        <div className="sig-box w-full sm:w-[240px] print:w-[240px] text-center flex flex-col justify-between h-[80px] print:h-[80px] relative">
+          <div className="sig-title text-[9.5pt] print:text-[9pt] font-black text-black uppercase tracking-wider leading-none">
+            For {currentCompany.name}
+          </div>
+          
+          {currentCompany.hasStamp && currentCompany.stampUrl && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-2">
+              <img 
+                src={currentCompany.stampUrl}
+                alt={`${currentCompany.name} Stamp`}
+                referrerPolicy="no-referrer"
+                className="w-[96px] h-[96px] sm:w-[100px] sm:h-[100px] print:w-[94px] print:h-[94px] object-contain select-none opacity-90"
+                style={{ printColorAdjust: "exact" }}
+              />
+            </div>
+          )}
+
+          <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold relative z-20 text-black tracking-wide leading-none">
+            Authorized Signature
+          </div>
+        </div>
+      </div>
+
+      {/* Non-returnable & non-exchangeable notice */}
+      <div className="doc-footer-notice text-center mt-3 pt-1.5 print:mt-1.5 print:pt-1 text-[9px] print:text-[8pt] leading-tight font-bold text-black uppercase tracking-wider">
+        ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
+      </div>
+    </div>
+  );
+
   return (
     <div className="erp-app-shell flex min-h-screen bg-slate-100 text-slate-900 font-sans antialiased w-full selection:bg-blue-600 selection:text-white">
       {/* Persistent Collapsible Sidebar with built-in responsive mobile drawer */}
@@ -4018,48 +4060,22 @@ export default function QuotationBuilder() {
           <tfoot className="table-footer-group print:table-footer-group">
             <tr>
               <td className="border-none p-0 m-0">
-                {/* Standard signature section repeated on every printed page */}
-                <div className="sig-section w-full mt-4 pt-2 print:mt-3 print:pt-2 flex flex-row justify-between items-end gap-10 sm:gap-14">
-                  {/* Receiver's Signature Block */}
-                  <div className="sig-box w-full sm:w-[240px] print:w-[240px] text-center flex flex-col justify-between h-[80px] print:h-[80px]">
-                    <div className="h-4 invisible select-none" aria-hidden="true">&nbsp;</div>
-                    <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold text-black tracking-wide">
-                      Receiver's Signature
-                    </div>
-                  </div>
-                  
-                  {/* Authorized Signature Block (Consistent across all document types) */}
-                  <div className="sig-box w-full sm:w-[240px] print:w-[240px] text-center flex flex-col justify-between h-[80px] print:h-[80px] relative">
-                    <div className="sig-title text-[9.5pt] print:text-[9pt] font-black text-black uppercase tracking-wider leading-none">
-                      For {currentCompany.name}
-                    </div>
-                    
-                    {currentCompany.hasStamp && currentCompany.stampUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-2">
-                        <img 
-                          src={currentCompany.stampUrl}
-                          alt={`${currentCompany.name} Stamp`}
-                          referrerPolicy="no-referrer"
-                          className="w-[96px] h-[96px] sm:w-[100px] sm:h-[100px] print:w-[94px] print:h-[94px] object-contain select-none opacity-90"
-                          style={{ printColorAdjust: "exact" }}
-                        />
-                      </div>
-                    )}
+                {/* Print spacer in tfoot reserves vertical space on the table so rows and totals never collide with the repeating fixed signature footer */}
+                <div className="print-footer-spacer hidden print:block h-[115px] w-full" aria-hidden="true" />
 
-                    <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold relative z-20 text-black tracking-wide leading-none">
-                      Authorized Signature
-                    </div>
-                  </div>
-                </div>
-
-                {/* Non-returnable & non-exchangeable notice */}
-                <div className="doc-footer-notice text-center mt-3 pt-1.5 print:mt-2 print:pt-1 text-[9px] print:text-[8pt] leading-tight font-bold text-black uppercase tracking-wider">
-                  ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
+                {/* Normal in-flow signature block on screen and in PDF generation */}
+                <div className="screen-sig-wrapper print:hidden">
+                  {renderSignatureBlock(false)}
                 </div>
               </td>
             </tr>
           </tfoot>
         </table>
+
+        {/* Repeating signature block on EVERY page while printing */}
+        <div className="print-repeating-signature-footer hidden print:block pointer-events-none">
+          {renderSignatureBlock(true)}
+        </div>
       </div>
         </div>
       </div>
