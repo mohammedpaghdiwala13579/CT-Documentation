@@ -3229,107 +3229,124 @@ export default function QuotationBuilder() {
                 </div>
 
                 {/* ==================================================================== */}
-                {/* 2. PRINT / PDF METADATA VIEW (Clean Dotted Layout, No Boxes) */}
+                {/* 2. PRINT / PDF METADATA VIEW (Clean Dotted Layout, 40px Height, 11pt Font) */}
                 {/* ==================================================================== */}
-                <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[6pt] sm:text-[6.5pt] mb-4 mt-5">
-                  {/* Left Column: Client & Vessel Info (only filled fields appear) */}
-                  <div className="meta-box bg-transparent space-y-1.5">
-                    {cleanHtmlText(messers).length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Messers:</span>
-                        <span
-                          id="print-messers"
-                          className="font-black text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[7pt]"
-                          style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-                          dangerouslySetInnerHTML={{ __html: messers }}
-                        />
-                      </div>
-                    )}
-                    {vesselName && vesselName.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Vessel Name:</span>
-                        <span className="font-bold text-black break-words flex-grow min-w-0 text-[6.2pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{vesselName.trim()}</span>
-                      </div>
-                    )}
-                    {portBerth && portBerth.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Port / Berth:</span>
-                        <span className="text-black break-words flex-grow min-w-0 text-[6.2pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{portBerth.trim()}</span>
-                      </div>
-                    )}
-                    {cleanHtmlText(address).length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[6.2pt]">Address:</span>
-                        <span
-                          id="print-address"
-                          className="text-black break-words whitespace-pre-wrap leading-relaxed flex-grow min-w-0 text-[6.2pt]"
-                          style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
-                          dangerouslySetInnerHTML={{ __html: address }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right Column: Specified Format Number always on top, then Date */}
-                  <div className="meta-box bg-transparent space-y-1.5">
-                    {/* 1. Format-specific Number on TOP */}
-                    {docType === "invoice" && (
-                      <>
-                        {invoiceNo && invoiceNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Invoice No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{invoiceNo.trim()}</span>
-                          </div>
-                        )}
-                        {challanNo && challanNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Challan No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                    {docType === "challan" && (
-                      <>
-                        {challanNo && challanNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Challan No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                    {docType === "quotation" && (
-                      <>
-                        {requisitionNo && requisitionNo.trim().length > 0 && (
-                          <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Requisition No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* 2. Date: ALWAYS right after format number */}
-                    <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                      <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Date:</span>
-                      <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]">{dateVal || " "}</span>
+                <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[11pt] mb-4 mt-3">
+                  {/* Left Column: Client & Vessel Info according to format */}
+                  <div className="meta-box bg-transparent space-y-1.5 flex flex-col">
+                    <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                      <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[11pt]">Messers:</span>
+                      <span
+                        id="print-messers"
+                        className="font-black text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[11pt]"
+                        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+                        dangerouslySetInnerHTML={{ __html: cleanHtmlText(messers).length > 0 ? messers : "&nbsp;" }}
+                      />
                     </div>
 
-                    {/* 3. Requisition No. for invoice & challan (for quotation it's already shown on top with date) */}
-                    {(docType === "invoice" || docType === "challan") && requisitionNo && requisitionNo.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">Requisition No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
-                      </div>
+                    <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                      <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[11pt]">Vessel Name:</span>
+                      <span className="font-bold text-black break-words flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                        {vesselName && vesselName.trim().length > 0 ? vesselName.trim() : "\u00A0"}
+                      </span>
+                    </div>
+
+                    <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                      <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[11pt]">Port / Berth:</span>
+                      <span className="text-black break-words flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                        {portBerth && portBerth.trim().length > 0 ? portBerth.trim() : "\u00A0"}
+                      </span>
+                    </div>
+
+                    <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                      <span className="font-extrabold text-black shrink-0 min-w-[70px] text-[11pt]">Address:</span>
+                      <span
+                        id="print-address"
+                        className="text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[11pt]"
+                        style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
+                        dangerouslySetInnerHTML={{ __html: cleanHtmlText(address).length > 0 ? address : "&nbsp;" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column: References & Date according to format */}
+                  <div className="meta-box bg-transparent space-y-1.5 flex flex-col">
+                    {/* Invoice format: Invoice No., Challan No., Date, Requisition No., PO Number */}
+                    {docType === "invoice" && (
+                      <>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Invoice No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {invoiceNo && invoiceNo.trim().length > 0 ? invoiceNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Challan No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {challanNo && challanNo.trim().length > 0 ? challanNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Date:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]">
+                            {dateVal || "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Requisition No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {requisitionNo && requisitionNo.trim().length > 0 ? requisitionNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">PO Number:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {poNumber && poNumber.trim().length > 0 ? poNumber.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                      </>
                     )}
 
-                    {/* 4. PO Number: ONLY for invoice */}
-                    {docType === "invoice" && poNumber && poNumber.trim().length > 0 && (
-                      <div className="meta-print-field border-b border-dotted border-slate-300 print:border-slate-400 pb-1 mb-1.5 flex items-baseline gap-2">
-                        <span className="font-extrabold text-black shrink-0 min-w-[80px] text-[6.2pt]">PO Number:</span>
-                        <span className="font-mono font-bold text-black flex-grow min-w-0 text-[6.5pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{poNumber.trim()}</span>
-                      </div>
+                    {/* Challan format: Challan No., Requisition No., Date */}
+                    {docType === "challan" && (
+                      <>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Challan No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {challanNo && challanNo.trim().length > 0 ? challanNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Requisition No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {requisitionNo && requisitionNo.trim().length > 0 ? requisitionNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Date:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]">
+                            {dateVal || "\u00A0"}
+                          </span>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Quotation format: Requisition No., Date */}
+                    {docType === "quotation" && (
+                      <>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Requisition No.:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+                            {requisitionNo && requisitionNo.trim().length > 0 ? requisitionNo.trim() : "\u00A0"}
+                          </span>
+                        </div>
+                        <div className="meta-print-field h-[40px] min-h-[40px] max-h-[40px] border-b border-dotted border-slate-400 print:border-black pb-1 flex items-end gap-2 text-[11pt]">
+                          <span className="font-extrabold text-black shrink-0 min-w-[85px] text-[11pt]">Date:</span>
+                          <span className="font-mono font-bold text-black flex-grow min-w-0 text-[11pt]">
+                            {dateVal || "\u00A0"}
+                          </span>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -3926,45 +3943,44 @@ export default function QuotationBuilder() {
               </td>
             </tr>
           </tbody>
-          <tfoot className="table-row-group print:table-row-group">
+          <tfoot className="table-footer-group print:table-footer-group">
             <tr>
               <td className="border-none p-0 m-0">
-                {/* Generous, stable signature section with balanced spacing and consistent baseline */}
-                <div className="sig-section w-full mt-6 pt-10 sm:pt-12 print:mt-4 print:pt-10 flex flex-row justify-between items-end gap-10 sm:gap-16">
+                {/* Compact, clean signature section repeated on every printed page */}
+                <div className="sig-section w-full mt-2 pt-1 print:mt-1 print:pt-1 flex flex-row justify-between items-end gap-8 sm:gap-12">
                   {/* Receiver's Signature Block */}
-                  <div className="sig-box w-full sm:w-[260px] print:w-[260px] text-center flex flex-col justify-between h-[110px] sm:h-[115px] print:h-[110px]">
-                    <div className="h-5 invisible select-none" aria-hidden="true">&nbsp;</div>
-                    <div className="sig-line border-t-2 border-slate-700 print:border-slate-700 pt-2 text-[10pt] sm:text-[10.5pt] print:text-[10pt] font-extrabold text-black tracking-wide">
+                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[46px] print:h-[46px]">
+                    <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1 text-[9pt] print:text-[8.5pt] font-extrabold text-black tracking-wide">
                       Receiver's Signature
                     </div>
                   </div>
                   
                   {/* Authorized Signature Block (Consistent across all document types) */}
-                  <div className="sig-box w-full sm:w-[260px] print:w-[260px] text-center flex flex-col justify-between h-[110px] sm:h-[115px] print:h-[110px] relative">
-                    <div className="sig-title text-[9.5pt] sm:text-[10.5pt] print:text-[10pt] font-black text-black uppercase tracking-wider">
+                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[46px] print:h-[46px] relative">
+                    <div className="sig-title text-[8.5pt] print:text-[8pt] font-black text-black uppercase tracking-wider leading-none">
                       For {currentCompany.name}
                     </div>
                     
                     {currentCompany.hasStamp && currentCompany.stampUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-5">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none">
                         <img 
                           src={currentCompany.stampUrl}
                           alt={`${currentCompany.name} Stamp`}
                           referrerPolicy="no-referrer"
-                          className="w-[96px] h-[96px] sm:w-[100px] sm:h-[100px] print:w-[96px] print:h-[96px] object-contain select-none opacity-90"
+                          className="w-[42px] h-[42px] print:w-[40px] print:h-[40px] object-contain select-none opacity-85"
                           style={{ printColorAdjust: "exact" }}
                         />
                       </div>
                     )}
 
-                    <div className="sig-line border-t-2 border-slate-700 print:border-slate-700 pt-2 text-[10pt] sm:text-[10.5pt] print:text-[10pt] font-extrabold relative z-20 text-black tracking-wide">
+                    <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1 text-[9pt] print:text-[8.5pt] font-extrabold relative z-20 text-black tracking-wide leading-none">
                       Authorized Signature
                     </div>
                   </div>
                 </div>
 
-                {/* Non-returnable & non-exchangeable notice with ample breathing space */}
-                <div className="doc-footer-notice text-center mt-6 pt-3 sm:mt-8 sm:pt-4 print:mt-5 print:pt-2 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
+                {/* Non-returnable & non-exchangeable notice */}
+                <div className="doc-footer-notice text-center mt-1.5 pt-0.5 print:mt-1 print:pt-0.5 text-[8.5px] print:text-[7.5pt] leading-tight font-bold text-black uppercase tracking-wider">
                   ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
                 </div>
               </td>

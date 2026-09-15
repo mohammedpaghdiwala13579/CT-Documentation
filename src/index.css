@@ -279,13 +279,15 @@ input[type="number"] {
     grid-template-columns: 1.35fr 1fr !important;
     gap: 24px !important;
     width: 100% !important;
-    margin-top: 18px !important;
-    margin-bottom: 16px !important;
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
     clear: both !important;
   }
 
   .meta-grid .meta-box {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
     width: 100% !important;
     box-sizing: border-box !important;
     padding: 0 !important;
@@ -296,29 +298,37 @@ input[type="number"] {
 
   .meta-grid .meta-print-field {
     display: flex !important;
-    align-items: baseline !important;
+    align-items: flex-end !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    box-sizing: border-box !important;
     gap: 8px !important;
-    padding-bottom: 2.5px !important;
-    margin-bottom: 5px !important;
-    border-bottom: 1.5px dotted rgba(0, 0, 0, 0.45) !important;
-    font-size: 6.2pt !important;
-    line-height: 1.35 !important;
+    padding-bottom: 3px !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1.5px dotted rgba(0, 0, 0, 0.55) !important;
+    font-size: 11pt !important;
+    line-height: 1.25 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
 
   .meta-grid .meta-print-field > span:first-child {
-    font-size: 6.2pt !important;
+    font-size: 11pt !important;
     font-weight: 800 !important;
     color: #000000 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .meta-grid .meta-print-field > span:last-child {
     min-width: 0 !important;
-    font-size: 6.2pt !important;
+    font-size: 11pt !important;
+    color: #000000 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
     white-space: pre-wrap !important;
+    flex-grow: 1 !important;
   }
 
   .meta-grid .meta-box .meta-print-field:last-child {
@@ -356,7 +366,7 @@ input[type="number"] {
   }
 
   table.print-outer-layout-table > tfoot {
-    display: table-row-group !important;
+    display: table-footer-group !important;
     position: static !important;
   }
 
@@ -456,20 +466,29 @@ input[type="number"] {
 
   .sig-line {
     border-top-width: 1.5px !important;
-    border-top-color: #334155 !important;
-    font-size: 10pt !important;
+    border-top-color: #000000 !important;
+    font-size: 8.5pt !important;
+    padding-top: 2px !important;
   }
 
   .sig-section {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 16px !important;
-    padding-top: 40px !important;
+    margin-top: 4px !important;
+    padding-top: 4px !important;
+  }
+
+  .sig-box {
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
   }
 
   .doc-footer-notice {
-    margin-top: 16px !important;
-    padding-top: 6px !important;
+    margin-top: 3px !important;
+    padding-top: 1px !important;
+    font-size: 7.5pt !important;
+    line-height: 1.1 !important;
   }
 
   /* Remove any cell outlines, focus borders, and selection highlights on print */
@@ -633,12 +652,14 @@ input[type="number"] {
   grid-template-columns: 1.35fr 1fr !important;
   gap: 20px !important;
   width: 100% !important;
-  margin-top: 14px !important;
-  margin-bottom: 14px !important;
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
 }
 
 .is-generating-pdf .meta-grid .meta-box {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
   width: 100% !important;
   padding: 0 !important;
   border: none !important;
@@ -647,34 +668,62 @@ input[type="number"] {
 
 .is-generating-pdf .meta-grid .meta-print-field {
   display: flex !important;
-  align-items: baseline !important;
-  gap: 6px !important;
-  padding-bottom: 2px !important;
-  margin-bottom: 3.5px !important;
-  border-bottom: 1px dotted rgba(0, 0, 0, 0.35) !important;
-  font-size: 5.8pt !important;
-  line-height: 1.35 !important;
+  align-items: flex-end !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  box-sizing: border-box !important;
+  gap: 8px !important;
+  padding-bottom: 3px !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.5) !important;
+  font-size: 11pt !important;
+  line-height: 1.25 !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
 }
 
 .is-generating-pdf .meta-grid .meta-print-field > span:first-child {
-  font-size: 5.8pt !important;
+  font-size: 11pt !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .is-generating-pdf .meta-grid .meta-print-field > span:last-child {
   min-width: 0 !important;
-  font-size: 5.8pt !important;
+  font-size: 11pt !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   white-space: pre-wrap !important;
+  flex-grow: 1 !important;
 }
 
 .is-generating-pdf .sig-section {
-  margin-top: 0 !important;
-  padding-top: 28px !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
   page-break-inside: avoid !important;
   break-inside: avoid !important;
+}
+
+.is-generating-pdf .sig-box {
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+}
+
+.is-generating-pdf .sig-line {
+  border-top-width: 1.5px !important;
+  border-top-color: #000000 !important;
+  font-size: 8.5pt !important;
+  padding-top: 2px !important;
+}
+
+.is-generating-pdf .doc-footer-notice {
+  margin-top: 3px !important;
+  padding-top: 1px !important;
+  font-size: 7.5pt !important;
+  line-height: 1.1 !important;
 }
 
 .is-generating-pdf .hidden.print\:inline,
