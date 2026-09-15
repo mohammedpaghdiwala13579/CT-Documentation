@@ -120,6 +120,11 @@ function replaceOklchInCss(cssText: string): string {
   });
 }
 
+const cleanHtmlText = (str?: string): string => {
+  if (!str) return "";
+  return str.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+};
+
 const getDraftStorageKey = (company: CompanyId = "comilla") => `${company}_active_draft_v2`;
 
 const getInitialCompany = (): CompanyId => "comilla";
@@ -2885,31 +2890,31 @@ export default function QuotationBuilder() {
                   {/* Top blank margin repeating on every printed page */}
                   <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
                   
-                  <div className="business-header border-b-2 border-black pb-1 mb-1 flex flex-col sm:flex-row items-center justify-between gap-2 text-black text-left">
-                    <div className="flex items-center gap-2.5">
-                      <div className="logo-container h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
+                  <div className="business-header border-b-2 border-black pb-2 mb-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-black text-left">
+                    <div className="flex items-center gap-3">
+                      <div className="logo-container h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
                         <img
                           src={currentCompany.logoUrl}
                           alt={`${currentCompany.name} Logo`}
-                          className="w-full h-full object-contain p-0.5"
+                          className="w-full h-full object-contain p-1"
                         />
                       </div>
                       <div>
-                        <h1 className="text-[15pt] sm:text-[17pt] font-black tracking-tight leading-none text-black uppercase">
+                        <h1 className="text-[17pt] sm:text-[20pt] font-black tracking-tight leading-none text-black uppercase">
                           {currentCompany.name}
                         </h1>
-                        <p className="text-[7.5pt] font-extrabold text-slate-700 tracking-wider uppercase mt-0.5">
+                        <p className="text-[8.5pt] sm:text-[9pt] font-extrabold text-slate-700 tracking-wider uppercase mt-1">
                           {currentCompany.tagline1}
                         </p>
                         {currentCompany.tagline2 && (
-                          <p className="text-[6.5pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                          <p className="text-[7.5pt] sm:text-[8pt] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
                             {currentCompany.tagline2}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="contact-details text-right text-[7pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block">
+                    <div className="contact-details text-right text-[7.5pt] sm:text-[8pt] text-slate-800 space-y-0.5 leading-snug sm:block hidden print:block">
                       <p className="font-bold whitespace-nowrap">
                         Office: <span className="font-medium whitespace-nowrap">{currentCompany.officeAddress}</span>
                       </p>
@@ -2919,12 +2924,12 @@ export default function QuotationBuilder() {
                       <p className="font-bold whitespace-nowrap">
                         Official Email: <span className="font-medium whitespace-nowrap">{currentCompany.email}</span>
                       </p>
-                      <p className="font-bold text-[6.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
+                      <p className="font-bold text-[7.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
                         {currentCompany.locationCity}
                       </p>
                     </div>
                     
-                    {/* Print contact information layout */}
+                    {/* Mobile contact information fallback */}
                     <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
                       <p>{currentCompany.officeAddress} &bull; Hotlines: {currentCompany.helplines}</p>
                       <p>{currentCompany.email}</p>
@@ -2932,253 +2937,92 @@ export default function QuotationBuilder() {
                   </div>
 
                 {/* Repeating Document Title on multi-page browser printing */}
-                <div className="doc-title text-center text-[11pt] sm:text-[12pt] font-black uppercase tracking-[6px] my-0.5">
+                <div className="doc-title text-center text-[11pt] sm:text-[13pt] font-black uppercase tracking-[6px] my-1">
                   {docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation"}
                 </div>
 
-                {/* Repeating Metadata Information Input Grid on multi-page browser printing */}
-                <div className="meta-grid grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-left text-[8pt] mb-1">
-                  <div className="meta-box space-y-1 border border-black p-1.5 bg-slate-50/30 rounded-xs">
+                {/* ==================================================================== */}
+                {/* 1. DOCUMENT EDITOR METADATA VIEW (Screen Only: Clean, Free, No Checkboxes) */}
+                {/* ==================================================================== */}
+                <div className="meta-editor-grid no-print print:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 text-left text-[8.5pt] mb-2 p-3 bg-slate-50/70 border border-slate-200 rounded-md">
+                  {/* Left Column: Client & Vessel Information */}
+                  <div className="space-y-2">
                     <div>
-                      <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Messers:</label>
+                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                        Messers:
+                      </label>
                       <RichTextCell
                         value={messers}
                         syncId="messers"
                         onChange={(val) => setMessers(val)}
-                        placeholder="Enter Client/Ship details"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-black font-bold text-[8.5pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
-                      />
-                      <div 
-                        id="print-messers"
-                        className="hidden print:block font-bold text-[8.5pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words whitespace-pre-wrap leading-tight"
-                        dangerouslySetInnerHTML={{ __html: messers || "&nbsp;" }}
+                        placeholder="Client / Ship name"
+                        className="w-full border-b border-slate-300 focus:border-indigo-600 font-bold text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px]"
                       />
                     </div>
-                    {/* In-place toggles for Vessel Name and Port / Berth */}
-                    <div className="no-print flex items-center justify-between pb-1 pt-0.5 border-b border-slate-200/80 text-[6.5pt] text-slate-500">
-                      <span className="font-extrabold uppercase tracking-wider text-slate-400">Format Fields:</span>
-                      <div className="flex items-center gap-2.5">
-                        <label className="inline-flex items-center gap-1 cursor-pointer font-bold text-slate-700 hover:text-indigo-600 select-none transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={includeVesselName}
-                            onChange={(e) => setIncludeVesselName(e.target.checked)}
-                            className="rounded text-indigo-600 focus:ring-0 cursor-pointer h-3 w-3"
-                          />
-                          <span>Vessel Name</span>
-                        </label>
-                        <label className="inline-flex items-center gap-1 cursor-pointer font-bold text-slate-700 hover:text-indigo-600 select-none transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={includePortBerth}
-                            onChange={(e) => setIncludePortBerth(e.target.checked)}
-                            className="rounded text-indigo-600 focus:ring-0 cursor-pointer h-3 w-3"
-                          />
-                          <span>Port / Berth</span>
-                        </label>
-                      </div>
-                    </div>
 
-                    {/* Both Vessel Name and Port / Berth enabled */}
-                    {includeVesselName && includePortBerth && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
-                        <div>
-                          <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
-                            <Ship className="h-2.5 w-2.5 text-slate-500 no-print" />
-                            <span>Vessel Name:</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={vesselName}
-                            onChange={(e) => setVesselName(e.target.value)}
-                            placeholder="M/V or M/T Vessel Name"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black font-semibold text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
-                          />
-                          <div className="hidden print:block font-semibold text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
-                            {vesselName || " "}
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Port / Berth:
-                          </label>
-                          <input
-                            type="text"
-                            value={portBerth}
-                            onChange={(e) => setPortBerth(e.target.value)}
-                            placeholder="Jetty / Anchorage"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
-                          />
-                          <div className="hidden print:block text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
-                            {portBerth || " "}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Only Vessel Name enabled */}
-                    {includeVesselName && !includePortBerth && (
-                      <div className="pt-0.5">
-                        <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
-                          <Ship className="h-2.5 w-2.5 text-slate-500 no-print" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                          <Ship className="h-3 w-3 text-slate-500" />
                           <span>Vessel Name:</span>
                         </label>
                         <input
                           type="text"
                           value={vesselName}
                           onChange={(e) => setVesselName(e.target.value)}
-                          placeholder="M/V or M/T Vessel Name"
-                          className="w-full border-b border-dotted border-slate-400 focus:border-black font-semibold text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
+                          placeholder="M/V or M/T Vessel Name (optional)"
+                          className="w-full border-b border-slate-300 focus:border-indigo-600 font-semibold text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
                         />
-                        <div className="hidden print:block font-semibold text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
-                          {vesselName || " "}
-                        </div>
                       </div>
-                    )}
-
-                    {/* Only Port / Berth enabled */}
-                    {!includeVesselName && includePortBerth && (
-                      <div className="pt-0.5">
-                        <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                      <div>
+                        <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                           Port / Berth:
                         </label>
                         <input
                           type="text"
                           value={portBerth}
                           onChange={(e) => setPortBerth(e.target.value)}
-                          placeholder="Jetty / Anchorage"
-                          className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8pt] outline-none bg-transparent py-0.5 no-print print:hidden min-h-[18px]"
+                          placeholder="Jetty / Anchorage (optional)"
+                          className="w-full border-b border-slate-300 focus:border-indigo-600 text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
                         />
-                        <div className="hidden print:block text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words">
-                          {portBerth || " "}
-                        </div>
                       </div>
-                    )}
+                    </div>
+
                     <div>
-                      <label className="block text-[6.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">Address:</label>
+                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                        Address:
+                      </label>
                       <RichTextCell
                         value={address}
                         syncId="address"
                         onChange={(val) => setAddress(val)}
-                        placeholder="Enter delivery/billing address"
-                        className="w-full border-b border-dotted border-slate-400 focus:border-black text-[8pt] outline-none bg-transparent leading-tight py-0.5 no-print print:hidden min-h-[18px]"
-                      />
-                      <div 
-                        id="print-address"
-                        className="hidden print:block text-[8pt] border-b border-dotted border-black min-h-[16px] py-0.5 break-words whitespace-pre-wrap leading-tight"
-                        dangerouslySetInnerHTML={{ __html: address || "&nbsp;" }}
+                        placeholder="Delivery or billing address (optional)"
+                        className="w-full border-b border-slate-300 focus:border-indigo-600 text-[8pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px] leading-snug"
                       />
                     </div>
                   </div>
 
-                  <div className={`meta-box grid border border-black p-2 bg-slate-50/30 rounded-xs ${
-                    docType === "invoice" ? "grid-cols-3 gap-1.5" : "grid-cols-2 gap-1.5"
-                  }`}>
-                    {/* INVOICE NO (Invoice only) */}
-                    {docType === "invoice" && (
-                      <div className={`meta-inner-field col-span-1 ${!includeInvoiceNo ? "print:hidden" : ""}`}>
-                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
-                          <span className="flex items-center gap-1">
-                            <input 
-                              type="checkbox" 
-                              checked={includeInvoiceNo} 
-                              onChange={(e) => {
-                                recordChange();
-                                setIncludeInvoiceNo(e.target.checked);
-                              }}
-                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
-                              title={includeInvoiceNo ? "Click to deselect Invoice No." : "Click to select Invoice No."}
-                            />
-                            <span className={!includeInvoiceNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
-                              Invoice No.:
-                            </span>
-                          </span>
-                          {!includeInvoiceNo && (
-                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
-                          )}
-                        </label>
-                        <input 
-                          type="text" 
-                          value={invoiceNo}
-                          onChange={(e) => setInvoiceNo(e.target.value)}
-                          placeholder={includeInvoiceNo ? "Invoice number" : "Omitted from print"}
-                          disabled={!includeInvoiceNo}
-                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
-                            !includeInvoiceNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
-                          }`}
-                        />
-                        {includeInvoiceNo && (
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {invoiceNo || " "}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* CHALLAN NO (Invoice or Challan) */}
-                    {(docType === "invoice" || docType === "challan") && (
-                      <div className={`meta-inner-field col-span-1 ${!includeChallanNo ? "print:hidden" : ""}`}>
-                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
-                          <span className="flex items-center gap-1">
-                            <input 
-                              type="checkbox" 
-                              checked={includeChallanNo} 
-                              onChange={(e) => {
-                                recordChange();
-                                setIncludeChallanNo(e.target.checked);
-                              }}
-                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
-                              title={includeChallanNo ? "Click to deselect Challan No." : "Click to select Challan No."}
-                            />
-                            <span className={!includeChallanNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
-                              Challan No.:
-                            </span>
-                          </span>
-                          {!includeChallanNo && (
-                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
-                          )}
-                        </label>
-                        <input 
-                          type="text" 
-                          value={challanNo}
-                          onChange={(e) => setChallanNo(e.target.value)}
-                          placeholder={includeChallanNo ? "Challan number" : "Omitted from print"}
-                          disabled={!includeChallanNo}
-                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
-                            !includeChallanNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
-                          }`}
-                        />
-                        {includeChallanNo && (
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {challanNo || " "}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* DATE (Always visible in all forms, no checkbox - "except date") */}
-                    <div className="meta-inner-field col-span-1 relative">
+                  {/* Right Column: References & Date */}
+                  <div className="space-y-2">
+                    <div className="relative">
                       <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                         Date:
                       </label>
-                      <div className="flex items-center gap-1 no-print print:hidden">
-                        <input 
-                          type="text" 
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
                           value={dateVal}
                           onChange={(e) => setDateVal(e.target.value)}
-                          className="w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5"
+                          className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
                         />
                         <button
                           type="button"
                           onClick={triggerDatePicker}
-                          className="p-0.5 hover:bg-slate-100 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                          className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
                           title="Open Date Picker"
                         >
-                          <Calendar className="h-3.5 w-3.5" />
+                          <Calendar className="h-3.5 w-3.5 text-indigo-600" />
                         </button>
-                      </div>
-                      <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5">
-                        {dateVal || " "}
                       </div>
                       <input
                         ref={dateRef}
@@ -3188,85 +3032,220 @@ export default function QuotationBuilder() {
                       />
                     </div>
 
-                    {/* REQUISITION NO */}
-                    <div className={`meta-inner-field ${
-                      docType === "challan" ? "col-span-2" : "col-span-1"
-                    } ${!includeRequisitionNo ? "print:hidden" : ""}`}>
-                      <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
-                        <span className="flex items-center gap-1">
-                          <input 
-                            type="checkbox" 
-                            checked={includeRequisitionNo} 
-                            onChange={(e) => {
-                              recordChange();
-                              setIncludeRequisitionNo(e.target.checked);
-                            }}
-                            className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
-                            title={includeRequisitionNo ? "Click to deselect Requisition No." : "Click to select Requisition No."}
+                    {/* Quotation fields */}
+                    {docType === "quotation" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Quotation No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={quotationNo}
+                            onChange={(e) => setQuotationNo(e.target.value)}
+                            placeholder="Quotation No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
                           />
-                          <span className={!includeRequisitionNo ? "text-slate-400 line-through decoration-slate-300" : ""}>
-                            Requisition No.:
-                          </span>
-                        </span>
-                        {!includeRequisitionNo && (
-                          <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
-                        )}
-                      </label>
-                      <input 
-                        type="text" 
-                        value={requisitionNo}
-                        onChange={(e) => setRequisitionNo(e.target.value)}
-                        placeholder={includeRequisitionNo ? "Requisition number" : "Omitted from print"}
-                        disabled={!includeRequisitionNo}
-                        className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
-                          !includeRequisitionNo ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
-                        }`}
-                      />
-                      {includeRequisitionNo && (
-                        <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                          {requisitionNo || " "}
                         </div>
-                      )}
-                    </div>
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Requisition No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            PO / Reference No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={poNumber}
+                            onChange={(e) => setPoNumber(e.target.value)}
+                            placeholder="PO or Reference No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    )}
 
-                    {/* PO NUMBER (Invoice only - NOT in Quotation or Challan) */}
+                    {/* Invoice fields */}
                     {docType === "invoice" && (
-                      <div className={`meta-inner-field col-span-2 ${!includePoNumber ? "print:hidden" : ""}`}>
-                        <label className="flex items-center justify-between text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 select-none cursor-pointer">
-                          <span className="flex items-center gap-1">
-                            <input 
-                              type="checkbox" 
-                              checked={includePoNumber} 
-                              onChange={(e) => {
-                                recordChange();
-                                setIncludePoNumber(e.target.checked);
-                              }}
-                              className="no-print rounded text-indigo-600 focus:ring-0 cursor-pointer h-2.5 w-2.5"
-                              title={includePoNumber ? "Click to deselect PO Number" : "Click to select PO Number"}
-                            />
-                            <span className={!includePoNumber ? "text-slate-400 line-through decoration-slate-300" : ""}>
-                              PO Number:
-                            </span>
-                          </span>
-                          {!includePoNumber && (
-                            <span className="no-print text-[6.5pt] font-normal text-slate-400 lowercase italic">(off)</span>
-                          )}
-                        </label>
-                        <input 
-                          type="text" 
-                          value={poNumber}
-                          onChange={(e) => setPoNumber(e.target.value)}
-                          placeholder={includePoNumber ? "PO number" : "Omitted from print"}
-                          disabled={!includePoNumber}
-                          className={`w-full border-b border-dotted border-slate-400 focus:border-black font-mono text-[9pt] outline-none bg-transparent py-0.5 no-print print:hidden ${
-                            !includePoNumber ? "opacity-35 cursor-not-allowed bg-slate-100/50" : ""
-                          }`}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Invoice No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={invoiceNo}
+                            onChange={(e) => setInvoiceNo(e.target.value)}
+                            placeholder="Invoice No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Challan No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={challanNo}
+                            onChange={(e) => setChallanNo(e.target.value)}
+                            placeholder="Challan No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Requisition No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            PO Number:
+                          </label>
+                          <input
+                            type="text"
+                            value={poNumber}
+                            onChange={(e) => setPoNumber(e.target.value)}
+                            placeholder="PO Number (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Challan fields */}
+                    {docType === "challan" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Challan No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={challanNo}
+                            onChange={(e) => setChallanNo(e.target.value)}
+                            placeholder="Challan No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            Requisition No.:
+                          </label>
+                          <input
+                            type="text"
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition No. (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                            PO Number:
+                          </label>
+                          <input
+                            type="text"
+                            value={poNumber}
+                            onChange={(e) => setPoNumber(e.target.value)}
+                            placeholder="PO Number (optional)"
+                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ==================================================================== */}
+                {/* 2. PRINT / PDF METADATA VIEW (Only Non-Empty Fields, Clean, No Lines) */}
+                {/* ==================================================================== */}
+                <div className="meta-grid hidden print:grid grid-cols-2 gap-2 text-left text-[8.5pt] mb-1.5">
+                  {/* Left Box: Client & Vessel Info (only filled fields appear) */}
+                  <div className="meta-box border border-black p-2 bg-transparent space-y-1">
+                    {cleanHtmlText(messers).length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Messers:</span>
+                        <span
+                          id="print-messers"
+                          className="font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow"
+                          dangerouslySetInnerHTML={{ __html: messers }}
                         />
-                        {includePoNumber && (
-                          <div className="hidden print:block font-mono text-[9pt] border-b border-dotted border-black min-h-[18px] py-0.5 break-words">
-                            {poNumber || " "}
-                          </div>
-                        )}
+                      </div>
+                    )}
+                    {vesselName && vesselName.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Vessel Name:</span>
+                        <span className="font-bold text-black break-words flex-grow">{vesselName.trim()}</span>
+                      </div>
+                    )}
+                    {portBerth && portBerth.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Port / Berth:</span>
+                        <span className="text-black break-words flex-grow">{portBerth.trim()}</span>
+                      </div>
+                    )}
+                    {cleanHtmlText(address).length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Address:</span>
+                        <span
+                          id="print-address"
+                          className="text-black break-words whitespace-pre-wrap leading-tight flex-grow"
+                          dangerouslySetInnerHTML={{ __html: address }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Box: Reference Numbers & Date (only filled fields appear) */}
+                  <div className="meta-box border border-black p-2 bg-transparent space-y-1">
+                    <div className="meta-print-field">
+                      <span className="font-extrabold text-black shrink-0">Date:</span>
+                      <span className="font-mono font-bold text-black flex-grow">{dateVal || " "}</span>
+                    </div>
+                    {invoiceNo && invoiceNo.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Invoice No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow">{invoiceNo.trim()}</span>
+                      </div>
+                    )}
+                    {challanNo && challanNo.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Challan No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow">{challanNo.trim()}</span>
+                      </div>
+                    )}
+                    {quotationNo && quotationNo.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Quotation No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow">{quotationNo.trim()}</span>
+                      </div>
+                    )}
+                    {requisitionNo && requisitionNo.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">Requisition No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow">{requisitionNo.trim()}</span>
+                      </div>
+                    )}
+                    {poNumber && poNumber.trim().length > 0 && (
+                      <div className="meta-print-field">
+                        <span className="font-extrabold text-black shrink-0">PO Number:</span>
+                        <span className="font-mono font-bold text-black flex-grow">{poNumber.trim()}</span>
                       </div>
                     )}
                   </div>
@@ -3282,15 +3261,15 @@ export default function QuotationBuilder() {
                 <div className="w-full overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mt-1">
                   <table className="main-table w-full min-w-full border-collapse border-[1.5px] border-black table-fixed text-[8pt]">
                     <thead>
-                      <tr className="bg-slate-50 text-[7.5pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-black py-0.5 px-1 text-center font-bold`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-black py-0.5 px-2 text-left font-bold`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-black py-0.5 px-1 text-center font-bold`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-black py-0.5 px-1 text-center font-bold`}>Unit</th>
+                      <tr className="bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt]">
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-black py-1.5 px-1 text-center font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-black py-1.5 px-2 text-left font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-black py-1.5 px-1 text-center font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-black py-1.5 px-1 text-center font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-black py-0.5 px-1 text-center font-bold">Price</th>
-                            <th className="w-[12%] border border-black py-0.5 px-1 text-center font-bold">Amount</th>
+                            <th className="w-[11%] border border-black py-1.5 px-1 text-center font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider">Price</th>
+                            <th className="w-[12%] border border-black py-1.5 px-1 text-center font-bold bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt] uppercase tracking-wider">Amount</th>
                           </>
                         )}
                       </tr>
@@ -3868,17 +3847,17 @@ export default function QuotationBuilder() {
             <tr>
               <td className="border-none p-0 m-0">
                 {/* Signatures & Stamps section - repeated on every page while printing */}
-                <div className="sig-section mt-8 sm:mt-10 pt-2.5 flex flex-row justify-between gap-8 sm:gap-14">
-                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[65px]">
-                    <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8pt] font-bold text-black">
+                <div className="sig-section mt-20 sm:mt-28 pt-6 flex flex-row justify-between gap-8 sm:gap-14">
+                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[75px]">
+                    <div className="sig-line border-t-[1.5px] border-black pt-1.5 text-[8.5pt] font-bold text-black">
                       Receiver's Signature
                     </div>
                   </div>
                   
                   {/* Authorized signature block */}
                   {docType !== "challan" && (
-                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[65px] relative">
-                      <div className="sig-title text-[8pt] font-bold text-black">For {currentCompany.name}</div>
+                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[75px] relative">
+                      <div className="sig-title text-[8.5pt] font-bold text-black">For {currentCompany.name}</div>
                       
                       {currentCompany.hasStamp && currentCompany.stampUrl && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
@@ -3886,13 +3865,13 @@ export default function QuotationBuilder() {
                             src={currentCompany.stampUrl}
                             alt={`${currentCompany.name} Stamp`}
                             referrerPolicy="no-referrer"
-                            className="w-[88px] h-[88px] object-contain select-none"
+                            className="w-[92px] h-[92px] object-contain select-none"
                             style={{ printColorAdjust: "exact" }}
                           />
                         </div>
                       )}
 
-                      <div className="sig-line border-t-[1.5px] border-black pt-1 text-[8pt] font-bold relative z-20 text-black">
+                      <div className="sig-line border-t-[1.5px] border-black pt-1.5 text-[8.5pt] font-bold relative z-20 text-black">
                         Authorized Signature
                       </div>
                     </div>

@@ -795,37 +795,39 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   const vatAmount = isInvoice ? (netAfterDiscount * parsedVat) / 100 : 0;
   const grandTotal = isInvoice ? netAfterDiscount + vatAmount + parsedTransport : rowsTotal;
 
-  // Build Metadata Left and Right lines for Page 1
+  // Build Metadata Left and Right lines for Page 1 (only include non-empty fields)
   const cleanMessers = cleanHtmlText(messers) || " ";
   const cleanAddress = cleanHtmlText(address) || " ";
 
-  const leftLines: { label: string; value: string; bold?: boolean }[] = [
-    { label: "Messers:", value: cleanMessers, bold: true },
-  ];
-  if (includeVesselName && vesselName) {
-    leftLines.push({ label: "Vessel Name:", value: vesselName, bold: true });
+  const leftLines: { label: string; value: string; bold?: boolean }[] = [];
+  if (cleanMessers.trim()) {
+    leftLines.push({ label: "Messers:", value: cleanMessers, bold: true });
   }
-  if (includePortBerth && portBerth) {
-    leftLines.push({ label: "Port / Berth:", value: portBerth });
+  if (vesselName && vesselName.trim()) {
+    leftLines.push({ label: "Vessel Name:", value: vesselName.trim(), bold: true });
   }
-  leftLines.push({ label: "Address:", value: cleanAddress });
+  if (portBerth && portBerth.trim()) {
+    leftLines.push({ label: "Port / Berth:", value: portBerth.trim() });
+  }
+  if (cleanAddress.trim()) {
+    leftLines.push({ label: "Address:", value: cleanAddress });
+  }
 
   const rightLines: { label: string; value: string; bold?: boolean }[] = [];
+  rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
   if (isInvoice) {
-    if (includeInvoiceNo && invoiceNo) rightLines.push({ label: "Invoice No.:", value: invoiceNo, bold: true });
-    if (includeChallanNo && challanNo) rightLines.push({ label: "Challan No.:", value: challanNo, bold: true });
-    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
-    if (includeRequisitionNo && requisitionNo) rightLines.push({ label: "Requisition No.:", value: requisitionNo, bold: true });
-    if (includePoNumber && poNumber) rightLines.push({ label: "PO Number:", value: poNumber, bold: true });
+    if (invoiceNo && invoiceNo.trim()) rightLines.push({ label: "Invoice No.:", value: invoiceNo.trim(), bold: true });
+    if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
+    if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
+    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else if (isChallan) {
-    if (includeChallanNo && challanNo) rightLines.push({ label: "Challan No.:", value: challanNo, bold: true });
-    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
-    if (includeRequisitionNo && requisitionNo) rightLines.push({ label: "Requisition No.:", value: requisitionNo, bold: true });
+    if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
+    if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
+    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else {
-    if (includeQuotationNo && quotationNo) rightLines.push({ label: "Quotation No.:", value: quotationNo, bold: true });
-    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
-    if (includeRequisitionNo && requisitionNo) rightLines.push({ label: "Requisition No.:", value: requisitionNo, bold: true });
-    if (includePoNumber && poNumber) rightLines.push({ label: "PO Number:", value: poNumber, bold: true });
+    if (quotationNo && quotationNo.trim()) rightLines.push({ label: "Quotation No.:", value: quotationNo.trim(), bold: true });
+    if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
+    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   }
 
   const maxMetaRows = Math.max(leftLines.length, rightLines.length, 3);
@@ -1116,10 +1118,10 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
         ];
 
     const headerRow = ws.addRow(headerValues);
-    headerRow.height = TABLE_HEADER_HEIGHT;
+    headerRow.height = Math.max(TABLE_HEADER_HEIGHT, 18);
     headerRow.eachCell((cell, colNumber) => {
-      cell.font = { name: "Arial", size: 7.5, bold: true, color: { argb: "FF000000" } };
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
+      cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF000000" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFDE047" } };
       cell.border = THIN_BORDER;
 
       if (colNumber === 1 || colNumber === 3 || colNumber === 4) {
@@ -1331,9 +1333,9 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     // =========================================================================
     // SIGNATURES & STAMP SECTION (Present on EVERY PAGE according to format)
     // =========================================================================
-    // Top spacing above signature block
+    // Top spacing above signature block (generous gap positioning signature section lower down)
     const sigGap = ws.addRow([]);
-    sigGap.height = 4;
+    sigGap.height = 38;
     currentRow++;
 
     // Row 1: "For [Company Name]" above Authorized Signature on the right
