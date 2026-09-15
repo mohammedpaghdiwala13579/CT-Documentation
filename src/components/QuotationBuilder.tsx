@@ -3017,32 +3017,42 @@ export default function QuotationBuilder() {
                     </div>
 
                     {/* Vessel Name: Single row, full width */}
-                    <div className="h-[40px] flex flex-col justify-between">
+                    <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                       <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                         <Ship className="h-3 w-3 text-slate-600 shrink-0" />
                         <span>Vessel Name:</span>
                       </label>
-                      <input
-                        type="text"
+                      <textarea
+                        rows={1}
                         value={vesselName}
                         onChange={(e) => setVesselName(e.target.value)}
+                        onInput={(e) => {
+                          const target = e.currentTarget;
+                          target.style.height = 'auto';
+                          target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                        }}
                         placeholder=""
-                        className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                        className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                       />
                     </div>
 
                     {/* Port / Berth: Single row, full width */}
-                    <div className="h-[40px] flex flex-col justify-between">
+                    <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                       <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                         <Anchor className="h-3 w-3 text-slate-600 shrink-0" />
                         <span>Port / Berth:</span>
                       </label>
-                      <input
-                        type="text"
+                      <textarea
+                        rows={1}
                         value={portBerth}
                         onChange={(e) => setPortBerth(e.target.value)}
+                        onInput={(e) => {
+                          const target = e.currentTarget;
+                          target.style.height = 'auto';
+                          target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                        }}
                         placeholder=""
-                        className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                        className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                       />
                     </div>
 
@@ -3067,17 +3077,22 @@ export default function QuotationBuilder() {
                     {/* Quotation format: ONLY Requisition No. with Date */}
                     {docType === "quotation" && (
                       <div className="space-y-3 sm:space-y-3.5">
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <FileText className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Requisition No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={requisitionNo}
                             onChange={(e) => setRequisitionNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
@@ -3116,31 +3131,41 @@ export default function QuotationBuilder() {
                     {/* Invoice format: All single lines, no side-by-side fields */}
                     {docType === "invoice" && (
                       <div className="space-y-3 sm:space-y-3.5">
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <FileText className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Invoice No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={invoiceNo}
                             onChange={(e) => setInvoiceNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <Hash className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Challan No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={challanNo}
                             onChange={(e) => setChallanNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
@@ -3174,31 +3199,41 @@ export default function QuotationBuilder() {
                           />
                         </div>
 
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <FileText className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Requisition No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={requisitionNo}
                             onChange={(e) => setRequisitionNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <Hash className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>PO Number:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={poNumber}
                             onChange={(e) => setPoNumber(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.2pt] sm:text-[6.5pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
                       </div>
@@ -3207,31 +3242,41 @@ export default function QuotationBuilder() {
                     {/* Challan format: All single lines, no side-by-side fields */}
                     {docType === "challan" && (
                       <div className="space-y-3 sm:space-y-3.5">
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <FileText className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Challan No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={challanNo}
                             onChange={(e) => setChallanNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
-                        <div className="h-[40px] flex flex-col justify-between">
+                        <div className="min-h-[40px] h-auto flex flex-col justify-between py-0.5">
                           <label className="text-[6pt] sm:text-[6.5pt] font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1 h-[14px] shrink-0">
                             <Hash className="h-3 w-3 text-slate-600 shrink-0" />
                             <span>Requisition No.:</span>
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={1}
                             value={requisitionNo}
                             onChange={(e) => setRequisitionNo(e.target.value)}
+                            onInput={(e) => {
+                              const target = e.currentTarget;
+                              target.style.height = 'auto';
+                              target.style.height = `${Math.max(20, target.scrollHeight)}px`;
+                            }}
                             placeholder=""
-                            className="w-full h-[20px] min-h-[20px] max-h-[20px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold shrink-0"
+                            className="w-full min-h-[20px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-black text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-[18px] transition-colors font-bold resize-none break-words overflow-hidden shrink-0"
                           />
                         </div>
 
@@ -3292,16 +3337,16 @@ export default function QuotationBuilder() {
                   if (!hasLeftContent && !hasRightContent) return null;
 
                   return (
-                    <div className="meta-grid hidden print:grid grid-cols-1 gap-1.5 text-left text-[10pt] mb-3 mt-2 w-full">
+                    <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[10pt] mb-3 mt-2 w-full">
                       {/* Left Column: Client & Vessel Info - Every field on its own line */}
                       <div className="meta-box bg-transparent space-y-1 flex flex-col">
                         {/* Messers */}
                         {hasMessers && (
-                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                            <span className="font-extrabold text-black shrink-0 text-[10pt]">Messers:</span>
+                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                            <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Messers:</span>
                             <span
                               id="print-messers"
-                              className="font-black text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                              className="font-black text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                               style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                               dangerouslySetInnerHTML={{ __html: messers }}
                             />
@@ -3310,11 +3355,11 @@ export default function QuotationBuilder() {
 
                         {/* Vessel Name: Single line, full width */}
                         {hasVesselName && (
-                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                            <span className="font-extrabold text-black shrink-0 text-[10pt]">Vessel Name:</span>
+                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                            <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Vessel Name:</span>
                             <span
                               id="print-vessel"
-                              className="font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                              className="font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                               style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                             >
                               {vesselName.trim()}
@@ -3324,11 +3369,11 @@ export default function QuotationBuilder() {
 
                         {/* Port / Berth: Single line, full width */}
                         {hasPortBerth && (
-                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                            <span className="font-extrabold text-black shrink-0 text-[10pt]">Port / Berth:</span>
+                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                            <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Port / Berth:</span>
                             <span
                               id="print-port"
-                              className="text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                              className="text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                               style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                             >
                               {portBerth.trim()}
@@ -3338,11 +3383,11 @@ export default function QuotationBuilder() {
 
                         {/* Address: Single line, full width */}
                         {hasAddress && (
-                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                            <span className="font-extrabold text-black shrink-0 text-[10pt]">Address:</span>
+                          <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                            <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Address:</span>
                             <span
                               id="print-address"
-                              className="text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                              className="text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                               style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                               dangerouslySetInnerHTML={{ __html: address }}
                             />
@@ -3356,11 +3401,11 @@ export default function QuotationBuilder() {
                         {docType === "invoice" && (
                           <>
                             {hasInvoiceNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Invoice No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Invoice No.:</span>
                                 <span
                                   id="print-invoice-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {invoiceNo.trim()}
@@ -3369,11 +3414,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasChallanNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Challan No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Challan No.:</span>
                                 <span
                                   id="print-challan-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {challanNo.trim()}
@@ -3382,11 +3427,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasDate && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Date:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Date:</span>
                                 <span
                                   id="print-date"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                 >
                                   {dateVal.trim()}
                                 </span>
@@ -3394,11 +3439,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasRequisitionNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Requisition No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Requisition No.:</span>
                                 <span
                                   id="print-requisition-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {requisitionNo.trim()}
@@ -3407,11 +3452,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasPoNumber && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">PO Number:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">PO Number:</span>
                                 <span
                                   id="print-po-number"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {poNumber.trim()}
@@ -3425,11 +3470,11 @@ export default function QuotationBuilder() {
                         {docType === "challan" && (
                           <>
                             {hasChallanNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Challan No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Challan No.:</span>
                                 <span
                                   id="print-challan-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {challanNo.trim()}
@@ -3438,11 +3483,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasRequisitionNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Requisition No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Requisition No.:</span>
                                 <span
                                   id="print-requisition-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {requisitionNo.trim()}
@@ -3451,11 +3496,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasDate && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Date:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Date:</span>
                                 <span
                                   id="print-date"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                 >
                                   {dateVal.trim()}
                                 </span>
@@ -3468,11 +3513,11 @@ export default function QuotationBuilder() {
                         {docType === "quotation" && (
                           <>
                             {hasRequisitionNo && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Requisition No.:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Requisition No.:</span>
                                 <span
                                   id="print-requisition-no"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                   style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                                 >
                                   {requisitionNo.trim()}
@@ -3481,11 +3526,11 @@ export default function QuotationBuilder() {
                             )}
 
                             {hasDate && (
-                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-baseline gap-2 text-[10pt] w-full">
-                                <span className="font-extrabold text-black shrink-0 text-[10pt]">Date:</span>
+                              <div className="meta-print-field min-h-[28px] h-auto border-b border-dotted border-slate-400 print:border-black pt-1 pb-0.5 flex items-start gap-2 text-[10pt] w-full">
+                                <span className="font-extrabold text-black shrink-0 text-[10pt] leading-[1.35]">Date:</span>
                                 <span
                                   id="print-date"
-                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0 text-[10pt]"
+                                  className="font-mono font-bold text-black break-words whitespace-pre-wrap leading-[1.35] flex-grow min-w-0 text-[10pt]"
                                 >
                                   {dateVal.trim()}
                                 </span>

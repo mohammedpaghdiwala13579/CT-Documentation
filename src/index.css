@@ -276,11 +276,11 @@ input[type="number"] {
 
   .meta-grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 4px !important;
+    grid-template-columns: 1.35fr 1fr !important;
+    gap: 24px !important;
     width: 100% !important;
     margin-top: 8px !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
     clear: both !important;
   }
 
@@ -693,11 +693,11 @@ input[type="number"] {
 
 .is-generating-pdf .meta-grid {
   display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 4px !important;
+  grid-template-columns: 1.35fr 1fr !important;
+  gap: 20px !important;
   width: 100% !important;
   margin-top: 8px !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 12px !important;
 }
 
 .is-generating-pdf .meta-grid .meta-box {
