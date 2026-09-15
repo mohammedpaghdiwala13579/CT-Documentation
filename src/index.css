@@ -276,11 +276,11 @@ input[type="number"] {
 
   .meta-grid {
     display: grid !important;
-    grid-template-columns: 1.35fr 1fr !important;
-    gap: 24px !important;
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
     width: 100% !important;
-    margin-top: 12px !important;
-    margin-bottom: 12px !important;
+    margin-top: 8px !important;
+    margin-bottom: 10px !important;
     clear: both !important;
   }
 
@@ -298,17 +298,18 @@ input[type="number"] {
 
   .meta-grid .meta-print-field {
     display: flex !important;
-    align-items: flex-end !important;
-    height: 30px !important;
-    min-height: 30px !important;
-    max-height: 30px !important;
+    align-items: flex-start !important;
+    height: auto !important;
+    min-height: 28px !important;
+    max-height: none !important;
     box-sizing: border-box !important;
     gap: 8px !important;
-    padding-bottom: 2px !important;
+    padding-top: 4px !important;
+    padding-bottom: 3px !important;
     margin-bottom: 0 !important;
     border-bottom: 1.5px dotted rgba(0, 0, 0, 0.55) !important;
     font-size: 10pt !important;
-    line-height: 1.2 !important;
+    line-height: 1.35 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
@@ -319,6 +320,7 @@ input[type="number"] {
     color: #000000 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+    line-height: 1.35 !important;
   }
 
   .meta-grid .meta-print-field > span:last-child {
@@ -329,6 +331,7 @@ input[type="number"] {
     overflow-wrap: anywhere !important;
     white-space: pre-wrap !important;
     flex-grow: 1 !important;
+    line-height: 1.35 !important;
   }
 
   .meta-grid .meta-box .meta-print-field:last-child {
@@ -690,11 +693,11 @@ input[type="number"] {
 
 .is-generating-pdf .meta-grid {
   display: grid !important;
-  grid-template-columns: 1.35fr 1fr !important;
-  gap: 20px !important;
+  grid-template-columns: 1fr !important;
+  gap: 4px !important;
   width: 100% !important;
-  margin-top: 12px !important;
-  margin-bottom: 12px !important;
+  margin-top: 8px !important;
+  margin-bottom: 10px !important;
 }
 
 .is-generating-pdf .meta-grid .meta-box {
@@ -709,17 +712,18 @@ input[type="number"] {
 
 .is-generating-pdf .meta-grid .meta-print-field {
   display: flex !important;
-  align-items: flex-end !important;
-  height: 30px !important;
-  min-height: 30px !important;
-  max-height: 30px !important;
+  align-items: flex-start !important;
+  height: auto !important;
+  min-height: 28px !important;
+  max-height: none !important;
   box-sizing: border-box !important;
   gap: 8px !important;
-  padding-bottom: 2px !important;
+  padding-top: 4px !important;
+  padding-bottom: 3px !important;
   margin-bottom: 0 !important;
   border-bottom: 1px dotted rgba(0, 0, 0, 0.5) !important;
   font-size: 10pt !important;
-  line-height: 1.2 !important;
+  line-height: 1.35 !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
 }
@@ -729,6 +733,7 @@ input[type="number"] {
   font-weight: 800 !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
+  line-height: 1.35 !important;
 }
 
 .is-generating-pdf .meta-grid .meta-print-field > span:last-child {
@@ -738,6 +743,7 @@ input[type="number"] {
   overflow-wrap: anywhere !important;
   white-space: pre-wrap !important;
   flex-grow: 1 !important;
+  line-height: 1.35 !important;
 }
 
 .is-generating-pdf .sig-section {
