@@ -299,22 +299,22 @@ input[type="number"] {
   .meta-grid .meta-print-field {
     display: flex !important;
     align-items: flex-end !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
     box-sizing: border-box !important;
     gap: 8px !important;
-    padding-bottom: 3px !important;
+    padding-bottom: 2px !important;
     margin-bottom: 0 !important;
     border-bottom: 1.5px dotted rgba(0, 0, 0, 0.55) !important;
-    font-size: 11pt !important;
-    line-height: 1.25 !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
 
   .meta-grid .meta-print-field > span:first-child {
-    font-size: 11pt !important;
+    font-size: 10pt !important;
     font-weight: 800 !important;
     color: #000000 !important;
     white-space: nowrap !important;
@@ -323,7 +323,7 @@ input[type="number"] {
 
   .meta-grid .meta-print-field > span:last-child {
     min-width: 0 !important;
-    font-size: 11pt !important;
+    font-size: 10pt !important;
     color: #000000 !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
@@ -467,28 +467,28 @@ input[type="number"] {
   .sig-line {
     border-top-width: 1.5px !important;
     border-top-color: #000000 !important;
-    font-size: 8.5pt !important;
-    padding-top: 2px !important;
+    font-size: 9.5pt !important;
+    padding-top: 4px !important;
   }
 
   .sig-section {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 4px !important;
-    padding-top: 4px !important;
+    margin-top: 10px !important;
+    padding-top: 8px !important;
   }
 
   .sig-box {
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    max-height: 80px !important;
   }
 
   .doc-footer-notice {
-    margin-top: 3px !important;
-    padding-top: 1px !important;
-    font-size: 7.5pt !important;
-    line-height: 1.1 !important;
+    margin-top: 6px !important;
+    padding-top: 2px !important;
+    font-size: 8pt !important;
+    line-height: 1.15 !important;
   }
 
   /* Remove any cell outlines, focus borders, and selection highlights on print */
@@ -669,22 +669,22 @@ input[type="number"] {
 .is-generating-pdf .meta-grid .meta-print-field {
   display: flex !important;
   align-items: flex-end !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
   box-sizing: border-box !important;
   gap: 8px !important;
-  padding-bottom: 3px !important;
+  padding-bottom: 2px !important;
   margin-bottom: 0 !important;
   border-bottom: 1px dotted rgba(0, 0, 0, 0.5) !important;
-  font-size: 11pt !important;
-  line-height: 1.25 !important;
+  font-size: 10pt !important;
+  line-height: 1.2 !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
 }
 
 .is-generating-pdf .meta-grid .meta-print-field > span:first-child {
-  font-size: 11pt !important;
+  font-size: 10pt !important;
   font-weight: 800 !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
@@ -692,7 +692,7 @@ input[type="number"] {
 
 .is-generating-pdf .meta-grid .meta-print-field > span:last-child {
   min-width: 0 !important;
-  font-size: 11pt !important;
+  font-size: 10pt !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   white-space: pre-wrap !important;
@@ -700,30 +700,30 @@ input[type="number"] {
 }
 
 .is-generating-pdf .sig-section {
-  margin-top: 4px !important;
-  padding-top: 4px !important;
+  margin-top: 10px !important;
+  padding-top: 8px !important;
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
 
 .is-generating-pdf .sig-box {
-  height: 46px !important;
-  min-height: 46px !important;
-  max-height: 46px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
 }
 
 .is-generating-pdf .sig-line {
   border-top-width: 1.5px !important;
   border-top-color: #000000 !important;
-  font-size: 8.5pt !important;
-  padding-top: 2px !important;
+  font-size: 9.5pt !important;
+  padding-top: 4px !important;
 }
 
 .is-generating-pdf .doc-footer-notice {
-  margin-top: 3px !important;
-  padding-top: 1px !important;
-  font-size: 7.5pt !important;
-  line-height: 1.1 !important;
+  margin-top: 6px !important;
+  padding-top: 2px !important;
+  font-size: 8pt !important;
+  line-height: 1.15 !important;
 }
 
 .is-generating-pdf .hidden.print\:inline,
