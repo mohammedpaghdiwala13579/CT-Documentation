@@ -196,8 +196,8 @@ input[type="number"] {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    border-bottom-width: 2px !important;
-    border-bottom-color: #000000 !important;
+    border-bottom-width: 1px !important;
+    border-bottom-color: #94a3b8 !important;
     padding-bottom: 12px !important;
     margin-bottom: 16px !important;
     clear: both !important;
@@ -385,24 +385,24 @@ input[type="number"] {
   .main-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    border: 1.5px solid #000000 !important;
+    border: 1px solid #64748b !important;
     table-layout: fixed !important;
   }
 
   .main-table th {
-    border: 1px solid #000000 !important;
-    padding: 4px 4px !important;
-    font-size: 9.5pt !important;
+    border: 1px solid #64748b !important;
+    padding: 3.5px 4px !important;
+    font-size: 8.5pt !important;
     line-height: 1.25 !important;
-    font-weight: 800 !important;
-    background-color: #fde047 !important; /* Prominent yellow highlight */
+    font-weight: 700 !important;
+    background-color: transparent !important;
     color: #000000 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.3px !important;
   }
 
   .main-table td {
-    border: 1px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     padding: 1px 3px !important; /* tight vertical fit so 35+ items comfortably fit on page 1 */
     font-size: 8pt !important;
     line-height: 1.15 !important;
@@ -443,6 +443,20 @@ input[type="number"] {
   .closing-wrap {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  .closing-row {
+    border: 1px solid #64748b !important;
+    border-collapse: collapse !important;
+  }
+
+  .closing-row td {
+    border-color: #94a3b8 !important;
+  }
+
+  .sig-line {
+    border-top-width: 1px !important;
+    border-top-color: #334155 !important;
   }
 
   .sig-section {
@@ -587,12 +601,21 @@ input[type="number"] {
   white-space: nowrap !important;
 }
 
+.is-generating-pdf .main-table {
+  border: 1px solid #64748b !important;
+}
+
 .is-generating-pdf .main-table th {
-  background-color: #fde047 !important;
+  background-color: transparent !important;
   color: #000000 !important;
-  font-size: 9.5pt !important;
-  font-weight: 800 !important;
-  padding: 4px 4px !important;
+  font-size: 8.5pt !important;
+  font-weight: 700 !important;
+  padding: 3.5px 4px !important;
+  border: 1px solid #64748b !important;
+}
+
+.is-generating-pdf .main-table td {
+  border: 1px solid #94a3b8 !important;
 }
 
 .is-generating-pdf .main-table td,
