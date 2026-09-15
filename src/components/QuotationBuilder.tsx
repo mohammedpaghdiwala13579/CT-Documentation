@@ -545,16 +545,23 @@ export default function QuotationBuilder() {
       setSavedDocs(uniqueDocs);
     };
 
+    let fallbackUnsub: (() => void) | null = null;
     const qComilla = query(collection(db, "documents"), orderBy("updatedAt", "desc"));
     const unsubComilla = onSnapshot(qComilla, (snapshot) => {
       comillaDocs = snapshot.docs.map(d => parseDocSnapshot(d));
       updateAllDocs();
     }, (error) => {
       console.warn("documents listener notice:", error);
-      onSnapshot(collection(db, "documents"), (fallbackSnapshot) => {
-        comillaDocs = fallbackSnapshot.docs.map(d => parseDocSnapshot(d));
-        updateAllDocs();
-      });
+      try {
+        fallbackUnsub = onSnapshot(collection(db, "documents"), (fallbackSnapshot) => {
+          comillaDocs = fallbackSnapshot.docs.map(d => parseDocSnapshot(d));
+          updateAllDocs();
+        }, (err) => {
+          console.warn("documents fallback collection error:", err);
+        });
+      } catch (err) {
+        console.warn("Failed to subscribe to documents fallback:", err);
+      }
     });
 
     const qLegacy = query(collection(db, "zainee_documents"), orderBy("updatedAt", "desc"));
@@ -568,6 +575,9 @@ export default function QuotationBuilder() {
     return () => {
       unsubComilla();
       unsubLegacy();
+      if (fallbackUnsub) {
+        fallbackUnsub();
+      }
     };
   }, []);
 
@@ -2869,7 +2879,7 @@ export default function QuotationBuilder() {
           <div className="w-full flex flex-col items-center">
 
             {/* A4 Standard-compliant visual grid container */}
-            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto">
+            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto overflow-hidden print:overflow-visible">
           
           {/* Anti-slip Background Watermark Asset */}
           <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
@@ -2883,54 +2893,54 @@ export default function QuotationBuilder() {
           </div>
 
           {/* Outer Layout Table ensuring thead repeats company details on multi-page browser printing */}
-          <table className="print-outer-layout-table w-full border-none p-0 m-0 relative z-10">
+          <table className="print-outer-layout-table w-full max-w-full table-fixed border-none p-0 m-0 relative z-10 box-border">
             <thead className="print:table-header-group">
               <tr>
                 <td className="border-none p-0 m-0">
                   {/* Top blank margin repeating on every printed page */}
                   <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
                   
-                  <div className="business-header border-b-2 border-black pb-2 mb-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-black text-left">
-                    <div className="flex items-center gap-3">
-                      <div className="logo-container h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
+                  <div className="business-header border-b-2 border-black pb-2 mb-2 flex flex-row items-center justify-between gap-3 text-black text-left w-full max-w-full overflow-hidden box-border">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                      <div className="logo-container h-16 w-16 sm:h-[68px] sm:w-[68px] print:h-[64px] print:w-[64px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
                         <img
                           src={currentCompany.logoUrl}
                           alt={`${currentCompany.name} Logo`}
                           className="w-full h-full object-contain p-1"
                         />
                       </div>
-                      <div>
-                        <h1 className="text-[17pt] sm:text-[20pt] print:text-[18pt] font-black tracking-tight leading-none text-black uppercase">
+                      <div className="min-w-0 flex-1">
+                        <h1 className="text-[16pt] sm:text-[18.5pt] print:text-[17pt] font-black tracking-tight leading-none text-black uppercase truncate">
                           {currentCompany.name}
                         </h1>
-                        <p className="company-tagline-1 text-[8.5pt] sm:text-[9pt] print:text-[8pt] font-extrabold text-slate-700 tracking-wider print:tracking-[0.01em] uppercase mt-1 whitespace-nowrap">
+                        <p className="company-tagline-1 text-[7.5pt] sm:text-[8pt] print:text-[7.5pt] font-extrabold text-slate-700 tracking-wide uppercase mt-1 leading-tight">
                           {currentCompany.tagline1}
                         </p>
                         {currentCompany.tagline2 && (
-                          <p className="company-tagline-2 text-[7.5pt] sm:text-[8pt] print:text-[7pt] font-bold text-slate-500 uppercase tracking-widest print:tracking-[0.01em] mt-0.5 whitespace-nowrap">
+                          <p className="company-tagline-2 text-[7pt] sm:text-[7.5pt] print:text-[7pt] font-bold text-slate-500 uppercase tracking-wide mt-0.5 leading-tight">
                             {currentCompany.tagline2}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="contact-details text-right text-[7.5pt] sm:text-[8pt] text-slate-800 space-y-0.5 leading-snug sm:block hidden print:block">
-                      <p className="font-bold whitespace-nowrap">
-                        Office: <span className="font-medium whitespace-nowrap">{currentCompany.officeAddress}</span>
+                    <div className="contact-details text-right text-[7pt] sm:text-[7.5pt] print:text-[7.2pt] text-slate-800 space-y-0.5 leading-tight sm:block hidden print:block shrink-0 max-w-[44%]">
+                      <p className="font-bold">
+                        Office: <span className="font-medium">{currentCompany.officeAddress}</span>
                       </p>
-                      <p className="font-bold whitespace-nowrap">
-                        Helplines: <span className="font-medium font-mono whitespace-nowrap">{currentCompany.helplines}</span>
+                      <p className="font-bold">
+                        Helplines: <span className="font-medium font-mono">{currentCompany.helplines}</span>
                       </p>
-                      <p className="font-bold whitespace-nowrap">
-                        Official Email: <span className="font-medium whitespace-nowrap">{currentCompany.email}</span>
+                      <p className="font-bold">
+                        Official Email: <span className="font-medium">{currentCompany.email}</span>
                       </p>
-                      <p className="font-bold text-[7.5pt] tracking-widest text-indigo-700 uppercase whitespace-nowrap">
+                      <p className="font-bold text-[7pt] tracking-widest text-indigo-700 uppercase">
                         {currentCompany.locationCity}
                       </p>
                     </div>
                     
                     {/* Mobile contact information fallback */}
-                    <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden">
+                    <div className="text-center text-[7.5pt] text-slate-800 space-y-0.5 leading-tight sm:hidden print:hidden shrink-0">
                       <p>{currentCompany.officeAddress} &bull; Hotlines: {currentCompany.helplines}</p>
                       <p>{currentCompany.email}</p>
                     </div>
@@ -3004,19 +3014,19 @@ export default function QuotationBuilder() {
 
                   {/* Right Column: References & Date - Format on top, then Date */}
                   <div className="sm:col-span-5 space-y-2.5">
-                    {/* Quotation format: Quotation No. on top, then Date */}
+                    {/* Quotation format: ONLY Requisition No. with Date */}
                     {docType === "quotation" && (
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         <div>
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Quotation No.:
+                            Requisition No.:
                           </label>
                           <input
                             type="text"
-                            value={quotationNo}
-                            onChange={(e) => setQuotationNo(e.target.value)}
-                            placeholder="Quotation No. (optional)"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            value={requisitionNo}
+                            onChange={(e) => setRequisitionNo(e.target.value)}
+                            placeholder="Requisition No. (e.g. REQ-2026/04)"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
                           />
                         </div>
 
@@ -3047,33 +3057,6 @@ export default function QuotationBuilder() {
                             onChange={handleDatePickerChange}
                             className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Requisition No.:
-                            </label>
-                            <input
-                              type="text"
-                              value={requisitionNo}
-                              onChange={(e) => setRequisitionNo(e.target.value)}
-                              placeholder="Requisition No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              PO / Reference No.:
-                            </label>
-                            <input
-                              type="text"
-                              value={poNumber}
-                              onChange={(e) => setPoNumber(e.target.value)}
-                              placeholder="PO or Reference No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                            />
-                          </div>
                         </div>
                       </div>
                     )}
@@ -3166,20 +3149,34 @@ export default function QuotationBuilder() {
                       </div>
                     )}
 
-                    {/* Challan format: Challan No. on top, then Date */}
+                    {/* Challan format: ONLY Challan No. and Requisition No. with Date */}
                     {docType === "challan" && (
-                      <div className="space-y-2">
-                        <div>
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Challan No.:
-                          </label>
-                          <input
-                            type="text"
-                            value={challanNo}
-                            onChange={(e) => setChallanNo(e.target.value)}
-                            placeholder="Challan No. (optional)"
-                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
+                      <div className="space-y-2.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Challan No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={challanNo}
+                              onChange={(e) => setChallanNo(e.target.value)}
+                              placeholder="Challan No. (e.g. CH-2026/01)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Requisition No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={requisitionNo}
+                              onChange={(e) => setRequisitionNo(e.target.value)}
+                              placeholder="Requisition No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors font-bold"
+                            />
+                          </div>
                         </div>
 
                         {/* Date field */}
@@ -3209,33 +3206,6 @@ export default function QuotationBuilder() {
                             onChange={handleDatePickerChange}
                             className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              Requisition No.:
-                            </label>
-                            <input
-                              type="text"
-                              value={requisitionNo}
-                              onChange={(e) => setRequisitionNo(e.target.value)}
-                              placeholder="Requisition No. (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                              PO Number:
-                            </label>
-                            <input
-                              type="text"
-                              value={poNumber}
-                              onChange={(e) => setPoNumber(e.target.value)}
-                              placeholder="PO Number (optional)"
-                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                            />
-                          </div>
                         </div>
                       </div>
                     )}
@@ -3315,10 +3285,10 @@ export default function QuotationBuilder() {
                     )}
                     {docType === "quotation" && (
                       <>
-                        {quotationNo && quotationNo.trim().length > 0 && (
+                        {requisitionNo && requisitionNo.trim().length > 0 && (
                           <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
-                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Quotation No.:</span>
-                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{quotationNo.trim()}</span>
+                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Requisition No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
                           </div>
                         )}
                       </>
@@ -3330,14 +3300,16 @@ export default function QuotationBuilder() {
                       <span className="font-mono font-bold text-black flex-grow min-w-0">{dateVal || " "}</span>
                     </div>
 
-                    {/* 3. Requisition & PO Numbers below Date */}
-                    {requisitionNo && requisitionNo.trim().length > 0 && (
+                    {/* 3. Requisition No. for invoice & challan (for quotation it's already shown on top with date) */}
+                    {(docType === "invoice" || docType === "challan") && requisitionNo && requisitionNo.trim().length > 0 && (
                       <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
                         <span className="font-extrabold text-black shrink-0 min-w-[102px]">Requisition No.:</span>
                         <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
                       </div>
                     )}
-                    {poNumber && poNumber.trim().length > 0 && (
+
+                    {/* 4. PO Number: ONLY for invoice */}
+                    {docType === "invoice" && poNumber && poNumber.trim().length > 0 && (
                       <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
                         <span className="font-extrabold text-black shrink-0 min-w-[102px]">PO Number:</span>
                         <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{poNumber.trim()}</span>
@@ -3353,7 +3325,7 @@ export default function QuotationBuilder() {
               <td className="border-none p-0 m-0">
 
                 {/* Main Data Sheet Table */}
-                <div className="w-full overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 mt-1">
+                <div className="w-full overflow-x-auto no-scrollbar mt-1">
                   <table className="main-table w-full min-w-full border-collapse border-[1.5px] border-black table-fixed text-[8pt]">
                     <thead>
                       <tr className="bg-[#fde047] text-black text-[9pt] sm:text-[9.5pt]">
@@ -3700,7 +3672,7 @@ export default function QuotationBuilder() {
                 {/* Bottom closing wraps, sums, signatures */}
                 <div className="closing-wrap mt-1.5">
                   {docType !== "challan" && (
-                    <table className="closing-row w-full border-collapse border-2 border-black mt-1.5 bg-white text-black z-10 relative">
+                    <table className="closing-row w-full max-w-full table-fixed border-collapse border-2 border-black mt-1.5 bg-white text-black z-10 relative">
                       <tbody>
                         {docType === "invoice" ? (
                           <>

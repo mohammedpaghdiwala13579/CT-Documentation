@@ -828,12 +828,10 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
     rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
-    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else {
-    if (quotationNo && quotationNo.trim()) rightLines.push({ label: "Quotation No.:", value: quotationNo.trim(), bold: true });
-    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
+    // Quotation format: ONLY Requisition No. with Date
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
-    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
+    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
   }
 
   const maxMetaRows = Math.max(leftLines.length, rightLines.length, 3);

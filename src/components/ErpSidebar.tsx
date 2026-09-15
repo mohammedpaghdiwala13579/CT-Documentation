@@ -62,19 +62,19 @@ export default function ErpSidebar({
       >
         {/* Top: Header / Brand Identity */}
         <div>
-          <div className="h-14 border-b border-slate-800/80 px-4 flex items-center justify-between">
+          <div className="h-16 border-b border-slate-800/80 px-4 flex items-center justify-between">
             {!isCollapsed ? (
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="h-8 w-8 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="h-9 w-9 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-xs">
                   <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
-                    <Ship className="h-4 w-4" />
+                    <Ship className="h-4.5 w-4.5" />
                   </div>
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold text-white tracking-wider truncate uppercase">
+                  <span className="text-sm font-bold text-white tracking-wider truncate uppercase">
                     Comilla Traders
                   </span>
-                  <span className="text-[10px] text-slate-400 truncate">
+                  <span className="text-[10.5px] text-slate-400 truncate">
                     Maritime Supply ERP
                   </span>
                 </div>
@@ -83,10 +83,10 @@ export default function ErpSidebar({
               <div className="mx-auto">
                 <div
                   title="Comilla Traders"
-                  className="h-8 w-8 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shadow-xs"
+                  className="h-9 w-9 rounded-full border border-slate-700 overflow-hidden bg-white flex items-center justify-center shadow-xs"
                 >
                   <div className="h-full w-full bg-blue-600 flex items-center justify-center text-white">
-                    <Ship className="h-4 w-4" />
+                    <Ship className="h-4.5 w-4.5" />
                   </div>
                 </div>
               </div>

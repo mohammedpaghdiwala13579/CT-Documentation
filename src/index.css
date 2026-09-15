@@ -171,11 +171,14 @@ input[type="number"] {
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     border-bottom-width: 2px !important;
     border-bottom-color: #000000 !important;
-    padding-bottom: 5px !important;
-    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 5px !important;
     clear: both !important;
+    overflow: hidden !important;
   }
 
   .business-header > div:first-child {
@@ -184,20 +187,25 @@ input[type="number"] {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     text-align: left !important;
+    overflow: hidden !important;
   }
 
   .business-header .contact-details {
     display: block !important;
     flex: 0 0 auto !important;
     text-align: right !important;
-    white-space: nowrap !important;
-    padding-left: 8px !important;
+    white-space: normal !important;
+    max-width: 44% !important;
+    padding-left: 6px !important;
+    font-size: 7.5pt !important;
+    line-height: 1.2 !important;
   }
 
   .logo-container {
-    height: 60px !important;
-    width: 60px !important;
-    min-width: 60px !important;
+    height: 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -217,20 +225,21 @@ input[type="number"] {
     display: block !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    overflow: hidden !important;
   }
 
   .company-tagline-1 {
-    white-space: nowrap !important;
-    font-size: 8pt !important;
+    font-size: 7.8pt !important;
     letter-spacing: 0.01em !important;
     font-weight: 800 !important;
+    line-height: 1.15 !important;
   }
 
   .company-tagline-2 {
-    white-space: nowrap !important;
-    font-size: 7pt !important;
+    font-size: 6.8pt !important;
     letter-spacing: 0.01em !important;
     font-weight: 700 !important;
+    line-height: 1.15 !important;
   }
 
   .doc-title {
@@ -296,11 +305,14 @@ input[type="number"] {
   table.print-outer-layout-table {
     display: table !important;
     width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
     border: none !important;
     position: static !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important;
   }
 
   table.print-outer-layout-table > thead {
