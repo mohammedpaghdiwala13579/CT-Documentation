@@ -1131,7 +1131,6 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     headerRow.height = Math.max(TABLE_HEADER_HEIGHT, 18);
     headerRow.eachCell((cell, colNumber) => {
       cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF000000" } };
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFDE047" } };
       cell.border = THIN_BORDER;
 
       if (colNumber === 1 || colNumber === 3 || colNumber === 4) {
