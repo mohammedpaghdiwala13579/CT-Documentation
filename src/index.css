@@ -356,7 +356,7 @@ input[type="number"] {
   }
 
   table.print-outer-layout-table > tfoot {
-    display: table-footer-group !important;
+    display: table-row-group !important;
     position: static !important;
   }
 
@@ -455,20 +455,21 @@ input[type="number"] {
   }
 
   .sig-line {
-    border-top-width: 1px !important;
+    border-top-width: 1.5px !important;
     border-top-color: #334155 !important;
+    font-size: 10pt !important;
   }
 
   .sig-section {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    margin-top: 0 !important;
-    padding-top: 28px !important;
+    margin-top: 16px !important;
+    padding-top: 40px !important;
   }
 
   .doc-footer-notice {
-    margin-top: 5px !important;
-    padding-top: 1px !important;
+    margin-top: 16px !important;
+    padding-top: 6px !important;
   }
 
   /* Remove any cell outlines, focus borders, and selection highlights on print */

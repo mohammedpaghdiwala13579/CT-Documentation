@@ -3926,43 +3926,45 @@ export default function QuotationBuilder() {
               </td>
             </tr>
           </tbody>
-          <tfoot className="table-footer-group print:table-footer-group">
+          <tfoot className="table-row-group print:table-row-group">
             <tr>
               <td className="border-none p-0 m-0">
-                {/* Clean, proper signature section with fixed, stable gap from items table */}
-                <div className="sig-section w-full mt-0 pt-7 sm:pt-7 print:mt-0 print:pt-7 flex flex-row justify-between gap-8 sm:gap-14">
-                  <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-end h-[70px]">
-                    <div className="sig-line border-t border-slate-700 print:border-slate-700 pt-1 text-[8.5pt] font-bold text-black">
+                {/* Generous, stable signature section with balanced spacing and consistent baseline */}
+                <div className="sig-section w-full mt-6 pt-10 sm:pt-12 print:mt-4 print:pt-10 flex flex-row justify-between items-end gap-10 sm:gap-16">
+                  {/* Receiver's Signature Block */}
+                  <div className="sig-box w-full sm:w-[260px] print:w-[260px] text-center flex flex-col justify-between h-[110px] sm:h-[115px] print:h-[110px]">
+                    <div className="h-5 invisible select-none" aria-hidden="true">&nbsp;</div>
+                    <div className="sig-line border-t-2 border-slate-700 print:border-slate-700 pt-2 text-[10pt] sm:text-[10.5pt] print:text-[10pt] font-extrabold text-black tracking-wide">
                       Receiver's Signature
                     </div>
                   </div>
                   
-                  {/* Authorized signature block */}
-                  {docType !== "challan" && (
-                    <div className="sig-box w-full sm:w-[220px] print:w-[220px] text-center flex flex-col justify-between h-[70px] relative">
-                      <div className="sig-title text-[8.5pt] font-bold text-black">For {currentCompany.name}</div>
-                      
-                      {currentCompany.hasStamp && currentCompany.stampUrl && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-0.5">
-                          <img 
-                            src={currentCompany.stampUrl}
-                            alt={`${currentCompany.name} Stamp`}
-                            referrerPolicy="no-referrer"
-                            className="w-[86px] h-[86px] object-contain select-none"
-                            style={{ printColorAdjust: "exact" }}
-                          />
-                        </div>
-                      )}
-
-                      <div className="sig-line border-t border-slate-700 print:border-slate-700 pt-1 text-[8.5pt] font-bold relative z-20 text-black">
-                        Authorized Signature
-                      </div>
+                  {/* Authorized Signature Block (Consistent across all document types) */}
+                  <div className="sig-box w-full sm:w-[260px] print:w-[260px] text-center flex flex-col justify-between h-[110px] sm:h-[115px] print:h-[110px] relative">
+                    <div className="sig-title text-[9.5pt] sm:text-[10.5pt] print:text-[10pt] font-black text-black uppercase tracking-wider">
+                      For {currentCompany.name}
                     </div>
-                  )}
+                    
+                    {currentCompany.hasStamp && currentCompany.stampUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 select-none pb-5">
+                        <img 
+                          src={currentCompany.stampUrl}
+                          alt={`${currentCompany.name} Stamp`}
+                          referrerPolicy="no-referrer"
+                          className="w-[96px] h-[96px] sm:w-[100px] sm:h-[100px] print:w-[96px] print:h-[96px] object-contain select-none opacity-90"
+                          style={{ printColorAdjust: "exact" }}
+                        />
+                      </div>
+                    )}
+
+                    <div className="sig-line border-t-2 border-slate-700 print:border-slate-700 pt-2 text-[10pt] sm:text-[10.5pt] print:text-[10pt] font-extrabold relative z-20 text-black tracking-wide">
+                      Authorized Signature
+                    </div>
+                  </div>
                 </div>
 
-                {/* Non-returnable & non-exchangeable notice */}
-                <div className="doc-footer-notice text-center mt-1.5 pt-1 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
+                {/* Non-returnable & non-exchangeable notice with ample breathing space */}
+                <div className="doc-footer-notice text-center mt-6 pt-3 sm:mt-8 sm:pt-4 print:mt-5 print:pt-2 text-[9.5px] leading-[13px] font-bold text-black uppercase tracking-wider">
                   ITEMS ONCE SOLD ARE NON-RETURNABLE AND NON-EXCHANGEABLE.
                 </div>
               </td>
