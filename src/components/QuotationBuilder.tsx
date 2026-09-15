@@ -2942,11 +2942,11 @@ export default function QuotationBuilder() {
                 </div>
 
                 {/* ==================================================================== */}
-                {/* 1. DOCUMENT EDITOR METADATA VIEW (Screen Only: Clean, Free, No Checkboxes) */}
+                {/* 1. DOCUMENT EDITOR METADATA VIEW (Screen Only: Clean Dotted Lines, No Boxes) */}
                 {/* ==================================================================== */}
-                <div className="meta-editor-grid no-print print:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 text-left text-[8.5pt] mb-2 p-3 bg-slate-50/70 border border-slate-200 rounded-md">
+                <div className="meta-editor-grid no-print print:hidden grid grid-cols-1 sm:grid-cols-12 gap-5 text-left text-[8.5pt] mb-3 p-2 bg-transparent">
                   {/* Left Column: Client & Vessel Information */}
-                  <div className="space-y-2">
+                  <div className="sm:col-span-7 space-y-2.5">
                     <div>
                       <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                         Messers:
@@ -2956,11 +2956,11 @@ export default function QuotationBuilder() {
                         syncId="messers"
                         onChange={(val) => setMessers(val)}
                         placeholder="Client / Ship name"
-                        className="w-full border-b border-slate-300 focus:border-indigo-600 font-bold text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px]"
+                        className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-bold text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px]"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5 flex items-center gap-1">
                           <Ship className="h-3 w-3 text-slate-500" />
@@ -2971,7 +2971,7 @@ export default function QuotationBuilder() {
                           value={vesselName}
                           onChange={(e) => setVesselName(e.target.value)}
                           placeholder="M/V or M/T Vessel Name (optional)"
-                          className="w-full border-b border-slate-300 focus:border-indigo-600 font-semibold text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
+                          className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-semibold text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
                         />
                       </div>
                       <div>
@@ -2983,7 +2983,7 @@ export default function QuotationBuilder() {
                           value={portBerth}
                           onChange={(e) => setPortBerth(e.target.value)}
                           placeholder="Jetty / Anchorage (optional)"
-                          className="w-full border-b border-slate-300 focus:border-indigo-600 text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
+                          className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[8pt] outline-none bg-transparent py-0.5 transition-colors"
                         />
                       </div>
                     </div>
@@ -2997,44 +2997,16 @@ export default function QuotationBuilder() {
                         syncId="address"
                         onChange={(val) => setAddress(val)}
                         placeholder="Delivery or billing address (optional)"
-                        className="w-full border-b border-slate-300 focus:border-indigo-600 text-[8pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px] leading-snug"
+                        className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[8pt] outline-none bg-transparent py-0.5 transition-colors min-h-[20px] leading-snug"
                       />
                     </div>
                   </div>
 
-                  {/* Right Column: References & Date */}
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                        Date:
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          value={dateVal}
-                          onChange={(e) => setDateVal(e.target.value)}
-                          className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                        />
-                        <button
-                          type="button"
-                          onClick={triggerDatePicker}
-                          className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                          title="Open Date Picker"
-                        >
-                          <Calendar className="h-3.5 w-3.5 text-indigo-600" />
-                        </button>
-                      </div>
-                      <input
-                        ref={dateRef}
-                        type="date"
-                        onChange={handleDatePickerChange}
-                        className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
-                      />
-                    </div>
-
-                    {/* Quotation fields */}
+                  {/* Right Column: References & Date - Format on top, then Date */}
+                  <div className="sm:col-span-5 space-y-2.5">
+                    {/* Quotation format: Quotation No. on top, then Date */}
                     {docType === "quotation" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         <div>
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                             Quotation No.:
@@ -3044,93 +3016,159 @@ export default function QuotationBuilder() {
                             value={quotationNo}
                             onChange={(e) => setQuotationNo(e.target.value)}
                             placeholder="Quotation No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
                           />
                         </div>
-                        <div>
+
+                        {/* Date field */}
+                        <div className="relative">
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Requisition No.:
+                            Date:
                           </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={dateVal}
+                              onChange={(e) => setDateVal(e.target.value)}
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={triggerDatePicker}
+                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              title="Open Date Picker"
+                            >
+                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                            </button>
+                          </div>
                           <input
-                            type="text"
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            ref={dateRef}
+                            type="date"
+                            onChange={handleDatePickerChange}
+                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
                         </div>
-                        <div className="sm:col-span-2">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            PO / Reference No.:
-                          </label>
-                          <input
-                            type="text"
-                            value={poNumber}
-                            onChange={(e) => setPoNumber(e.target.value)}
-                            placeholder="PO or Reference No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Requisition No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={requisitionNo}
+                              onChange={(e) => setRequisitionNo(e.target.value)}
+                              placeholder="Requisition No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              PO / Reference No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={poNumber}
+                              onChange={(e) => setPoNumber(e.target.value)}
+                              placeholder="PO or Reference No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
 
-                    {/* Invoice fields */}
+                    {/* Invoice format: Invoice No. & Challan No. on top, then Date */}
                     {docType === "invoice" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Invoice No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={invoiceNo}
+                              onChange={(e) => setInvoiceNo(e.target.value)}
+                              placeholder="Invoice No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Challan No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={challanNo}
+                              onChange={(e) => setChallanNo(e.target.value)}
+                              placeholder="Challan No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Date field */}
+                        <div className="relative">
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Invoice No.:
+                            Date:
                           </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={dateVal}
+                              onChange={(e) => setDateVal(e.target.value)}
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={triggerDatePicker}
+                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              title="Open Date Picker"
+                            >
+                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                            </button>
+                          </div>
                           <input
-                            type="text"
-                            value={invoiceNo}
-                            onChange={(e) => setInvoiceNo(e.target.value)}
-                            placeholder="Invoice No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            ref={dateRef}
+                            type="date"
+                            onChange={handleDatePickerChange}
+                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
                         </div>
-                        <div>
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Challan No.:
-                          </label>
-                          <input
-                            type="text"
-                            value={challanNo}
-                            onChange={(e) => setChallanNo(e.target.value)}
-                            placeholder="Challan No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Requisition No.:
-                          </label>
-                          <input
-                            type="text"
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            PO Number:
-                          </label>
-                          <input
-                            type="text"
-                            value={poNumber}
-                            onChange={(e) => setPoNumber(e.target.value)}
-                            placeholder="PO Number (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Requisition No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={requisitionNo}
+                              onChange={(e) => setRequisitionNo(e.target.value)}
+                              placeholder="Requisition No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              PO Number:
+                            </label>
+                            <input
+                              type="text"
+                              value={poNumber}
+                              onChange={(e) => setPoNumber(e.target.value)}
+                              placeholder="PO Number (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
 
-                    {/* Challan fields */}
+                    {/* Challan format: Challan No. on top, then Date */}
                     {docType === "challan" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         <div>
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
                             Challan No.:
@@ -3140,32 +3178,64 @@ export default function QuotationBuilder() {
                             value={challanNo}
                             onChange={(e) => setChallanNo(e.target.value)}
                             placeholder="Challan No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
                           />
                         </div>
-                        <div>
+
+                        {/* Date field */}
+                        <div className="relative">
                           <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            Requisition No.:
+                            Date:
                           </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={dateVal}
+                              onChange={(e) => setDateVal(e.target.value)}
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={triggerDatePicker}
+                              className="p-1 hover:bg-slate-200/70 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              title="Open Date Picker"
+                            >
+                              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+                            </button>
+                          </div>
                           <input
-                            type="text"
-                            value={requisitionNo}
-                            onChange={(e) => setRequisitionNo(e.target.value)}
-                            placeholder="Requisition No. (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            ref={dateRef}
+                            type="date"
+                            onChange={handleDatePickerChange}
+                            className="absolute invisible w-0 h-0 opacity-0 pointer-events-none"
                           />
                         </div>
-                        <div className="sm:col-span-2">
-                          <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
-                            PO Number:
-                          </label>
-                          <input
-                            type="text"
-                            value={poNumber}
-                            onChange={(e) => setPoNumber(e.target.value)}
-                            placeholder="PO Number (optional)"
-                            className="w-full border-b border-slate-300 focus:border-indigo-600 font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
-                          />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              Requisition No.:
+                            </label>
+                            <input
+                              type="text"
+                              value={requisitionNo}
+                              onChange={(e) => setRequisitionNo(e.target.value)}
+                              placeholder="Requisition No. (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[7.5pt] font-extrabold text-slate-700 uppercase tracking-wider mb-0.5">
+                              PO Number:
+                            </label>
+                            <input
+                              type="text"
+                              value={poNumber}
+                              onChange={(e) => setPoNumber(e.target.value)}
+                              placeholder="PO Number (optional)"
+                              className="w-full border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono text-[8.5pt] outline-none bg-transparent py-0.5 transition-colors"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
@@ -3173,79 +3243,104 @@ export default function QuotationBuilder() {
                 </div>
 
                 {/* ==================================================================== */}
-                {/* 2. PRINT / PDF METADATA VIEW (Only Non-Empty Fields, Clean, No Lines) */}
+                {/* 2. PRINT / PDF METADATA VIEW (Clean Dotted Layout, No Boxes) */}
                 {/* ==================================================================== */}
-                <div className="meta-grid hidden print:grid grid-cols-2 gap-2 text-left text-[8.5pt] mb-1.5">
-                  {/* Left Box: Client & Vessel Info (only filled fields appear) */}
-                  <div className="meta-box border border-black p-2 bg-transparent space-y-1">
+                <div className="meta-grid hidden print:grid grid-cols-[1.35fr_1fr] gap-6 text-left text-[8.5pt] mb-3.5 mt-1.5">
+                  {/* Left Column: Client & Vessel Info (only filled fields appear) */}
+                  <div className="meta-box bg-transparent space-y-1">
                     {cleanHtmlText(messers).length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Messers:</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Messers:</span>
                         <span
                           id="print-messers"
-                          className="font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow"
+                          className="font-bold text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0"
+                          style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                           dangerouslySetInnerHTML={{ __html: messers }}
                         />
                       </div>
                     )}
                     {vesselName && vesselName.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Vessel Name:</span>
-                        <span className="font-bold text-black break-words flex-grow">{vesselName.trim()}</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Vessel Name:</span>
+                        <span className="font-bold text-black break-words flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{vesselName.trim()}</span>
                       </div>
                     )}
                     {portBerth && portBerth.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Port / Berth:</span>
-                        <span className="text-black break-words flex-grow">{portBerth.trim()}</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Port / Berth:</span>
+                        <span className="text-black break-words flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{portBerth.trim()}</span>
                       </div>
                     )}
                     {cleanHtmlText(address).length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Address:</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[78px]">Address:</span>
                         <span
                           id="print-address"
-                          className="text-black break-words whitespace-pre-wrap leading-tight flex-grow"
+                          className="text-black break-words whitespace-pre-wrap leading-tight flex-grow min-w-0"
+                          style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}
                           dangerouslySetInnerHTML={{ __html: address }}
                         />
                       </div>
                     )}
                   </div>
 
-                  {/* Right Box: Reference Numbers & Date (only filled fields appear) */}
-                  <div className="meta-box border border-black p-2 bg-transparent space-y-1">
-                    <div className="meta-print-field">
-                      <span className="font-extrabold text-black shrink-0">Date:</span>
-                      <span className="font-mono font-bold text-black flex-grow">{dateVal || " "}</span>
+                  {/* Right Column: Specified Format Number always on top, then Date */}
+                  <div className="meta-box bg-transparent space-y-1">
+                    {/* 1. Format-specific Number on TOP */}
+                    {docType === "invoice" && (
+                      <>
+                        {invoiceNo && invoiceNo.trim().length > 0 && (
+                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Invoice No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{invoiceNo.trim()}</span>
+                          </div>
+                        )}
+                        {challanNo && challanNo.trim().length > 0 && (
+                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Challan No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {docType === "challan" && (
+                      <>
+                        {challanNo && challanNo.trim().length > 0 && (
+                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Challan No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{challanNo.trim()}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {docType === "quotation" && (
+                      <>
+                        {quotationNo && quotationNo.trim().length > 0 && (
+                          <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                            <span className="font-extrabold text-black shrink-0 min-w-[102px]">Quotation No.:</span>
+                            <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{quotationNo.trim()}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* 2. Date: ALWAYS right after format number */}
+                    <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                      <span className="font-extrabold text-black shrink-0 min-w-[102px]">Date:</span>
+                      <span className="font-mono font-bold text-black flex-grow min-w-0">{dateVal || " "}</span>
                     </div>
-                    {invoiceNo && invoiceNo.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Invoice No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow">{invoiceNo.trim()}</span>
-                      </div>
-                    )}
-                    {challanNo && challanNo.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Challan No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow">{challanNo.trim()}</span>
-                      </div>
-                    )}
-                    {quotationNo && quotationNo.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Quotation No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow">{quotationNo.trim()}</span>
-                      </div>
-                    )}
+
+                    {/* 3. Requisition & PO Numbers below Date */}
                     {requisitionNo && requisitionNo.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">Requisition No.:</span>
-                        <span className="font-mono font-bold text-black flex-grow">{requisitionNo.trim()}</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[102px]">Requisition No.:</span>
+                        <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{requisitionNo.trim()}</span>
                       </div>
                     )}
                     {poNumber && poNumber.trim().length > 0 && (
-                      <div className="meta-print-field">
-                        <span className="font-extrabold text-black shrink-0">PO Number:</span>
-                        <span className="font-mono font-bold text-black flex-grow">{poNumber.trim()}</span>
+                      <div className="meta-print-field border-b border-dotted border-black/35 pb-0.5 mb-1 flex items-baseline gap-2">
+                        <span className="font-extrabold text-black shrink-0 min-w-[102px]">PO Number:</span>
+                        <span className="font-mono font-bold text-black flex-grow min-w-0" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{poNumber.trim()}</span>
                       </div>
                     )}
                   </div>
@@ -3343,12 +3438,12 @@ export default function QuotationBuilder() {
                                     onPaste={(e) => handlePaste(e, idx, 0)}
                                     dataRow={idx}
                                     dataCol={0}
-                                    style={cellStyle}
+                                    style={{ ...cellStyle, wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}
                                     className="w-full min-w-full text-left border-none outline-none bg-transparent p-0 text-slate-800 text-[8pt] sm:text-[8.5pt] leading-[1.25] block overflow-visible py-[1px] whitespace-pre-wrap break-words no-print print:hidden font-normal"
                                   />
                                   <div 
                                     id={`print-desc-${idx}`}
-                                    style={cellStyle} 
+                                    style={{ ...cellStyle, wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "pre-wrap" }} 
                                     className="hidden print:block whitespace-pre-wrap break-words text-left text-slate-900 leading-[1.25] py-[1px] text-[8pt]"
                                     dangerouslySetInnerHTML={{ __html: row.desc || "&nbsp;" }}
                                   />

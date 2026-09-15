@@ -666,6 +666,10 @@ const THIN_BORDER: Partial<ExcelJS.Borders> = {
   right: { style: "thin", color: { argb: "FF000000" } },
 };
 
+const DOTTED_BOTTOM_BORDER: Partial<ExcelJS.Borders> = {
+  bottom: { style: "dotted", color: { argb: "FF64748B" } },
+};
+
 interface PreparedItem {
   row: QuotationRow;
   originalIndex: number;
@@ -814,18 +818,20 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
   }
 
   const rightLines: { label: string; value: string; bold?: boolean }[] = [];
-  rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
   if (isInvoice) {
     if (invoiceNo && invoiceNo.trim()) rightLines.push({ label: "Invoice No.:", value: invoiceNo.trim(), bold: true });
     if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
+    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
     if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else if (isChallan) {
     if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
+    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
     if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else {
     if (quotationNo && quotationNo.trim()) rightLines.push({ label: "Quotation No.:", value: quotationNo.trim(), bold: true });
+    rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
     if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   }
@@ -1061,7 +1067,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       const row = ws.addRow([]);
       row.height = calculateCompactRowHeight(metaLines);
 
-      // Left Box (Messers, Vessel Name, Port / Berth, Address)
+      // Left Column (Messers, Vessel Name, Port / Berth, Address)
       const leftCell = ws.getCell(currentRow, 1);
       if (lItem) {
         leftCell.value = {
@@ -1070,15 +1076,16 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
             { text: lItem.value || "", font: { name: "Arial", size: 7.5, bold: !!lItem.bold, color: { argb: "FF000000" } } },
           ],
         };
-        leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
+        leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 0 };
       } else {
         leftCell.value = "";
       }
       ws.mergeCells(currentRow, 1, currentRow, leftColEnd);
-      leftCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
-      leftCell.border = THIN_BORDER;
+      for (let c = 1; c <= leftColEnd; c++) {
+        ws.getCell(currentRow, c).border = lItem ? DOTTED_BOTTOM_BORDER : undefined;
+      }
 
-      // Right Box (Invoice / Challan / Quotation No, Date, Requisition No, PO Number)
+      // Right Column (Invoice / Challan / Quotation No, Date, Requisition No, PO Number)
       const rightCell = ws.getCell(currentRow, rightColStart);
       if (rItem) {
         rightCell.value = {
@@ -1087,20 +1094,21 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
             { text: rItem.value || "", font: { name: "Arial", size: 7.5, bold: !!rItem.bold, color: { argb: "FF000000" } } },
           ],
         };
-        rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
+        rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 0 };
       } else {
         rightCell.value = "";
       }
       ws.mergeCells(currentRow, rightColStart, currentRow, colCount);
-      rightCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
-      rightCell.border = THIN_BORDER;
+      for (let c = rightColStart; c <= colCount; c++) {
+        ws.getCell(currentRow, c).border = rItem ? DOTTED_BOTTOM_BORDER : undefined;
+      }
 
       currentRow++;
     }
 
-    // Compact gap before table
+    // Clean gap before table to ensure metadata dotted lines and table border do not collide
     const gapRow = ws.addRow([]);
-    gapRow.height = 3;
+    gapRow.height = 8;
     currentRow++;
 
     // =========================================================================
