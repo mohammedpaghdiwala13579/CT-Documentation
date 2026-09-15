@@ -1341,9 +1341,15 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     // =========================================================================
     // SIGNATURES & STAMP SECTION (Present on EVERY PAGE according to format)
     // =========================================================================
-    // Top spacing above signature block (generous gap positioning signature section lower down)
+    // Calculate cumulative height so signature block is anchored at the exact bottom of every page
+    let currentSheetHeight = 0;
+    ws.eachRow((r) => {
+      currentSheetHeight += (r.height || 15);
+    });
+    // Signature block takes 78.5pt (12.5 For Comp + 39 stamp area + 13 sig line + 3 gap + 11 notice)
+    const remainingToPageBottom = Math.max(25, PAGE_LIMIT - currentSheetHeight - 78.5);
     const sigGap = ws.addRow([]);
-    sigGap.height = 38;
+    sigGap.height = remainingToPageBottom;
     currentRow++;
 
     // Row 1: "For [Company Name]" above Authorized Signature on the right
