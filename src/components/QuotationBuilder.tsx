@@ -2504,6 +2504,20 @@ export default function QuotationBuilder() {
     });
   };
 
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      setSelectedCell(null);
+      setSelectionStart(null);
+      setSelectionEnd(null);
+      syncAllEditableFields();
+    };
+    window.addEventListener("beforeprint", handleBeforePrint);
+    return () => window.removeEventListener("beforeprint", handleBeforePrint);
+  }, []);
+
   const handlePrint = () => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
@@ -2782,7 +2796,7 @@ export default function QuotationBuilder() {
   );
 
   return (
-    <div className="erp-app-shell flex min-h-screen bg-slate-100 text-slate-900 font-sans antialiased w-full selection:bg-blue-600 selection:text-white">
+    <div className="erp-app-shell flex min-h-screen bg-slate-100 print:bg-white print:p-0 print:m-0 print:block text-slate-900 font-sans antialiased w-full selection:bg-blue-600 selection:text-white">
       {/* Persistent Collapsible Sidebar with built-in responsive mobile drawer */}
       <ErpSidebar
         activeView={activeView}
@@ -2805,7 +2819,7 @@ export default function QuotationBuilder() {
       />
 
       {/* Main ERP Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden print:overflow-visible print:p-0 print:m-0 print:bg-white print:block">
         {/* Clean Sticky Top Navigation */}
         <div className="no-print print:hidden sticky top-0 z-30 w-full">
           <ErpTopNav
@@ -2872,7 +2886,7 @@ export default function QuotationBuilder() {
         {/* View 2: Document Editor (centered A4 canvas with minimal surrounding UI & compact ribbon toolbar) */}
         <div
           id="document-editor-wrapper"
-          className={activeView === "editor" ? "flex flex-col items-center py-4 px-2 sm:px-4 w-full" : "hidden"}
+          className={activeView === "editor" ? "flex flex-col items-center py-4 px-2 sm:px-4 print:p-0 print:py-0 print:px-0 print:m-0 print:bg-white print:block w-full" : "hidden"}
         >
           {/* Compact Ribbon Toolbar */}
           <div className="w-full max-w-[210mm] no-print print:hidden mb-3">
@@ -2929,10 +2943,10 @@ export default function QuotationBuilder() {
             />
           </div>
 
-          <div className="w-full flex flex-col items-center">
+          <div className="w-full flex flex-col items-center print:block print:p-0 print:m-0 print:bg-white">
 
             {/* A4 Standard-compliant visual grid container */}
-            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl print:shadow-none border border-slate-200/60 print:border-none rounded-xs print:rounded-none box-border z-10 mx-auto overflow-hidden print:overflow-visible">
+            <div className="sheet relative w-full max-w-[210mm] print:max-w-full min-h-[297mm] print:min-h-0 bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl print:shadow-none border border-slate-200/60 print:border-none rounded-xs print:rounded-none box-border z-10 mx-auto overflow-hidden print:overflow-visible">
           
           {/* Anti-slip Background Watermark Asset */}
           <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
@@ -2950,9 +2964,6 @@ export default function QuotationBuilder() {
             <thead className="print:table-header-group">
               <tr>
                 <td className="border-none p-0 m-0">
-                  {/* Top blank margin repeating on every printed page */}
-                  <div className="print-page-top-spacer hidden print:block h-[2mm] w-full" />
-                  
                   {/* Format of the Page: Written ONLY on the Top of the Page (No Underline) */}
                   <div className="page-format-header text-center mb-2 pb-0 border-none">
                     <span className="doc-title inline-block text-[12pt] sm:text-[14pt] print:text-[13pt] font-black uppercase tracking-[7px] text-black">
@@ -2961,7 +2972,7 @@ export default function QuotationBuilder() {
                   </div>
 
                   {/* Enlarged Business Header with Larger Logo and Lower Bottom Line */}
-                  <div className="business-header border-b border-slate-300 print:border-slate-400 pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
+                  <div className="business-header border-b border-slate-300 print:border-black pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
                         <img

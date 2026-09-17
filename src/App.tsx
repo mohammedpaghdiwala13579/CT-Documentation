@@ -105,7 +105,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-100 print:bg-white print:p-0 print:m-0 text-slate-900 font-sans flex flex-col selection:bg-blue-600 selection:text-white">
       
       {/* 1. Dynamic PWA Install Banner - Top of the page */}
       {showBanner && !isStandalone && (
@@ -267,7 +267,7 @@ export default function App() {
       )}
 
       {/* Main ERP Full-width Viewport */}
-      <main className="flex-1 flex flex-col w-full">
+      <main className="flex-1 flex flex-col w-full print:p-0 print:m-0 print:bg-white print:block">
         <QuotationBuilder />
       </main>
     </div>
