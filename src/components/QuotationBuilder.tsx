@@ -3022,7 +3022,7 @@ export default function QuotationBuilder() {
                   const hasAnyMeta = hasLeftMeta || hasRightMeta;
 
                   return (
-                    <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-3 sm:p-3.5 print:p-2.5 mt-6 sm:mt-7 mb-4 sm:mb-5 print:mt-5 print:mb-4 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
+                    <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-3 sm:p-3.5 print:p-2.5 my-4.5 print:my-3.5 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
                       <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
                         <div className={`meta-left-col col-span-7 space-y-2 print:space-y-1.5 pr-3 sm:pr-4 print:pr-3 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
