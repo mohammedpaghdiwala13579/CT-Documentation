@@ -55,6 +55,36 @@ input[type="number"] {
   line-height: 1.15 !important;
 }
 
+/* Physical spacers ensuring clear separation between header, meta table, and items table */
+.meta-top-spacer {
+  display: block !important;
+  width: 100% !important;
+  height: 12px !important;
+  min-height: 12px !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  clear: both !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.meta-bottom-spacer {
+  display: block !important;
+  width: 100% !important;
+  height: 12px !important;
+  min-height: 12px !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  clear: both !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.items-table-wrapper {
+  padding-top: 0;
+  width: 100%;
+}
+
 /* Information Table container */
 .meta-info-container {
   display: block;
@@ -64,8 +94,8 @@ input[type="number"] {
   border-radius: 8px;
   background-color: #ffffff;
   padding: 16px 20px;
-  margin-top: 48px;
-  margin-bottom: 40px;
+  margin-top: 0;
+  margin-bottom: 0;
   box-sizing: border-box;
 }
 
@@ -304,6 +334,36 @@ input[type="number"] {
     line-height: 1.15 !important;
   }
 
+  /* Physical spacers ensuring clear separation between header, meta table, and items table */
+  .meta-top-spacer {
+    display: block !important;
+    width: 100% !important;
+    height: 10px !important;
+    min-height: 10px !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    clear: both !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .meta-bottom-spacer {
+    display: block !important;
+    width: 100% !important;
+    height: 10px !important;
+    min-height: 10px !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    clear: both !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .items-table-wrapper {
+    padding-top: 0 !important;
+    width: 100% !important;
+  }
+
   /* Information Table container with clear border and balanced spacing */
   .meta-info-container {
     display: block !important;
@@ -313,8 +373,8 @@ input[type="number"] {
     border-radius: 4px !important;
     background-color: #ffffff !important;
     padding: 12px 16px !important;
-    margin-top: 42px !important;
-    margin-bottom: 36px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
     box-sizing: border-box !important;
     clear: both !important;
   }
@@ -775,6 +835,35 @@ input[type="number"] {
   white-space: pre-wrap !important;
 }
 
+.is-generating-pdf .meta-top-spacer {
+  display: block !important;
+  width: 100% !important;
+  height: 10px !important;
+  min-height: 10px !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  clear: both !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.is-generating-pdf .meta-bottom-spacer {
+  display: block !important;
+  width: 100% !important;
+  height: 10px !important;
+  min-height: 10px !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  clear: both !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.is-generating-pdf .items-table-wrapper {
+  padding-top: 0 !important;
+  width: 100% !important;
+}
+
 .is-generating-pdf .meta-info-container {
   display: block !important;
   width: 100% !important;
@@ -783,8 +872,8 @@ input[type="number"] {
   border-radius: 4px !important;
   background-color: #ffffff !important;
   padding: 12px 16px !important;
-  margin-top: 42px !important;
-  margin-bottom: 36px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
   box-sizing: border-box !important;
   clear: both !important;
 }

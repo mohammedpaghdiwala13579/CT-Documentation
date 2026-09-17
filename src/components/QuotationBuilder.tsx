@@ -3022,8 +3022,16 @@ export default function QuotationBuilder() {
                   const hasAnyMeta = hasLeftMeta || hasRightMeta;
 
                   return (
-                    <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
-                      <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
+                    <>
+                      {/* Physical spacer between Business Header and Information Table to ensure clear breathing room */}
+                      <div
+                        className={`meta-top-spacer w-full select-none ${!hasAnyMeta ? 'print:hidden' : ''}`}
+                        aria-hidden="true"
+                        style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
+                      />
+
+                      <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
+                        <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
                         <div className={`meta-left-col col-span-7 space-y-3 sm:space-y-4 print:space-y-2 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
                           {/* Messers */}
@@ -3420,7 +3428,15 @@ export default function QuotationBuilder() {
                           )}
                         </div>
                       </div>
-                    </div>
+                      </div>
+
+                      {/* Physical spacer between Information Table and Items Table ensuring they are NEVER connected */}
+                      <div
+                        className="meta-bottom-spacer w-full select-none"
+                        aria-hidden="true"
+                        style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
+                      />
+                    </>
                   );
                 })()}
 
@@ -3433,7 +3449,7 @@ export default function QuotationBuilder() {
               <td className="border-none p-0 m-0">
 
                 {/* Main Data Sheet Table */}
-                <div className="w-full overflow-x-auto no-scrollbar mt-2 sm:mt-3 print:mt-1">
+                <div className="items-table-wrapper w-full overflow-x-auto no-scrollbar">
                   <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-slate-500 table-fixed text-[8pt]">
                     <thead>
                       <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
