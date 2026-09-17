@@ -3022,12 +3022,12 @@ export default function QuotationBuilder() {
                   const hasAnyMeta = hasLeftMeta || hasRightMeta;
 
                   return (
-                    <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-3 sm:p-3.5 print:p-2.5 mt-6 sm:mt-7 mb-4 sm:mb-5 print:mt-5 print:mb-4 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
+                    <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
                       <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
-                        <div className={`meta-left-col col-span-7 space-y-2 print:space-y-1.5 pr-3 sm:pr-4 print:pr-3 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
+                        <div className={`meta-left-col col-span-7 space-y-3 sm:space-y-4 print:space-y-2 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
                           {/* Messers */}
-                          <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasMessers ? 'print:hidden' : ''}`}>
+                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasMessers ? 'print:hidden' : ''}`}>
                             <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                               <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Messers:</span>
@@ -3047,7 +3047,7 @@ export default function QuotationBuilder() {
                           </div>
 
                           {/* Vessel Name: Single row, full width */}
-                          <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasVessel ? 'print:hidden' : ''}`}>
+                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasVessel ? 'print:hidden' : ''}`}>
                             <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                               <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Vessel Name:</span>
@@ -3073,7 +3073,7 @@ export default function QuotationBuilder() {
                           </div>
 
                           {/* Port / Berth: Single row, full width */}
-                          <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasPort ? 'print:hidden' : ''}`}>
+                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasPort ? 'print:hidden' : ''}`}>
                             <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                               <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Port / Berth:</span>
@@ -3099,7 +3099,7 @@ export default function QuotationBuilder() {
                           </div>
 
                           {/* Address: Single row, full width */}
-                          <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasAddress ? 'print:hidden' : ''}`}>
+                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasAddress ? 'print:hidden' : ''}`}>
                             <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                               <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Address:</span>
@@ -3120,11 +3120,11 @@ export default function QuotationBuilder() {
                         </div>
 
                         {/* Right Column: References & Date */}
-                        <div className={`meta-right-col col-span-5 space-y-2 print:space-y-1.5 pl-3 sm:pl-4 print:pl-3 ${!hasRightMeta ? 'print:hidden' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
+                        <div className={`meta-right-col col-span-5 space-y-3 sm:space-y-4 print:space-y-2 pl-4 sm:pl-6 print:pl-4 ${!hasRightMeta ? 'print:hidden' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
                           {/* Quotation format: ONLY Requisition No. with Date */}
                           {docType === "quotation" && (
-                            <div className="space-y-2 print:space-y-1.5">
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
+                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
@@ -3150,7 +3150,7 @@ export default function QuotationBuilder() {
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
@@ -3189,8 +3189,8 @@ export default function QuotationBuilder() {
 
                           {/* Invoice format: All single lines, no side-by-side fields */}
                           {docType === "invoice" && (
-                            <div className="space-y-2 print:space-y-1.5">
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasInvoiceNo ? 'print:hidden' : ''}`}>
+                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasInvoiceNo ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Invoice No.:</span>
@@ -3215,7 +3215,7 @@ export default function QuotationBuilder() {
                                 </div>
                               </div>
 
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
@@ -3241,7 +3241,7 @@ export default function QuotationBuilder() {
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
@@ -3276,7 +3276,7 @@ export default function QuotationBuilder() {
                                 />
                               </div>
 
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
@@ -3301,7 +3301,7 @@ export default function QuotationBuilder() {
                                 </div>
                               </div>
 
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasPoNumber ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasPoNumber ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>PO Number:</span>
@@ -3330,8 +3330,8 @@ export default function QuotationBuilder() {
 
                           {/* Challan format: All single lines, no side-by-side fields */}
                           {docType === "challan" && (
-                            <div className="space-y-2 print:space-y-1.5">
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
+                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
@@ -3356,7 +3356,7 @@ export default function QuotationBuilder() {
                                 </div>
                               </div>
 
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
@@ -3382,7 +3382,7 @@ export default function QuotationBuilder() {
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[32px] print:min-h-0 h-auto flex flex-col justify-between py-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
                                 <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
@@ -3433,7 +3433,7 @@ export default function QuotationBuilder() {
               <td className="border-none p-0 m-0">
 
                 {/* Main Data Sheet Table */}
-                <div className="w-full overflow-x-auto no-scrollbar mt-1">
+                <div className="w-full overflow-x-auto no-scrollbar mt-2 sm:mt-3 print:mt-1">
                   <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-slate-500 table-fixed text-[8pt]">
                     <thead>
                       <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
