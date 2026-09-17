@@ -2,9 +2,11 @@
  * Robust Clipboard & Excel / Google Sheets parser
  * Supports:
  * - HTML table extraction from Excel/Google Sheets rich clipboard
- * - TSV (Tab Separated Values) with multi-line quote escapes
+ * - TSV (Tab Separated Values) with multi-line quote escapes and inch-symbol resilience
  * - Intelligent header detection & column alignment
  * - Guarantees commas and semicolons inside cell content are NEVER split into separate cells
+ * - Guarantees quotes and inch marks (e.g. 2", 1/2") never swallow subsequent lines or gather items into one cell
+ * - Guarantees exact cell-to-cell layout preservation and blank cell filling
  */
 
 import { stripHtml } from "./textFormatter";
@@ -19,7 +21,7 @@ export interface ParsedClipboardResult {
 
 /**
  * Helper to clean and flatten cell text into continuous space-separated text,
- * preserving commas, semicolons, and all punctuation intact.
+ * preserving commas, semicolons, quotes, and all punctuation intact.
  */
 export function cleanCellText(str: string): string {
   if (!str) return "";
@@ -32,13 +34,19 @@ export function cleanCellText(str: string): string {
 
   // If cell was wrapped in matching outer quotes from TSV/Excel escaping, unwrap them
   if (cleaned.startsWith('"') && cleaned.endsWith('"') && cleaned.length >= 2) {
-    cleaned = cleaned.slice(1, -1).trim();
+    const inner = cleaned.slice(1, -1);
+    // If it was wrapped by Excel because it contained quotes or newlines, unescape doubled quotes
+    if (inner.includes('""') || !inner.includes('"')) {
+      cleaned = inner.replace(/""/g, '"').trim();
+    }
   }
   return cleaned;
 }
 
 /**
- * Extracts a 2D string array from an HTML table clipboard payload (Excel / Google Sheets)
+ * Extracts a 2D string array from an HTML table clipboard payload (Excel / Google Sheets).
+ * Excel places rich HTML tables with <tr> and <td> tags on the clipboard.
+ * Preserves blank cells, colspans, and exact cell positions.
  */
 export function parseHTMLTable(html: string): string[][] | null {
   if (!html || !html.includes("<table") || typeof DOMParser === "undefined") {
@@ -60,22 +68,39 @@ export function parseHTMLTable(html: string): string[][] | null {
       const cells = Array.from(tr.querySelectorAll("th, td"));
       if (cells.length === 0) return;
 
-      const rowValues = cells.map((cell) => {
-        // Replace <br>, <p>, <div> linebreaks with space so text flows continuously
+      const rowValues: string[] = [];
+      cells.forEach((cell) => {
+        const colSpan = parseInt(cell.getAttribute("colspan") || "1", 10) || 1;
         const clones = cell.cloneNode(true) as HTMLElement;
         const brs = clones.querySelectorAll("br, p, div");
         brs.forEach((br) => br.replaceWith(" "));
 
-        let text = clones.textContent || "";
-        return cleanCellText(text);
+        const text = clones.textContent || "";
+        const cleaned = cleanCellText(text);
+        rowValues.push(cleaned);
+
+        // For spanned columns, pad with empty string so adjacent column indexes stay aligned
+        for (let s = 1; s < colSpan; s++) {
+          rowValues.push("");
+        }
       });
 
-      // Avoid adding completely empty rows
+      // Keep rows that have at least one non-empty cell
       const hasContent = rowValues.some((val) => val.length > 0);
       if (hasContent) {
         grid.push(rowValues);
       }
     });
+
+    // Normalize all rows to have the same number of columns (fill with blank "")
+    if (grid.length > 0) {
+      const maxCols = Math.max(...grid.map((r) => r.length));
+      grid.forEach((r) => {
+        while (r.length < maxCols) {
+          r.push("");
+        }
+      });
+    }
 
     return grid.length > 0 ? grid : null;
   } catch (e) {
@@ -86,10 +111,13 @@ export function parseHTMLTable(html: string): string[][] | null {
 
 /**
  * State-machine parser for TSV (Tab-Separated Values).
- * Tabs separate columns, newlines separate rows.
- * Commas and semicolons are NEVER treated as delimiters!
+ * Tabs unconditionally separate columns, newlines separate rows.
+ * Commas and semicolons are NEVER treated as column delimiters!
+ * Handles quotes without letting inch symbols (2", 1/2") swallow subsequent rows.
  */
 export function parseTSV(text: string): string[][] {
+  if (!text) return [];
+
   const result: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -99,38 +127,71 @@ export function parseTSV(text: string): string[][] {
     const char = text[i];
     const nextChar = text[i + 1];
 
+    // Check if cell starts with an opening quote (Excel wraps multiline cells in quotes)
+    if (cell.length === 0 && char === '"') {
+      inQuotes = true;
+      continue;
+    }
+
     if (inQuotes) {
       if (char === '"') {
         if (nextChar === '"') {
+          // Escaped quote: "" -> "
           cell += '"';
           i++; // Skip next escaped quote
-        } else {
+        } else if (nextChar === "\t" || nextChar === "\r" || nextChar === "\n" || i === text.length - 1) {
+          // Closing quote at end of cell
           inQuotes = false;
+        } else {
+          // Quote within text (e.g. inch mark)
+          cell += '"';
         }
-      } else if (char === '\r' || char === '\n') {
-        // Internal newline within quoted cell converted to space
-        cell += ' ';
+      } else if (char === "\t") {
+        // Tab is ALWAYS a column boundary in spreadsheet TSV
+        row.push(cleanCellText(cell));
+        cell = "";
+        inQuotes = false;
+      } else if (char === "\r" || char === "\n") {
+        // Check if there is a closing quote ahead before the end of the text
+        const remaining = text.slice(i);
+        const hasClosingQuoteAhead =
+          remaining.includes('"\t') ||
+          remaining.includes('"\r') ||
+          remaining.includes('"\n') ||
+          remaining.endsWith('"');
+
+        if (hasClosingQuoteAhead) {
+          // Multiline cell (Alt+Enter in Excel) - convert to single space
+          cell += " ";
+          if (char === "\r" && nextChar === "\n") {
+            i++; // Skip \n
+          }
+        } else {
+          // Unclosed quote: terminate row safely instead of swallowing subsequent items!
+          row.push(cleanCellText(cell));
+          result.push(row);
+          row = [];
+          cell = "";
+          inQuotes = false;
+          if (char === "\r" && nextChar === "\n") {
+            i++;
+          }
+        }
       } else {
         cell += char;
       }
     } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === "\t") {
+      if (char === "\t") {
+        // Tab unconditionally ends the cell
         row.push(cleanCellText(cell));
         cell = "";
       } else if (char === "\r") {
+        row.push(cleanCellText(cell));
+        result.push(row);
+        row = [];
+        cell = "";
         if (nextChar === "\n") {
-          row.push(cleanCellText(cell));
-          result.push(row);
-          row = [];
-          cell = "";
           i++; // Skip \n
-        } else {
-          row.push(cleanCellText(cell));
-          result.push(row);
-          row = [];
-          cell = "";
         }
       } else if (char === "\n") {
         row.push(cleanCellText(cell));
@@ -148,7 +209,17 @@ export function parseTSV(text: string): string[][] {
     result.push(row);
   }
 
-  // Remove empty trailing rows
+  // Normalize grid: ensure all rows have equal columns so blank cells at the end of rows are preserved
+  if (result.length > 0) {
+    const maxCols = Math.max(...result.map((r) => r.length));
+    result.forEach((r) => {
+      while (r.length < maxCols) {
+        r.push("");
+      }
+    });
+  }
+
+  // Remove completely empty trailing rows
   while (
     result.length > 0 &&
     result[result.length - 1].every((c) => c === "")
@@ -238,6 +309,7 @@ export interface ParseClipboardOptions {
 /**
  * Universal clipboard parser that extracts a 2D grid from Excel, Google Sheets, or text.
  * Guarantees that commas and semicolons are NEVER treated as column splitters.
+ * Guarantees that every cell in Excel maps cell-to-cell, and any blank places get filled.
  */
 export function parseClipboardData(
   input: {
@@ -249,20 +321,22 @@ export function parseClipboardData(
   const { text, html } = input;
   const rawText = (text || "").trim();
 
-  // 1. If clipboard text contains tabs, this is native spreadsheet data (Excel / Google Sheets).
-  // TSV is 100% exact, preserves all quotes, commas, semicolons, and cell boundaries without HTML table artifacts.
-  if (rawText.includes("\t")) {
-    const tsvGrid = parseTSV(rawText);
-    if (tsvGrid.length > 0) {
-      return analyzeGrid(tsvGrid, "tsv");
-    }
-  }
-
-  // 2. Try HTML Table parsing if text did not have tabs (e.g. copied from a website table)
+  // 1. Prefer HTML Table parsing if available from Excel/Google Sheets rich clipboard.
+  // HTML tables have explicit <tr> and <td> tags, ensuring 100% cell-to-cell fidelity
+  // and preserving all blank cells without ambiguity.
   if (html && html.includes("<table")) {
     const htmlGrid = parseHTMLTable(html);
     if (htmlGrid && htmlGrid.length > 0 && htmlGrid.some((r) => r.length > 1 || htmlGrid.length > 1)) {
       return analyzeGrid(htmlGrid, "html_table");
+    }
+  }
+
+  // 2. If clipboard text contains tabs, parse via native spreadsheet TSV.
+  // Use text without outer trimming so leading/trailing tab separators are not lost!
+  if ((text || "").includes("\t")) {
+    const tsvGrid = parseTSV(text);
+    if (tsvGrid.length > 0) {
+      return analyzeGrid(tsvGrid, "tsv");
     }
   }
 

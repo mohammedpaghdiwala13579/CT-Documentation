@@ -2302,28 +2302,30 @@ export default function QuotationBuilder() {
         // Sub-column paste (User clicked directly on Qty, Unit, or Price column)
         if (startColIndex > 0) {
           if (startColIndex === 1) {
-            // Started at Qty
-            targetRow.qty = cleanCellText(cols[0]);
+            // Started at Qty (Col 1)
+            targetRow.qty = cleanCellText(cols[0] ?? "");
             if (cols.length === 2) {
               if (isColNumeric(1) && docType !== "challan") {
-                targetRow.price = cleanCellText(cols[1]);
+                targetRow.price = cleanCellText(cols[1] ?? "");
+                targetRow.unit = "";
               } else {
-                targetRow.unit = cleanCellText(cols[1]);
+                targetRow.unit = cleanCellText(cols[1] ?? "");
+                if (docType !== "challan") targetRow.price = "";
               }
             } else if (cols.length >= 3) {
-              targetRow.unit = cleanCellText(cols[1]);
-              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+              targetRow.unit = cleanCellText(cols[1] ?? "");
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[2] ?? "");
             }
           } else if (startColIndex === 2) {
-            // Started at Unit
-            targetRow.unit = cleanCellText(cols[0]);
-            if (cols[1] !== undefined && docType !== "challan") {
-              targetRow.price = cleanCellText(cols[1]);
+            // Started at Unit (Col 2)
+            targetRow.unit = cleanCellText(cols[0] ?? "");
+            if (cols.length >= 2 && docType !== "challan") {
+              targetRow.price = cleanCellText(cols[1] ?? "");
             }
           } else if (startColIndex === 3) {
-            // Started at Price
+            // Started at Price (Col 3)
             if (docType !== "challan") {
-              targetRow.price = cleanCellText(cols[0]);
+              targetRow.price = cleanCellText(cols[0] ?? "");
             }
           }
         }
@@ -2332,76 +2334,85 @@ export default function QuotationBuilder() {
           // Copied Col 0 is SL! The remaining columns start at index 1:
           // [SL (0), Description (1), ...]
           const itemCols = cols.slice(1);
-          if (itemCols[0] !== undefined) targetRow.desc = cleanCellText(itemCols[0]);
+          targetRow.desc = cleanCellText(itemCols[0] ?? "");
 
-          if (itemCols.length === 2) {
+          if (itemCols.length === 1) {
+            targetRow.qty = "";
+            targetRow.unit = "";
+            if (docType !== "challan") targetRow.price = "";
+          } else if (itemCols.length === 2) {
             // [SL, Desc, Qty]
-            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+            targetRow.qty = cleanCellText(itemCols[1] ?? "");
+            targetRow.unit = "";
+            if (docType !== "challan") targetRow.price = "";
           } else if (itemCols.length === 3) {
             // [SL, Desc, Qty, Unit] OR [SL, Desc, Qty, Price]
-            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
-            if (isColNumeric(3)) {
-              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[2]);
+            targetRow.qty = cleanCellText(itemCols[1] ?? "");
+            if (isColNumeric(3) && docType !== "challan") {
+              targetRow.unit = "";
+              targetRow.price = cleanCellText(itemCols[2] ?? "");
             } else {
-              targetRow.unit = cleanCellText(itemCols[2]);
+              targetRow.unit = cleanCellText(itemCols[2] ?? "");
+              if (docType !== "challan") targetRow.price = "";
             }
           } else if (itemCols.length === 4) {
             // [SL, Desc, Qty, Unit, Price] OR [SL, Desc, Qty, Price, Amount]
-            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
+            targetRow.qty = cleanCellText(itemCols[1] ?? "");
             if (isColNumeric(3) && isColNumeric(4)) {
               // [SL, Desc, Qty, Price, Amount]
-              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[2]);
+              targetRow.unit = "";
+              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[2] ?? "");
             } else {
               // [SL, Desc, Qty, Unit, Price]
-              targetRow.unit = cleanCellText(itemCols[2]);
-              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3]);
+              targetRow.unit = cleanCellText(itemCols[2] ?? "");
+              if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3] ?? "");
             }
-          } else if (itemCols.length >= 5) {
+          } else {
             // [SL, Desc, Qty, Unit, Price, Amount...]
-            if (itemCols[1] !== undefined) targetRow.qty = cleanCellText(itemCols[1]);
-            targetRow.unit = cleanCellText(itemCols[2]);
-            if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3]);
+            targetRow.qty = cleanCellText(itemCols[1] ?? "");
+            targetRow.unit = cleanCellText(itemCols[2] ?? "");
+            if (docType !== "challan") targetRow.price = cleanCellText(itemCols[3] ?? "");
           }
         }
         // Copied from Excel WITHOUT Serial Column (Col 0 is Description)
         else {
           if (maxCols === 1) {
             // Single column of items
-            targetRow.desc = cleanCellText(cols[0]);
+            targetRow.desc = cleanCellText(cols[0] ?? "");
           } else if (maxCols === 2) {
             // [Desc, Qty]
-            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
+            targetRow.desc = cleanCellText(cols[0] ?? "");
+            targetRow.qty = cleanCellText(cols[1] ?? "");
+            targetRow.unit = "";
+            if (docType !== "challan") targetRow.price = "";
           } else if (maxCols === 3) {
             // [Desc, Qty, Unit] OR [Desc, Qty, Price]
-            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
-            if (isColNumeric(2)) {
-              // Col 2 is numeric rate/price!
-              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+            targetRow.desc = cleanCellText(cols[0] ?? "");
+            targetRow.qty = cleanCellText(cols[1] ?? "");
+            if (isColNumeric(2) && docType !== "challan") {
+              targetRow.unit = "";
+              targetRow.price = cleanCellText(cols[2] ?? "");
             } else {
-              // Col 2 is unit (e.g. PCS, NOS, SET, MTR)
-              targetRow.unit = cleanCellText(cols[2]);
+              targetRow.unit = cleanCellText(cols[2] ?? "");
+              if (docType !== "challan") targetRow.price = "";
             }
           } else if (maxCols === 4) {
             // [Desc, Qty, Unit, Price] OR [Desc, Qty, Price, Amount]
-            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
-
+            targetRow.desc = cleanCellText(cols[0] ?? "");
+            targetRow.qty = cleanCellText(cols[1] ?? "");
             if (isColNumeric(2) && isColNumeric(3)) {
-              // [Desc, Qty, Price, Amount]
-              if (docType !== "challan") targetRow.price = cleanCellText(cols[2]);
+              targetRow.unit = "";
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[2] ?? "");
             } else {
-              // Standard [Desc, Qty, Unit, Price]
-              targetRow.unit = cleanCellText(cols[2]);
-              if (docType !== "challan") targetRow.price = cleanCellText(cols[3]);
+              targetRow.unit = cleanCellText(cols[2] ?? "");
+              if (docType !== "challan") targetRow.price = cleanCellText(cols[3] ?? "");
             }
           } else {
             // 5+ columns: [Desc, Qty, Unit, Price, Amount...]
-            if (cols[0] !== undefined) targetRow.desc = cleanCellText(cols[0]);
-            if (cols[1] !== undefined) targetRow.qty = cleanCellText(cols[1]);
-            targetRow.unit = cleanCellText(cols[2]);
-            if (docType !== "challan") targetRow.price = cleanCellText(cols[3]);
+            targetRow.desc = cleanCellText(cols[0] ?? "");
+            targetRow.qty = cleanCellText(cols[1] ?? "");
+            targetRow.unit = cleanCellText(cols[2] ?? "");
+            if (docType !== "challan") targetRow.price = cleanCellText(cols[3] ?? "");
           }
         }
 
@@ -2921,7 +2932,7 @@ export default function QuotationBuilder() {
           <div className="w-full flex flex-col items-center">
 
             {/* A4 Standard-compliant visual grid container */}
-            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl border border-slate-200/60 rounded-xs box-border z-10 mx-auto overflow-hidden print:overflow-visible">
+            <div className="sheet relative w-full max-w-[210mm] min-h-[297mm] bg-white p-2.5 sm:p-[6mm] print:p-0 shadow-xl print:shadow-none border border-slate-200/60 print:border-none rounded-xs print:rounded-none box-border z-10 mx-auto overflow-hidden print:overflow-visible">
           
           {/* Anti-slip Background Watermark Asset */}
           <div className="watermark-container absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0 select-none">
@@ -3450,17 +3461,17 @@ export default function QuotationBuilder() {
 
                 {/* Main Data Sheet Table */}
                 <div className="items-table-wrapper w-full overflow-x-auto no-scrollbar">
-                  <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-slate-500 table-fixed text-[8pt]">
+                  <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-black table-fixed text-[8pt]">
                     <thead>
                       <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-400 print:border-slate-500 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-400 print:border-slate-500 py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-400 print:border-slate-500 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-400 print:border-slate-500 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-400 print:border-black py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-slate-400 print:border-slate-500 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
-                            <th className="w-[12%] border border-slate-400 print:border-slate-500 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
+                            <th className="w-[11%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
+                            <th className="w-[12%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
                           </>
                         )}
                       </tr>
@@ -3492,7 +3503,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, -1)}
                                   onClick={() => handleCellClick(idx, -1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, -1)}
-                                  className={getCellClassName(idx, -1, `border border-slate-300 print:border-slate-400 text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
+                                  className={getCellClassName(idx, -1, `border border-slate-300 print:border-black text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
                                 >
                                   {idx + 1}
                                 </td>
@@ -3512,7 +3523,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 0)}
                                   onClick={() => handleCellClick(idx, 0)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 0)}
-                                  className={getCellClassName(idx, 0, `border border-slate-300 print:border-slate-400 text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
+                                  className={getCellClassName(idx, 0, `border border-slate-300 print:border-black text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
                                 >
                                   <RichTextCell
                                     value={row.desc}
@@ -3560,7 +3571,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 1)}
                                   onClick={() => handleCellClick(idx, 1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 1)}
-                                  className={getCellClassName(idx, 1, "border border-slate-300 print:border-slate-400 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 1, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.qty}
@@ -3600,7 +3611,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 2)}
                                   onClick={() => handleCellClick(idx, 2)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 2)}
-                                  className={getCellClassName(idx, 2, "border border-slate-300 print:border-slate-400 text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 2, "border border-slate-300 print:border-black text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.unit}
@@ -3640,7 +3651,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 3)}
                                   onClick={() => handleCellClick(idx, 3)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 3)}
-                                  className={getCellClassName(idx, 3, "border border-slate-300 print:border-slate-400 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 3, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.price}
@@ -3679,7 +3690,7 @@ export default function QuotationBuilder() {
                                 onMouseUp={(e) => handleCellMouseUp(e, idx, 4)}
                                 onClick={() => handleCellClick(idx, 4)}
                                 onContextMenu={(e) => handleCellContextMenu(e, idx, 4)}
-                                className={getCellClassName(idx, 4, "border border-slate-300 print:border-slate-400 text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
+                                className={getCellClassName(idx, 4, "border border-slate-300 print:border-black text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
                               >
                                 <div style={cellStyle} className="whitespace-nowrap overflow-visible leading-[1.25] text-[8pt] sm:text-[8.5pt]">
                                   {row.amount !== 0 ? row.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "0.00"}
@@ -3796,12 +3807,12 @@ export default function QuotationBuilder() {
                 {/* Bottom closing wraps, sums, signatures */}
                 <div className="closing-wrap mt-1.5">
                   {docType !== "challan" && (
-                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-400 print:border-slate-500 mt-1.5 bg-white text-black z-10 relative">
+                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-400 print:border-black mt-1.5 bg-white text-black z-10 relative">
                       <tbody>
                         {docType === "invoice" ? (
                           <>
                             <tr className="align-stretch">
-                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r border-slate-300 print:border-slate-400 p-1.5 bg-slate-50/50 text-left align-middle">
+                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1.5 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
@@ -3809,7 +3820,7 @@ export default function QuotationBuilder() {
                                   {numberToWords(calculatedGrandTotal, currency || "Taka")}
                                 </span>
                               </td>
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -3842,7 +3853,7 @@ export default function QuotationBuilder() {
                             </tr>
                             {includeDiscount && (
                               <tr className="align-stretch">
-                                <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
+                                <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
                                   <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                     <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                       <div className="flex items-center justify-end gap-1 w-full pl-0.5 overflow-visible">
@@ -3931,7 +3942,7 @@ export default function QuotationBuilder() {
                               </tr>
                             )}
                             <tr className="align-stretch">
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -3960,7 +3971,7 @@ export default function QuotationBuilder() {
                               </td>
                             </tr>
                             <tr className="align-stretch">
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -4005,7 +4016,7 @@ export default function QuotationBuilder() {
                         ) : (
                           <>
                             <tr className="align-stretch">
-                              <td className="amount-words-container w-1/2 border-r border-slate-300 print:border-slate-400 p-1 bg-slate-50/50 text-left align-middle">
+                              <td className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
