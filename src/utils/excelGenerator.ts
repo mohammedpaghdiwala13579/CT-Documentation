@@ -1153,9 +1153,9 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       currentRow++;
     }
 
-    // One row gap before items table to cleanly separate metadata box and items table
+    // Clean gap before table to ensure metadata box and item table border do not collide
     const gapRow = ws.addRow([]);
-    gapRow.height = 15; // 1 standard Excel row gap
+    gapRow.height = 10;
     currentRow++;
 
     // =========================================================================
