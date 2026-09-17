@@ -1054,8 +1054,11 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     let currentRow = 12;
 
     // =========================================================================
-    // METADATA BOXES (Present on EVERY PAGE according to format)
+    // METADATA BOXES (Unified Bordered Container with Vertical Middle Divider)
     // =========================================================================
+    const metaStartRow = currentRow;
+    const metaEndRow = currentRow + maxMetaRows - 1;
+
     for (let i = 0; i < maxMetaRows; i++) {
       const lItem = leftLines[i];
       const rItem = rightLines[i];
@@ -1078,14 +1081,11 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
             { text: lItem.value || "", font: { name: "Arial", size: 7.5, bold: !!lItem.bold, color: { argb: "FF000000" } } },
           ],
         };
-        leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 0 };
+        leftCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
       } else {
         leftCell.value = "";
       }
       ws.mergeCells(currentRow, 1, currentRow, leftColEnd);
-      for (let c = 1; c <= leftColEnd; c++) {
-        ws.getCell(currentRow, c).border = lItem ? DOTTED_BOTTOM_BORDER : undefined;
-      }
 
       // Right Column (Invoice / Challan / Quotation No, Date, Requisition No, PO Number)
       const rightCell = ws.getCell(currentRow, rightColStart);
@@ -1096,21 +1096,66 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
             { text: rItem.value || "", font: { name: "Arial", size: 7.5, bold: !!rItem.bold, color: { argb: "FF000000" } } },
           ],
         };
-        rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 0 };
+        rightCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
       } else {
         rightCell.value = "";
       }
       ws.mergeCells(currentRow, rightColStart, currentRow, colCount);
-      for (let c = rightColStart; c <= colCount; c++) {
-        ws.getCell(currentRow, c).border = rItem ? DOTTED_BOTTOM_BORDER : undefined;
+
+      // Apply dotted bottom underlines and box/compartment borders
+      const isTopRow = currentRow === metaStartRow;
+      const isBottomRow = currentRow === metaEndRow;
+
+      for (let c = 1; c <= colCount; c++) {
+        const cell = ws.getCell(currentRow, c);
+        
+        // Subtle clean background matching PDF/web metadata table
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF8FAFC" },
+        };
+
+        const borderDef: Partial<ExcelJS.Borders> = {};
+
+        // Outer Top & Bottom Borders of the Metadata Table
+        if (isTopRow) {
+          borderDef.top = { style: "thin", color: { argb: "FF000000" } };
+        }
+        if (isBottomRow) {
+          borderDef.bottom = { style: "thin", color: { argb: "FF000000" } };
+        } else {
+          // Inner rows keep dotted bottom divider if content exists
+          const hasDotted = c <= leftColEnd ? !!lItem : !!rItem;
+          if (hasDotted) {
+            borderDef.bottom = { style: "dotted", color: { argb: "FF94A3B8" } };
+          }
+        }
+
+        // Outer Left Border
+        if (c === 1) {
+          borderDef.left = { style: "thin", color: { argb: "FF000000" } };
+        }
+
+        // Middle Divider Border between Left and Right compartments
+        if (c === leftColEnd) {
+          borderDef.right = { style: "thin", color: { argb: "FF000000" } };
+        }
+
+        // Outer Right Border
+        if (c === colCount) {
+          borderDef.right = { style: "thin", color: { argb: "FF000000" } };
+        }
+
+        cell.border = borderDef;
       }
 
       currentRow++;
     }
 
-    // Clean gap before table to ensure metadata dotted lines and table border do not collide
+    // Clean gap before table to ensure metadata box and item table border do not collide
     const gapRow = ws.addRow([]);
-    gapRow.height = 8;
+    gapRow.height = 10;
     currentRow++;
 
     // =========================================================================
