@@ -288,7 +288,7 @@ input[type="number"] {
     max-width: 100% !important;
     box-sizing: border-box !important;
     border-bottom-width: 1px !important;
-    border-bottom-color: #000000 !important;
+    border-bottom-color: #94a3b8 !important;
     padding-bottom: 12px !important;
     margin-bottom: 16px !important;
     clear: both !important;
@@ -400,7 +400,7 @@ input[type="number"] {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    border: 1.5px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     border-radius: 4px !important;
     background-color: #ffffff !important;
     padding: 12px 16px !important;
@@ -449,7 +449,7 @@ input[type="number"] {
     align-items: center !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
-    border-bottom: 1px dotted #475569 !important;
+    border-bottom: 1px dotted #94a3b8 !important;
     min-height: 22px !important;
   }
 
@@ -505,7 +505,7 @@ input[type="number"] {
     padding-top: 2px !important;
     padding-bottom: 2px !important;
     margin-bottom: 0 !important;
-    border-bottom: 1px dotted rgba(0, 0, 0, 0.55) !important;
+    border-bottom: 1px dotted #94a3b8 !important;
     font-size: 6.8pt !important;
     line-height: 1.25 !important;
     word-break: break-word !important;
@@ -596,12 +596,12 @@ input[type="number"] {
   .main-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    border: 1px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     table-layout: fixed !important;
   }
 
   .main-table th {
-    border: 1px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     padding: 3.5px 4px !important;
     font-size: 8.5pt !important;
     line-height: 1.25 !important;
@@ -613,7 +613,7 @@ input[type="number"] {
   }
 
   .main-table td {
-    border: 1px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     padding: 1px 3px !important; /* tight vertical fit so 35+ items comfortably fit on page 1 */
     font-size: 8pt !important;
     line-height: 1.15 !important;
@@ -657,17 +657,17 @@ input[type="number"] {
   }
 
   .closing-row {
-    border: 1px solid #000000 !important;
+    border: 1px solid #94a3b8 !important;
     border-collapse: collapse !important;
   }
 
   .closing-row td {
-    border-color: #000000 !important;
+    border-color: #94a3b8 !important;
   }
 
   .sig-line {
     border-top-width: 1.5px !important;
-    border-top-color: #000000 !important;
+    border-top-color: #94a3b8 !important;
     font-size: 9.5pt !important;
     padding-top: 4px !important;
   }
@@ -871,7 +871,7 @@ input[type="number"] {
 }
 
 .is-generating-pdf .main-table {
-  border: 1px solid #000000 !important;
+  border: 1px solid #94a3b8 !important;
 }
 
 .is-generating-pdf .main-table th {
@@ -880,11 +880,11 @@ input[type="number"] {
   font-size: 8.5pt !important;
   font-weight: 700 !important;
   padding: 3.5px 4px !important;
-  border: 1px solid #000000 !important;
+  border: 1px solid #94a3b8 !important;
 }
 
 .is-generating-pdf .main-table td {
-  border: 1px solid #000000 !important;
+  border: 1px solid #94a3b8 !important;
 }
 
 .is-generating-pdf .main-table td,
@@ -929,7 +929,7 @@ input[type="number"] {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  border: 1.5px solid #000000 !important;
+  border: 1px solid #94a3b8 !important;
   border-radius: 4px !important;
   background-color: #ffffff !important;
   padding: 12px 16px !important;
@@ -978,7 +978,7 @@ input[type="number"] {
   align-items: center !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
-  border-bottom: 1px dotted #475569 !important;
+  border-bottom: 1px dotted #94a3b8 !important;
   min-height: 22px !important;
 }
 
@@ -1031,7 +1031,7 @@ input[type="number"] {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
   margin-bottom: 0 !important;
-  border-bottom: 1px dotted rgba(0, 0, 0, 0.5) !important;
+  border-bottom: 1px dotted #94a3b8 !important;
   font-size: 6.8pt !important;
   line-height: 1.25 !important;
   word-break: break-word !important;
@@ -1069,9 +1069,18 @@ input[type="number"] {
   max-height: 80px !important;
 }
 
+.is-generating-pdf .closing-row {
+  border: 1px solid #94a3b8 !important;
+  border-collapse: collapse !important;
+}
+
+.is-generating-pdf .closing-row td {
+  border-color: #94a3b8 !important;
+}
+
 .is-generating-pdf .sig-line {
   border-top-width: 1.5px !important;
-  border-top-color: #000000 !important;
+  border-top-color: #94a3b8 !important;
   font-size: 9.5pt !important;
   padding-top: 4px !important;
 }

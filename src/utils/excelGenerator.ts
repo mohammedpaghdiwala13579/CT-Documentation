@@ -660,10 +660,10 @@ async function fetchImageBuffer(url: string): Promise<ArrayBuffer | null> {
 }
 
 const THIN_BORDER: Partial<ExcelJS.Borders> = {
-  top: { style: "thin", color: { argb: "FF000000" } },
-  bottom: { style: "thin", color: { argb: "FF000000" } },
-  left: { style: "thin", color: { argb: "FF000000" } },
-  right: { style: "thin", color: { argb: "FF000000" } },
+  top: { style: "thin", color: { argb: "FF94A3B8" } },
+  bottom: { style: "thin", color: { argb: "FF94A3B8" } },
+  left: { style: "thin", color: { argb: "FF94A3B8" } },
+  right: { style: "thin", color: { argb: "FF94A3B8" } },
 };
 
 const DOTTED_BOTTOM_BORDER: Partial<ExcelJS.Borders> = {
@@ -1120,10 +1120,10 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
         // Outer Top & Bottom Borders of the Metadata Table
         if (isTopRow) {
-          borderDef.top = { style: "thin", color: { argb: "FF000000" } };
+          borderDef.top = { style: "thin", color: { argb: "FF94A3B8" } };
         }
         if (isBottomRow) {
-          borderDef.bottom = { style: "thin", color: { argb: "FF000000" } };
+          borderDef.bottom = { style: "thin", color: { argb: "FF94A3B8" } };
         } else {
           // Inner rows keep dotted bottom divider if content exists
           const hasDotted = c <= leftColEnd ? !!lItem : !!rItem;
@@ -1134,17 +1134,17 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
         // Outer Left Border
         if (c === 1) {
-          borderDef.left = { style: "thin", color: { argb: "FF000000" } };
+          borderDef.left = { style: "thin", color: { argb: "FF94A3B8" } };
         }
 
         // Middle Divider Border between Left and Right compartments
         if (c === leftColEnd) {
-          borderDef.right = { style: "thin", color: { argb: "FF000000" } };
+          borderDef.right = { style: "thin", color: { argb: "FF94A3B8" } };
         }
 
         // Outer Right Border
         if (c === colCount) {
-          borderDef.right = { style: "thin", color: { argb: "FF000000" } };
+          borderDef.right = { style: "thin", color: { argb: "FF94A3B8" } };
         }
 
         cell.border = borderDef;
@@ -1366,16 +1366,16 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
           labelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
           valCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
           labelCell.border = {
-            top: { style: "thin", color: { argb: "FF000000" } },
-            bottom: { style: "double", color: { argb: "FF000000" } },
-            left: { style: "thin", color: { argb: "FF000000" } },
-            right: { style: "thin", color: { argb: "FF000000" } },
+            top: { style: "thin", color: { argb: "FF94A3B8" } },
+            bottom: { style: "double", color: { argb: "FF94A3B8" } },
+            left: { style: "thin", color: { argb: "FF94A3B8" } },
+            right: { style: "thin", color: { argb: "FF94A3B8" } },
           };
           valCell.border = {
-            top: { style: "thin", color: { argb: "FF000000" } },
-            bottom: { style: "double", color: { argb: "FF000000" } },
-            left: { style: "thin", color: { argb: "FF000000" } },
-            right: { style: "thin", color: { argb: "FF000000" } },
+            top: { style: "thin", color: { argb: "FF94A3B8" } },
+            bottom: { style: "double", color: { argb: "FF94A3B8" } },
+            left: { style: "thin", color: { argb: "FF94A3B8" } },
+            right: { style: "thin", color: { argb: "FF94A3B8" } },
           };
         } else {
           labelCell.border = THIN_BORDER;
@@ -1461,8 +1461,8 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     recCell.value = "Receiver's Signature";
     recCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
     recCell.alignment = { horizontal: "center", vertical: "middle" };
-    ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: "FF000000" } } };
-    ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: "FF000000" } } };
+    ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
+    ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
 
     // Right Box: Authorized Signature (Cols E-F, or C-D for challan)
     if (!isChallan) {
@@ -1475,7 +1475,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
       const startColNum = isChallan ? 3 : 5;
       for (let c = startColNum; c <= colCount; c++) {
-        ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: "FF000000" } } };
+        ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
       }
     }
     currentRow++;

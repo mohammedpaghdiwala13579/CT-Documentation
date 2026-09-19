@@ -1777,10 +1777,10 @@ export default function QuotationBuilder() {
           switch (preset) {
             case "all":
               borders = {
-                top: "1px solid black",
-                bottom: "1px solid black",
-                left: "1px solid black",
-                right: "1px solid black",
+                top: "1px solid #94a3b8",
+                bottom: "1px solid #94a3b8",
+                left: "1px solid #94a3b8",
+                right: "1px solid #94a3b8",
               };
               break;
             case "none":
@@ -1792,46 +1792,46 @@ export default function QuotationBuilder() {
               };
               break;
             case "outside":
-              if (isTop) borders.top = "1px solid black";
-              if (isBottom) borders.bottom = "1px solid black";
-              if (isLeft) borders.left = "1px solid black";
-              if (isRight) borders.right = "1px solid black";
+              if (isTop) borders.top = "1px solid #94a3b8";
+              if (isBottom) borders.bottom = "1px solid #94a3b8";
+              if (isLeft) borders.left = "1px solid #94a3b8";
+              if (isRight) borders.right = "1px solid #94a3b8";
               break;
             case "thick_outside":
-              if (isTop) borders.top = "2px solid black";
-              if (isBottom) borders.bottom = "2px solid black";
-              if (isLeft) borders.left = "2px solid black";
-              if (isRight) borders.right = "2px solid black";
+              if (isTop) borders.top = "2px solid #94a3b8";
+              if (isBottom) borders.bottom = "2px solid #94a3b8";
+              if (isLeft) borders.left = "2px solid #94a3b8";
+              if (isRight) borders.right = "2px solid #94a3b8";
               break;
             case "bottom":
-              if (isBottom) borders.bottom = "1px solid black";
+              if (isBottom) borders.bottom = "1px solid #94a3b8";
               break;
             case "top":
-              if (isTop) borders.top = "1px solid black";
+              if (isTop) borders.top = "1px solid #94a3b8";
               break;
             case "left":
-              if (isLeft) borders.left = "1px solid black";
+              if (isLeft) borders.left = "1px solid #94a3b8";
               break;
             case "right":
-              if (isRight) borders.right = "1px solid black";
+              if (isRight) borders.right = "1px solid #94a3b8";
               break;
             case "thick_bottom":
-              if (isBottom) borders.bottom = "2px solid black";
+              if (isBottom) borders.bottom = "2px solid #94a3b8";
               break;
             case "bottom_double":
-              if (isBottom) borders.bottom = "3px double black";
+              if (isBottom) borders.bottom = "3px double #94a3b8";
               break;
             case "top_and_bottom":
-              if (isTop) borders.top = "1px solid black";
-              if (isBottom) borders.bottom = "1px solid black";
+              if (isTop) borders.top = "1px solid #94a3b8";
+              if (isBottom) borders.bottom = "1px solid #94a3b8";
               break;
             case "top_and_thick_bottom":
-              if (isTop) borders.top = "1px solid black";
-              if (isBottom) borders.bottom = "2px solid black";
+              if (isTop) borders.top = "1px solid #94a3b8";
+              if (isBottom) borders.bottom = "2px solid #94a3b8";
               break;
             case "top_and_double_bottom":
-              if (isTop) borders.top = "1px solid black";
-              if (isBottom) borders.bottom = "3px double black";
+              if (isTop) borders.top = "1px solid #94a3b8";
+              if (isBottom) borders.bottom = "3px double #94a3b8";
               break;
           }
 
@@ -2759,7 +2759,7 @@ export default function QuotationBuilder() {
         {/* Receiver's Signature Block */}
         <div className="sig-box w-full sm:w-[240px] print:w-[240px] text-center flex flex-col justify-between h-[80px] print:h-[80px]">
           <div className="h-4 invisible select-none" aria-hidden="true">&nbsp;</div>
-          <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold text-black tracking-wide">
+          <div className="sig-line border-t-2 border-slate-700 print:border-slate-400 pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold text-black tracking-wide">
             Receiver's Signature
           </div>
         </div>
@@ -2782,7 +2782,7 @@ export default function QuotationBuilder() {
             </div>
           )}
 
-          <div className="sig-line border-t-2 border-slate-700 print:border-black pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold relative z-20 text-black tracking-wide leading-none">
+          <div className="sig-line border-t-2 border-slate-700 print:border-slate-400 pt-1.5 text-[10pt] print:text-[9.5pt] font-extrabold relative z-20 text-black tracking-wide leading-none">
             Authorized Signature
           </div>
         </div>
@@ -2972,7 +2972,7 @@ export default function QuotationBuilder() {
                   </div>
 
                   {/* Enlarged Business Header with Larger Logo and Lower Bottom Line */}
-                  <div className="business-header border-b border-slate-300 print:border-black pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
+                  <div className="business-header border-b border-slate-300 print:border-slate-400 pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
                         <img
@@ -3052,7 +3052,7 @@ export default function QuotationBuilder() {
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                      <div className={`meta-info-container w-full border border-slate-300 print:border-slate-400 rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
                         <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 border-r border-slate-200 print:border-slate-300 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
@@ -3071,7 +3071,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-messers"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                             />
                           </div>
@@ -3091,7 +3091,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-vessel"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {vesselName.trim() || '\u00A0'}
                             </div>
@@ -3112,7 +3112,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-port"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {portBerth.trim() || '\u00A0'}
                             </div>
@@ -3133,7 +3133,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-address"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                             />
                           </div>
@@ -3158,7 +3158,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3188,7 +3188,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3219,7 +3219,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-invoice-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {invoiceNo.trim() || '\u00A0'}
                                 </div>
@@ -3239,7 +3239,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
@@ -3269,7 +3269,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3295,7 +3295,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3315,7 +3315,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-po-number"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {poNumber.trim() || '\u00A0'}
                                 </div>
@@ -3340,7 +3340,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
@@ -3360,7 +3360,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3390,7 +3390,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-500 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3427,17 +3427,17 @@ export default function QuotationBuilder() {
 
                 {/* Main Data Sheet Table */}
                 <div className="items-table-wrapper w-full overflow-x-auto no-scrollbar">
-                  <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-black table-fixed text-[8pt]">
+                  <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-slate-400 table-fixed text-[8pt]">
                     <thead>
                       <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-400 print:border-black py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-400 print:border-slate-400 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-400 print:border-slate-400 py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-400 print:border-slate-400 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-400 print:border-slate-400 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
-                            <th className="w-[12%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
+                            <th className="w-[11%] border border-slate-400 print:border-slate-400 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
+                            <th className="w-[12%] border border-slate-400 print:border-slate-400 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
                           </>
                         )}
                       </tr>
@@ -3469,7 +3469,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, -1)}
                                   onClick={() => handleCellClick(idx, -1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, -1)}
-                                  className={getCellClassName(idx, -1, `border border-slate-300 print:border-black text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
+                                  className={getCellClassName(idx, -1, `border border-slate-300 print:border-slate-400 text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
                                 >
                                   {idx + 1}
                                 </td>
@@ -3489,7 +3489,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 0)}
                                   onClick={() => handleCellClick(idx, 0)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 0)}
-                                  className={getCellClassName(idx, 0, `border border-slate-300 print:border-black text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
+                                  className={getCellClassName(idx, 0, `border border-slate-300 print:border-slate-400 text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
                                 >
                                   <RichTextCell
                                     value={row.desc}
@@ -3537,7 +3537,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 1)}
                                   onClick={() => handleCellClick(idx, 1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 1)}
-                                  className={getCellClassName(idx, 1, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 1, "border border-slate-300 print:border-slate-400 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.qty}
@@ -3577,7 +3577,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 2)}
                                   onClick={() => handleCellClick(idx, 2)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 2)}
-                                  className={getCellClassName(idx, 2, "border border-slate-300 print:border-black text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 2, "border border-slate-300 print:border-slate-400 text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.unit}
@@ -3617,7 +3617,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 3)}
                                   onClick={() => handleCellClick(idx, 3)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 3)}
-                                  className={getCellClassName(idx, 3, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 3, "border border-slate-300 print:border-slate-400 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.price}
@@ -3656,7 +3656,7 @@ export default function QuotationBuilder() {
                                 onMouseUp={(e) => handleCellMouseUp(e, idx, 4)}
                                 onClick={() => handleCellClick(idx, 4)}
                                 onContextMenu={(e) => handleCellContextMenu(e, idx, 4)}
-                                className={getCellClassName(idx, 4, "border border-slate-300 print:border-black text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
+                                className={getCellClassName(idx, 4, "border border-slate-300 print:border-slate-400 text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
                               >
                                 <div style={cellStyle} className="whitespace-nowrap overflow-visible leading-[1.25] text-[8pt] sm:text-[8.5pt]">
                                   {row.amount !== 0 ? row.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "0.00"}
@@ -3773,12 +3773,12 @@ export default function QuotationBuilder() {
                 {/* Bottom closing wraps, sums, signatures */}
                 <div className="closing-wrap mt-1.5">
                   {docType !== "challan" && (
-                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-400 print:border-black mt-1.5 bg-white text-black z-10 relative">
+                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-400 print:border-slate-400 mt-1.5 bg-white text-black z-10 relative">
                       <tbody>
                         {docType === "invoice" ? (
                           <>
                             <tr className="align-stretch">
-                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1.5 bg-slate-50/50 text-left align-middle">
+                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r border-slate-300 print:border-slate-400 p-1.5 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
@@ -3786,7 +3786,7 @@ export default function QuotationBuilder() {
                                   {numberToWords(calculatedGrandTotal, currency || "Taka")}
                                 </span>
                               </td>
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -3819,7 +3819,7 @@ export default function QuotationBuilder() {
                             </tr>
                             {includeDiscount && (
                               <tr className="align-stretch">
-                                <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                                <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
                                   <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                     <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                       <div className="flex items-center justify-end gap-1 w-full pl-0.5 overflow-visible">
@@ -3908,7 +3908,7 @@ export default function QuotationBuilder() {
                               </tr>
                             )}
                             <tr className="align-stretch">
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -3937,7 +3937,7 @@ export default function QuotationBuilder() {
                               </td>
                             </tr>
                             <tr className="align-stretch">
-                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-slate-400 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
@@ -3982,7 +3982,7 @@ export default function QuotationBuilder() {
                         ) : (
                           <>
                             <tr className="align-stretch">
-                              <td className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1 bg-slate-50/50 text-left align-middle">
+                              <td className="amount-words-container w-1/2 border-r border-slate-300 print:border-slate-400 p-1 bg-slate-50/50 text-left align-middle">
                                 <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
                                   Amount in Words:
                                 </span>
