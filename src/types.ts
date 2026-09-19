@@ -78,7 +78,9 @@ export interface SavedDocument {
   mergedRegions: MergedRegion[];
   cellFormats?: CellFormatMap;
   vatPercent?: number;
+  includeVat?: boolean;
   transportationFee?: number;
+  includeTransport?: boolean;
   discountPercent?: number;
   includeDiscount?: boolean;
   discountType?: "percentage" | "fixed";
