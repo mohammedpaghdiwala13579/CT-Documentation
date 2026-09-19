@@ -1295,44 +1295,34 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       const wordsText = numberToWords(grandTotal, currency);
       const summaryStartRow = currentRow;
 
-      const hasAdjustments = isInvoice && (
-        (includeDiscount && discountAmount > 0) ||
-        (vatAmount > 0) ||
-        (parsedTransport > 0)
-      );
+      // Sub Total
+      const subTotalRow = ws.addRow(["", "", "", "", "Sub Total:", rowsTotal]);
+      subTotalRow.height = 13;
+      currentRow++;
 
-      // Only show Sub Total and itemized rows if adjustments exist
-      if (hasAdjustments) {
-        const subTotalRow = ws.addRow(["", "", "", "", "Sub Total:", rowsTotal]);
-        subTotalRow.height = 13;
+      // Discount (if any)
+      if (isInvoice && includeDiscount && discountAmount > 0) {
+        const discRow = ws.addRow(["", "", "", "", "Discount:", -discountAmount]);
+        discRow.height = 13;
         currentRow++;
-
-        // Discount (if any)
-        if (isInvoice && includeDiscount && discountAmount > 0) {
-          const discLabel = discountType === "percentage" ? `Discount (${discountValue}%):` : "Discount:";
-          const discRow = ws.addRow(["", "", "", "", discLabel, -discountAmount]);
-          discRow.height = 13;
-          currentRow++;
-        }
-
-        // VAT (if any)
-        if (isInvoice && vatAmount > 0) {
-          const vatLabel = parsedVat > 0 ? `VAT (${parsedVat}%):` : "VAT:";
-          const vatRow = ws.addRow(["", "", "", "", vatLabel, vatAmount]);
-          vatRow.height = 13;
-          currentRow++;
-        }
-
-        // Transportation (if any)
-        if (isInvoice && parsedTransport > 0) {
-          const transRow = ws.addRow(["", "", "", "", "Transportation:", parsedTransport]);
-          transRow.height = 13;
-          currentRow++;
-        }
       }
 
-      // Grand Total / Net Payable / Total
-      const grandTotalLabel = hasAdjustments ? "Net Payable:" : "Total:";
+      // VAT (if any)
+      if (isInvoice && vatAmount > 0) {
+        const vatRow = ws.addRow(["", "", "", "", "VAT:", vatAmount]);
+        vatRow.height = 13;
+        currentRow++;
+      }
+
+      // Transportation (if any)
+      if (isInvoice && parsedTransport > 0) {
+        const transRow = ws.addRow(["", "", "", "", "Transportation:", parsedTransport]);
+        transRow.height = 13;
+        currentRow++;
+      }
+
+      // Grand Total / Net Payable
+      const grandTotalLabel = isInvoice ? "Net Payable:" : "Grand Total:";
       const grandTotalRow = ws.addRow(["", "", "", "", grandTotalLabel, grandTotal]);
       grandTotalRow.height = 15;
       const grandTotalRowIndex = currentRow;

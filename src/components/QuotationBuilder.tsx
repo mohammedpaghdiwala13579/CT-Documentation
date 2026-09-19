@@ -194,17 +194,7 @@ export default function QuotationBuilder() {
     if (initialDraft?.includePoNumber !== undefined) return Boolean(initialDraft.includePoNumber);
     return true;
   });
-  const [includeVat, setIncludeVat] = useState<boolean>(() => {
-    if (initialDraft?.includeVat !== undefined) return Boolean(initialDraft.includeVat);
-    if (initialDraft?.vatPercent !== undefined && Number(initialDraft.vatPercent) > 0) return true;
-    return false;
-  });
   const [vatPercent, setVatPercent] = useState<string>(() => initialDraft?.vatPercent !== undefined ? String(initialDraft.vatPercent) : "0");
-  const [includeTransport, setIncludeTransport] = useState<boolean>(() => {
-    if (initialDraft?.includeTransport !== undefined) return Boolean(initialDraft.includeTransport);
-    if (initialDraft?.transportationFee !== undefined && Number(initialDraft.transportationFee) > 0) return true;
-    return false;
-  });
   const [transportationFee, setTransportationFee] = useState<string>(() => initialDraft?.transportationFee !== undefined ? String(initialDraft.transportationFee) : "0");
   const [includeDiscount, setIncludeDiscount] = useState<boolean>(() => {
     if (initialDraft?.includeDiscount !== undefined) return Boolean(initialDraft.includeDiscount);
@@ -324,9 +314,7 @@ export default function QuotationBuilder() {
     includeRequisitionNo: boolean;
     includePoNumber: boolean;
     vatPercent: string;
-    includeVat: boolean;
     transportationFee: string;
-    includeTransport: boolean;
     includeDiscount: boolean;
     discountType: "percentage" | "fixed";
     discountValue: string;
@@ -361,9 +349,7 @@ export default function QuotationBuilder() {
     includeRequisitionNo,
     includePoNumber,
     vatPercent,
-    includeVat,
     transportationFee,
-    includeTransport,
     includeDiscount,
     discountType,
     discountValue,
@@ -415,9 +401,7 @@ export default function QuotationBuilder() {
     setIncludeRequisitionNo(previous.includeRequisitionNo !== undefined ? previous.includeRequisitionNo : true);
     setIncludePoNumber(previous.includePoNumber !== undefined ? previous.includePoNumber : true);
     setVatPercent(previous.vatPercent);
-    setIncludeVat(previous.includeVat !== undefined ? previous.includeVat : Number(previous.vatPercent) > 0);
     setTransportationFee(previous.transportationFee);
-    setIncludeTransport(previous.includeTransport !== undefined ? previous.includeTransport : Number(previous.transportationFee) > 0);
     setIncludeDiscount(previous.includeDiscount);
     setDiscountType(previous.discountType);
     setDiscountValue(previous.discountValue);
@@ -465,9 +449,7 @@ export default function QuotationBuilder() {
     setIncludeRequisitionNo(next.includeRequisitionNo !== undefined ? next.includeRequisitionNo : true);
     setIncludePoNumber(next.includePoNumber !== undefined ? next.includePoNumber : true);
     setVatPercent(next.vatPercent);
-    setIncludeVat(next.includeVat !== undefined ? next.includeVat : Number(next.vatPercent) > 0);
     setTransportationFee(next.transportationFee);
-    setIncludeTransport(next.includeTransport !== undefined ? next.includeTransport : Number(next.transportationFee) > 0);
     setIncludeDiscount(next.includeDiscount);
     setDiscountType(next.discountType);
     setDiscountValue(next.discountValue);
@@ -547,9 +529,7 @@ export default function QuotationBuilder() {
         mergedRegions: docMergedRegions,
         cellFormats: (data.cellFormats as CellFormatMap) || {},
         vatPercent: data.vatPercent,
-        includeVat: data.includeVat !== undefined ? Boolean(data.includeVat) : (Number(data.vatPercent) > 0),
-        transportationFee: data.transportationFee,
-        includeTransport: data.includeTransport !== undefined ? Boolean(data.includeTransport) : (Number(data.transportationFee) > 0)
+        transportationFee: data.transportationFee
       };
     };
 
@@ -677,9 +657,7 @@ export default function QuotationBuilder() {
       mergedRegions: sanitizedMergedRegions,
       cellFormats: { ...cellFormats },
       vatPercent: parseFloat(vatPercent) || 0,
-      includeVat: Boolean(includeVat),
-      transportationFee: parseFloat(transportationFee) || 0,
-      includeTransport: Boolean(includeTransport)
+      transportationFee: parseFloat(transportationFee) || 0
     };
 
     setSaveStatus("saving");
@@ -786,9 +764,7 @@ export default function QuotationBuilder() {
     setCurrentDocId(doc.id);
     setLastSavedTime(null);
     setVatPercent(doc.vatPercent !== undefined ? String(doc.vatPercent) : "0");
-    setIncludeVat(doc.includeVat !== undefined ? Boolean(doc.includeVat) : (doc.vatPercent !== undefined && Number(doc.vatPercent) > 0));
     setTransportationFee(doc.transportationFee !== undefined ? String(doc.transportationFee) : "0");
-    setIncludeTransport(doc.includeTransport !== undefined ? Boolean(doc.includeTransport) : (doc.transportationFee !== undefined && Number(doc.transportationFee) > 0));
 
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -888,9 +864,7 @@ export default function QuotationBuilder() {
         mergedRegions: mergedRegions.map(m => ({ ...m })),
         cellFormats: { ...cellFormats },
         vatPercent: parseFloat(vatPercent) || 0,
-        includeVat: Boolean(includeVat),
         transportationFee: parseFloat(transportationFee) || 0,
-        includeTransport: Boolean(includeTransport),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -989,9 +963,7 @@ export default function QuotationBuilder() {
         mergedRegions: sanitizedMergedRegions,
         cellFormats: { ...cellFormats },
         vatPercent: parseFloat(vatPercent) || 0,
-        includeVat: Boolean(includeVat),
-        transportationFee: parseFloat(transportationFee) || 0,
-        includeTransport: Boolean(includeTransport)
+        transportationFee: parseFloat(transportationFee) || 0
       };
 
       setSaveStatus("saving");
@@ -1044,9 +1016,7 @@ export default function QuotationBuilder() {
     autoSaveEnabled,
     currentDocId,
     vatPercent,
-    includeVat,
-    transportationFee,
-    includeTransport
+    transportationFee
   ]);
 
   // Active sheet draft persistence to prevent any loss of data on reload or refresh - strictly isolated by active company
@@ -1078,9 +1048,7 @@ export default function QuotationBuilder() {
         includeRequisitionNo,
         includePoNumber,
         vatPercent,
-        includeVat,
         transportationFee,
-        includeTransport,
         currentDocId: currentDocId || null,
         rows,
         mergedRegions,
@@ -1119,9 +1087,7 @@ export default function QuotationBuilder() {
     cellFormats,
     currentDocId,
     vatPercent,
-    includeVat,
-    transportationFee,
-    includeTransport
+    transportationFee
   ]);
 
   // Adjust textarea heights dynamically based on content
@@ -2121,9 +2087,9 @@ export default function QuotationBuilder() {
   };
 
   const rowsTotal = rows.reduce((sum, r) => sum + r.amount, 0);
-  const parsedVatPercent = includeVat ? parseNumericInput(vatPercent) : 0;
-  const parsedTransportationFee = includeTransport ? parseNumericInput(transportationFee) : 0;
-  const parsedDiscountValue = includeDiscount ? parseNumericInput(discountValue) : 0;
+  const parsedVatPercent = parseNumericInput(vatPercent);
+  const parsedTransportationFee = parseNumericInput(transportationFee);
+  const parsedDiscountValue = parseNumericInput(discountValue);
 
   let discountAmount = 0;
   if (docType === "invoice" && includeDiscount && parsedDiscountValue > 0) {
@@ -2135,22 +2101,11 @@ export default function QuotationBuilder() {
   }
   discountAmount = Math.min(rowsTotal, Math.max(0, discountAmount));
   const netAfterDiscount = Math.max(0, rowsTotal - discountAmount);
-  const vatAmount = docType === "invoice" && includeVat ? (netAfterDiscount * parsedVatPercent) / 100 : 0;
+  const vatAmount = docType === "invoice" ? (netAfterDiscount * parsedVatPercent) / 100 : 0;
   const grandTotal = docType === "invoice" 
     ? (netAfterDiscount + vatAmount + parsedTransportationFee) 
     : rowsTotal;
   const calculatedGrandTotal = docType === "challan" ? 0 : grandTotal;
-
-  const hasAdjustments = docType === "invoice" && (
-    (includeDiscount && (discountAmount > 0 || discountValue !== "")) ||
-    includeVat ||
-    includeTransport
-  );
-  const hasPrintAdjustments = docType === "invoice" && (
-    (includeDiscount && discountAmount > 0) ||
-    (includeVat && vatAmount > 0) ||
-    (includeTransport && parsedTransportationFee > 0)
-  );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, rowIndex: number, colIndex: number) => {
     const { key } = e;
@@ -2748,8 +2703,8 @@ export default function QuotationBuilder() {
         includeDiscount,
         discountType,
         discountValue,
-        vatPercent: includeVat ? vatPercent : "0",
-        transportationFee: includeTransport ? transportationFee : "0",
+        vatPercent,
+        transportationFee,
         currency,
         currencySymbol: currency === "USD" ? "$" : "Tk",
       });
@@ -3097,7 +3052,7 @@ export default function QuotationBuilder() {
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border border-slate-200 print:border-slate-300 rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                      <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
                         <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 border-r border-slate-200 print:border-slate-300 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
@@ -3472,17 +3427,17 @@ export default function QuotationBuilder() {
 
                 {/* Main Data Sheet Table */}
                 <div className="items-table-wrapper w-full overflow-x-auto no-scrollbar">
-                  <table className="main-table w-full min-w-full border-collapse border border-slate-200 print:border-slate-300 table-fixed text-[8pt]">
+                  <table className="main-table w-full min-w-full border-collapse border border-slate-400 print:border-black table-fixed text-[8pt]">
                     <thead>
-                      <tr className="bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-200 print:border-slate-300 py-1.5 px-1 text-center font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-200 print:border-slate-300 py-1.5 px-2 text-left font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-200 print:border-slate-300 py-1.5 px-1 text-center font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-200 print:border-slate-300 py-1.5 px-1 text-center font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
+                      <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-400 print:border-black py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-slate-200 print:border-slate-300 py-1.5 px-1 text-center font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
-                            <th className="w-[12%] border border-slate-200 print:border-slate-300 py-1.5 px-1 text-center font-bold bg-slate-100/70 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
+                            <th className="w-[11%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
+                            <th className="w-[12%] border border-slate-400 print:border-black py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
                           </>
                         )}
                       </tr>
@@ -3514,7 +3469,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, -1)}
                                   onClick={() => handleCellClick(idx, -1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, -1)}
-                                  className={getCellClassName(idx, -1, `border border-slate-200 print:border-slate-300 text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
+                                  className={getCellClassName(idx, -1, `border border-slate-300 print:border-black text-center font-mono text-[7.5pt] sm:text-[8pt] align-middle py-0.5 px-0.5 whitespace-nowrap leading-tight transition-all cursor-pointer select-none bg-slate-50/30 text-slate-800`)}
                                 >
                                   {idx + 1}
                                 </td>
@@ -3534,7 +3489,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 0)}
                                   onClick={() => handleCellClick(idx, 0)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 0)}
-                                  className={getCellClassName(idx, 0, `border border-slate-200 print:border-slate-300 text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
+                                  className={getCellClassName(idx, 0, `border border-slate-300 print:border-black text-left px-1.5 py-0.5 text-[8pt] sm:text-[8.5pt] align-middle whitespace-normal transition-all cursor-text ${region ? "bg-slate-50/40" : ""}`)}
                                 >
                                   <RichTextCell
                                     value={row.desc}
@@ -3582,7 +3537,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 1)}
                                   onClick={() => handleCellClick(idx, 1)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 1)}
-                                  className={getCellClassName(idx, 1, "border border-slate-200 print:border-slate-300 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 1, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.qty}
@@ -3622,7 +3577,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 2)}
                                   onClick={() => handleCellClick(idx, 2)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 2)}
-                                  className={getCellClassName(idx, 2, "border border-slate-200 print:border-slate-300 text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 2, "border border-slate-300 print:border-black text-center text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.unit}
@@ -3662,7 +3617,7 @@ export default function QuotationBuilder() {
                                   onMouseUp={(e) => handleCellMouseUp(e, idx, 3)}
                                   onClick={() => handleCellClick(idx, 3)}
                                   onContextMenu={(e) => handleCellContextMenu(e, idx, 3)}
-                                  className={getCellClassName(idx, 3, "border border-slate-200 print:border-slate-300 text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
+                                  className={getCellClassName(idx, 3, "border border-slate-300 print:border-black text-center font-mono text-[8pt] sm:text-[8.5pt] align-middle py-0.5 px-1 transition-all cursor-text")}
                                 >
                                   <RichTextCell
                                     value={row.price}
@@ -3701,7 +3656,7 @@ export default function QuotationBuilder() {
                                 onMouseUp={(e) => handleCellMouseUp(e, idx, 4)}
                                 onClick={() => handleCellClick(idx, 4)}
                                 onContextMenu={(e) => handleCellContextMenu(e, idx, 4)}
-                                className={getCellClassName(idx, 4, "border border-slate-200 print:border-slate-300 text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
+                                className={getCellClassName(idx, 4, "border border-slate-300 print:border-black text-right pr-1.5 pl-1 font-mono text-[8pt] sm:text-[8.5pt] font-semibold text-slate-800 align-middle py-0.5 transition-all cursor-pointer")}
                               >
                                 <div style={cellStyle} className="whitespace-nowrap overflow-visible leading-[1.25] text-[8pt] sm:text-[8.5pt]">
                                   {row.amount !== 0 ? row.amount.toLocaleString("en-US", { minimumFractionDigits: 2 }) : "0.00"}
@@ -3818,252 +3773,237 @@ export default function QuotationBuilder() {
                 {/* Bottom closing wraps, sums, signatures */}
                 <div className="closing-wrap mt-1.5">
                   {docType !== "challan" && (
-                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-200 print:border-slate-300 mt-1.5 bg-white text-black z-10 relative">
+                    <table className="closing-row w-full max-w-full table-fixed border-collapse border border-slate-400 print:border-black mt-1.5 bg-white text-black z-10 relative">
                       <tbody>
-                        <tr className="align-stretch">
-                          <td className="amount-words-container w-1/2 border-r border-slate-200 print:border-slate-300 p-2 sm:p-2.5 bg-slate-50/20 print:bg-transparent text-left align-middle">
-                            <span className="font-semibold text-[6.5pt] text-slate-500 print:text-slate-600 uppercase tracking-wider block mb-0.5">
-                              Amount in Words:
-                            </span>
-                            <span className="text-[7.5pt] sm:text-[8pt] font-mono italic text-slate-900 print:text-black font-extrabold uppercase leading-normal block">
-                              {numberToWords(calculatedGrandTotal, currency || "Taka")}
-                            </span>
-                          </td>
-                          <td className="w-1/2 p-0 align-top">
-                            {docType === "invoice" ? (
-                              <div className="flex flex-col h-full justify-between">
-                                {hasAdjustments ? (
-                                  <div className="flex flex-col divide-y divide-slate-100 print:divide-slate-200">
-                                    {/* Subtotal row */}
-                                    <div className="flex items-center justify-between px-2.5 py-1 text-[7.5pt]">
-                                      <span className="font-semibold text-slate-600 print:text-slate-800 uppercase tracking-wider">
-                                        Subtotal
-                                      </span>
-                                      <span className="font-mono font-bold text-slate-800 text-[8.5pt]">
-                                        {rowsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                      </span>
+                        {docType === "invoice" ? (
+                          <>
+                            <tr className="align-stretch">
+                              <td rowSpan={includeDiscount ? 5 : 4} className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1.5 bg-slate-50/50 text-left align-middle">
+                                <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
+                                  Amount in Words:
+                                </span>
+                                <span className="text-[8pt] font-mono italic text-black font-black uppercase leading-tight">
+                                  {numberToWords(calculatedGrandTotal, currency || "Taka")}
+                                </span>
+                              </td>
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
+                                      <span>SUBTOTAL</span>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
+                                      {!includeDiscount && (
+                                        <button
+                                          type="button"
+                                          id="btn-add-invoice-discount"
+                                          onClick={() => {
+                                            setIncludeDiscount(true);
+                                            if (!discountValue || discountValue === "0") {
+                                              setDiscountValue("");
+                                            }
+                                          }}
+                                          className="no-print print:hidden px-1 py-0.2 text-[6pt] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded cursor-pointer transition-colors flex items-center gap-0.5 shrink-0"
+                                          title="Add discount option to invoice"
+                                        >
+                                          <Plus className="w-1.5 h-1.5" />
+                                          <span>DISC.</span>
+                                        </button>
+                                      )}
                                     </div>
-
-                                    {/* Discount row (if active) */}
-                                    {includeDiscount && (
-                                      <div className={`flex items-center justify-between px-2.5 py-1 text-[7.5pt] text-rose-700 bg-rose-50/20 print:bg-transparent ${(!includeDiscount || discountAmount <= 0) ? 'print:hidden' : ''}`}>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-semibold uppercase tracking-wider text-rose-800 print:text-black">
-                                            Discount
-                                          </span>
-                                          {/* Screen controls */}
-                                          <div className="flex items-center gap-1 no-print print:hidden">
-                                            <div className="inline-flex rounded border border-slate-200 bg-slate-100 p-0.5 shrink-0" title="Switch discount type">
-                                              <button
-                                                type="button"
-                                                onClick={() => setDiscountType("percentage")}
-                                                className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${discountType === "percentage" ? "bg-blue-600 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"}`}
-                                              >
-                                                %
-                                              </button>
-                                              <button
-                                                type="button"
-                                                onClick={() => setDiscountType("fixed")}
-                                                className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${discountType === "fixed" ? "bg-blue-600 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"}`}
-                                              >
-                                                123
-                                              </button>
-                                            </div>
+                                  </div>
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight">
+                                    {rowsTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                            {includeDiscount && (
+                              <tr className="align-stretch">
+                                <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                                  <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                    <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                      <div className="flex items-center justify-end gap-1 w-full pl-0.5 overflow-visible">
+                                        <div className="flex items-center gap-1 no-print print:hidden shrink-0">
+                                          {/* Fast 1-click toggle between % and Fixed */}
+                                          <div className="inline-flex rounded border border-slate-300 bg-slate-100 p-0.5 shrink-0" title="Switch discount type (% or 123)">
+                                            <button
+                                              type="button"
+                                              onClick={() => setDiscountType("percentage")}
+                                              className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${
+                                                discountType === "percentage"
+                                                  ? "bg-blue-600 text-white shadow-2xs"
+                                                  : "text-slate-600 hover:text-slate-900"
+                                              }`}
+                                              title="Percentage discount (%)"
+                                            >
+                                              %
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => setDiscountType("fixed")}
+                                              className={`px-1 py-0.2 text-[6.5pt] font-bold rounded-xs transition-colors cursor-pointer ${
+                                                discountType === "fixed"
+                                                  ? "bg-blue-600 text-white shadow-2xs"
+                                                  : "text-slate-600 hover:text-slate-900"
+                                              }`}
+                                              title="Fixed amount discount (123)"
+                                            >
+                                              123
+                                            </button>
+                                          </div>
+                                          <select
+                                            id="invoice-discount-type-select"
+                                            value={discountType}
+                                            onChange={(e) => setDiscountType(e.target.value as "percentage" | "fixed")}
+                                            className="sr-only"
+                                            aria-label="Discount Type"
+                                          >
+                                            <option value="percentage">%</option>
+                                            <option value="fixed">123</option>
+                                          </select>
+                                          <div className="flex items-center gap-0.5 shrink-0">
                                             <input
                                               type="text"
                                               id="invoice-discount-value-input"
                                               value={discountValue}
                                               onChange={(e) => {
                                                 const val = e.target.value;
-                                                if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) setDiscountValue(val);
+                                                if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
+                                                  setDiscountValue(val);
+                                                }
                                               }}
                                               placeholder="0"
-                                              className="h-[18px] w-10 text-center border border-slate-200 rounded font-mono text-[7pt] bg-white text-slate-900 px-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                              className={`h-[18px] text-center border border-slate-300 rounded font-mono text-[7.5pt] font-bold bg-white text-slate-900 px-1 focus:outline-none focus:ring-1 focus:ring-blue-500 shrink-0 ${
+                                                discountType === "fixed" ? "w-13" : "w-9"
+                                              }`}
+                                              title={`Enter ${discountType === "percentage" ? "discount percentage" : "fixed discount amount"}`}
                                             />
-                                            <button
-                                              type="button"
-                                              id="btn-remove-invoice-discount"
-                                              onClick={() => {
-                                                setIncludeDiscount(false);
-                                                setDiscountValue("0");
-                                              }}
-                                              className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
-                                              title="Remove discount"
-                                            >
-                                              <X className="w-3 h-3 stroke-[2.5]" />
-                                            </button>
-                                          </div>
-                                          {/* Print percentage label */}
-                                          {discountType === "percentage" && parsedDiscountValue > 0 && (
-                                            <span className="hidden print:inline text-[7pt] text-slate-600 font-mono">
-                                              ({parsedDiscountValue}%)
+                                            <span className="text-[7pt] font-black text-slate-700 font-mono shrink-0">
+                                              {discountType === "percentage" ? "%" : (currency === "USD" ? "$" : "Tk")}
                                             </span>
-                                          )}
-                                        </div>
-                                        <span className="font-mono font-bold text-[8.5pt] text-rose-700 print:text-black">
-                                          {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {/* VAT row (if active) */}
-                                    {includeVat && (
-                                      <div className={`flex items-center justify-between px-2.5 py-1 text-[7.5pt] text-slate-700 print:text-slate-800 ${(!includeVat || vatAmount <= 0) ? 'print:hidden' : ''}`}>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-semibold uppercase tracking-wider text-slate-700 print:text-black">
-                                            VAT
-                                          </span>
-                                          {/* Screen controls */}
-                                          <div className="flex items-center gap-1 no-print print:hidden">
-                                            <input
-                                              type="text"
-                                              id="invoice-vat-value-input"
-                                              value={vatPercent}
-                                              onChange={(e) => {
-                                                const val = e.target.value;
-                                                if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) setVatPercent(val);
-                                              }}
-                                              placeholder="5"
-                                              className="h-[18px] w-9 text-center border border-slate-200 rounded font-mono text-[7pt] bg-white text-slate-900 px-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            />
-                                            <span className="text-[7pt] font-mono text-slate-500">%</span>
-                                            <button
-                                              type="button"
-                                              id="btn-remove-invoice-vat"
-                                              onClick={() => {
-                                                setIncludeVat(false);
-                                                setVatPercent("0");
-                                              }}
-                                              className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
-                                              title="Remove VAT"
-                                            >
-                                              <X className="w-3 h-3 stroke-[2.5]" />
-                                            </button>
                                           </div>
-                                          {/* Print label */}
-                                          {parsedVatPercent > 0 && (
-                                            <span className="hidden print:inline text-[7pt] text-slate-600 font-mono">
-                                              ({parsedVatPercent}%)
-                                            </span>
-                                          )}
+                                          <button
+                                            type="button"
+                                            id="btn-remove-invoice-discount"
+                                            onClick={() => setIncludeDiscount(false)}
+                                            title="Remove discount from invoice"
+                                            className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-0.5 rounded transition-colors cursor-pointer shrink-0"
+                                            aria-label="Remove discount"
+                                          >
+                                            <X className="w-3 h-3 stroke-[2.5]" />
+                                          </button>
                                         </div>
-                                        <span className="font-mono font-bold text-[8.5pt] text-slate-900">
-                                          {vatAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                        {/* Print: Whole word "DISCOUNT" without disclosing percentage */}
+                                        <span className="hidden print:inline font-bold uppercase tracking-wider text-[7.5pt] text-black">
+                                          DISCOUNT
                                         </span>
+                                        <span className="font-bold text-[8pt] text-slate-900 ml-0.5 shrink-0">=</span>
                                       </div>
-                                    )}
-
-                                    {/* Transportation row (if active) */}
-                                    {includeTransport && (
-                                      <div className={`flex items-center justify-between px-2.5 py-1 text-[7.5pt] text-slate-700 print:text-slate-800 ${(!includeTransport || parsedTransportationFee <= 0) ? 'print:hidden' : ''}`}>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="font-semibold uppercase tracking-wider text-slate-700 print:text-black">
-                                            Transportation
-                                          </span>
-                                          {/* Screen controls */}
-                                          <div className="flex items-center gap-1 no-print print:hidden">
-                                            <input
-                                              type="text"
-                                              id="invoice-transport-value-input"
-                                              value={transportationFee}
-                                              onChange={(e) => {
-                                                const val = e.target.value;
-                                                if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) setTransportationFee(val);
-                                              }}
-                                              placeholder="0"
-                                              className="h-[18px] w-12 text-center border border-slate-200 rounded font-mono text-[7pt] bg-white text-slate-900 px-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            />
-                                            <button
-                                              type="button"
-                                              id="btn-remove-invoice-transport"
-                                              onClick={() => {
-                                                setIncludeTransport(false);
-                                                setTransportationFee("0");
-                                              }}
-                                              className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
-                                              title="Remove Transportation"
-                                            >
-                                              <X className="w-3 h-3 stroke-[2.5]" />
-                                            </button>
-                                          </div>
-                                        </div>
-                                        <span className="font-mono font-bold text-[8.5pt] text-slate-900">
-                                          {parsedTransportationFee.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                        </span>
-                                      </div>
-                                    )}
+                                    </div>
+                                    <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-bold flex items-center justify-end px-1.5 py-0.5 leading-tight text-rose-700">
+                                      {discountAmount > 0 ? `-${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "0.00"}
+                                    </div>
                                   </div>
-                                ) : null}
-
-                                {/* Screen buttons to add adjustments when not yet active */}
-                                {(!includeDiscount || !includeVat || !includeTransport) && (
-                                  <div className="no-print print:hidden flex items-center justify-end gap-1.5 px-2.5 py-0.5 bg-slate-50/40 border-b border-slate-100 text-[6.5pt]">
-                                    <span className="font-medium text-slate-400">Add:</span>
-                                    {!includeDiscount && (
-                                      <button
-                                        type="button"
-                                        id="btn-add-invoice-discount"
-                                        onClick={() => {
-                                          setIncludeDiscount(true);
-                                          if (!discountValue || discountValue === "0") setDiscountValue("");
-                                        }}
-                                        className="text-slate-600 hover:text-blue-600 px-1 py-0.5 rounded cursor-pointer transition-colors font-medium flex items-center gap-0.5"
-                                      >
-                                        <Plus className="w-2.5 h-2.5" /> Discount
-                                      </button>
-                                    )}
-                                    {!includeVat && (
-                                      <button
-                                        type="button"
-                                        id="btn-add-invoice-vat"
-                                        onClick={() => {
-                                          setIncludeVat(true);
-                                          if (!vatPercent || vatPercent === "0") setVatPercent("5");
-                                        }}
-                                        className="text-slate-600 hover:text-blue-600 px-1 py-0.5 rounded cursor-pointer transition-colors font-medium flex items-center gap-0.5"
-                                      >
-                                        <Plus className="w-2.5 h-2.5" /> VAT
-                                      </button>
-                                    )}
-                                    {!includeTransport && (
-                                      <button
-                                        type="button"
-                                        id="btn-add-invoice-transport"
-                                        onClick={() => {
-                                          setIncludeTransport(true);
-                                          if (!transportationFee || transportationFee === "0") setTransportationFee("");
-                                        }}
-                                        className="text-slate-600 hover:text-blue-600 px-1 py-0.5 rounded cursor-pointer transition-colors font-medium flex items-center gap-0.5"
-                                      >
-                                        <Plus className="w-2.5 h-2.5" /> Transport
-                                      </button>
-                                    )}
-                                  </div>
-                                )}
-
-                                {/* Grand Total / Net Payable */}
-                                <div className={`flex items-center justify-between px-2.5 py-1.5 bg-slate-50/30 print:bg-slate-50/20 text-[8pt] ${hasAdjustments ? 'border-t border-slate-200 print:border-slate-300' : ''}`}>
-                                  <span className="font-extrabold uppercase tracking-wider text-slate-800 print:text-black">
-                                    {hasPrintAdjustments ? "NET PAYABLE" : "TOTAL"}
-                                  </span>
-                                  <span className="font-mono font-black text-slate-950 text-[9pt]">
-                                    {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                  </span>
-                                </div>
-                              </div>
-                            ) : (
-                              /* Quotation Mode: Pure simplicity */
-                              <div className="flex items-center justify-between px-3 py-2 bg-slate-50/30 print:bg-slate-50/20 text-[8pt] h-full min-h-[36px]">
-                                <span className="font-extrabold uppercase tracking-wider text-slate-800 print:text-black">
-                                  TOTAL
-                                </span>
-                                <span className="font-mono font-black text-slate-950 text-[9pt]">
-                                  {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                </span>
-                              </div>
+                                </td>
+                              </tr>
                             )}
-                          </td>
-                        </tr>
+                            <tr className="align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
+                                      <span>VAT</span>
+                                      <div className="flex items-center gap-0.5 no-print print:hidden shrink-0">
+                                        <input
+                                          type="text"
+                                          value={vatPercent}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
+                                              setVatPercent(val);
+                                            }
+                                          }}
+                                          className="h-[18px] w-8 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
+                                        />
+                                        <span className="text-[7pt] font-bold text-slate-700">%</span>
+                                      </div>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
+                                    </div>
+                                  </div>
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
+                                    {vatAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="align-stretch">
+                              <td className="w-1/2 p-0 border-b border-slate-300 print:border-black align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
+                                    <div className="flex items-center justify-end gap-1 w-full pl-1">
+                                      <span>TRANS.</span>
+                                      <div className="flex items-center no-print print:hidden shrink-0">
+                                        <input
+                                          type="text"
+                                          value={transportationFee}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === "" || /^-?\d*[.,]?\d*$/.test(val)) {
+                                              setTransportationFee(val);
+                                            }
+                                          }}
+                                          placeholder="0"
+                                          className="h-[18px] w-12 text-center border border-slate-300 rounded font-mono text-[7pt] bg-white text-slate-800 px-0.5"
+                                        />
+                                      </div>
+                                      <span className="font-bold text-[8pt] shrink-0">=</span>
+                                    </div>
+                                  </div>
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-semibold flex items-center justify-end px-1.5 py-0.5 leading-tight">
+                                    {parsedTransportationFee.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="align-stretch">
+                              <td className="w-1/2 p-0 align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
+                                  <div className="total-lbl bg-indigo-50/40 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[8pt] font-black uppercase flex items-center justify-end gap-1 tracking-wider text-indigo-950">
+                                    <span>GRAND TOTAL</span>
+                                    <span className="font-black text-[8.5pt] shrink-0">=</span>
+                                  </div>
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[9.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight text-indigo-950">
+                                    {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </>
+                        ) : (
+                          <>
+                            <tr className="align-stretch">
+                              <td className="amount-words-container w-1/2 border-r border-slate-300 print:border-black p-1 bg-slate-50/50 text-left align-middle">
+                                <span className="font-extrabold text-[6.5pt] text-slate-700 uppercase tracking-wider block mb-0.5">
+                                  Amount in Words:
+                                </span>
+                                <span className="text-[7.5pt] font-mono italic text-black font-black uppercase leading-tight">
+                                  {numberToWords(calculatedGrandTotal, currency || "Taka")}
+                                </span>
+                              </td>
+                              <td className="w-1/2 p-0 align-stretch">
+                                <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
+                                  <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end gap-1">
+                                    <span>TOTAL</span>
+                                    <span className="font-bold text-[8pt] shrink-0">=</span>
+                                  </div>
+                                  <div className="total-val flex-grow text-right pr-2.5 text-[8.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight min-h-[22px]">
+                                    {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </>
+                        )}
                       </tbody>
                     </table>
                   )}
