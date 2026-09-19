@@ -107,7 +107,7 @@ input[type="number"] {
 }
 
 .meta-left-col {
-  border-right: 1.5px solid #cbd5e1;
+  border-right: 1px solid #e2e8f0;
   padding-right: 14px;
 }
 
@@ -116,10 +116,10 @@ input[type="number"] {
 }
 
 .meta-info-row {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  width: 100% !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
 }
 
 /* Print Styling Configuration */
@@ -418,7 +418,7 @@ input[type="number"] {
   }
 
   .meta-left-col {
-    border-right: 1.5px solid #000000 !important;
+    border-right: 1px solid #cbd5e1 !important;
     padding-right: 16px !important;
   }
 
@@ -430,7 +430,14 @@ input[type="number"] {
     color: #000000 !important;
   }
 
-  .meta-info-row {
+  .meta-info-row.print\:hidden,
+  .meta-info-row.meta-row-empty,
+  .meta-col-empty,
+  .meta-box-empty {
+    display: none !important;
+  }
+
+  .meta-info-row:not(.meta-row-empty):not(.print\:hidden) {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -442,7 +449,7 @@ input[type="number"] {
     align-items: center !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
-    border-bottom: 1px dotted #000000 !important;
+    border-bottom: 1px dotted #475569 !important;
     min-height: 22px !important;
   }
 
@@ -940,7 +947,7 @@ input[type="number"] {
 }
 
 .is-generating-pdf .meta-left-col {
-  border-right: 1.5px solid #000000 !important;
+  border-right: 1px solid #cbd5e1 !important;
   padding-right: 16px !important;
 }
 
@@ -952,7 +959,14 @@ input[type="number"] {
   color: #000000 !important;
 }
 
-.is-generating-pdf .meta-info-row {
+.is-generating-pdf .meta-info-row.print\:hidden,
+.is-generating-pdf .meta-info-row.meta-row-empty,
+.is-generating-pdf .meta-col-empty,
+.is-generating-pdf .meta-box-empty {
+  display: none !important;
+}
+
+.is-generating-pdf .meta-info-row:not(.meta-row-empty):not(.print\:hidden) {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -964,7 +978,7 @@ input[type="number"] {
   align-items: center !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
-  border-bottom: 1px dotted #000000 !important;
+  border-bottom: 1px dotted #475569 !important;
   min-height: 22px !important;
 }
 
