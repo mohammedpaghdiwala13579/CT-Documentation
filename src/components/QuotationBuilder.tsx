@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor, Share2 } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
@@ -214,6 +214,7 @@ export default function QuotationBuilder() {
     return "0";
   });
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isSharingPDF, setIsSharingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
 
   // In-app storage & Auto-Save states
@@ -2672,6 +2673,186 @@ export default function QuotationBuilder() {
     }
   };
 
+  const downloadBlobFile = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
+  const handleShareCurrentPagePDF = async () => {
+    const container = document.querySelector(".quotation-container");
+    if (!container) return;
+    
+    const element = document.querySelector(".sheet") as HTMLElement | null;
+    if (!element) return;
+    
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    syncAllEditableFields();
+    
+    setIsSharingPDF(true);
+    container.classList.add("is-generating-pdf");
+    document.body.classList.add("is-generating-pdf");
+
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = function (el: Element, pseudoElt?: string | null) {
+      const style = originalGetComputedStyle.call(this, el, pseudoElt);
+      return new Proxy(style, {
+        get(target, prop, receiver) {
+          if (prop === 'getPropertyValue') {
+            return function(propertyName: string) {
+              const val = target.getPropertyValue(propertyName);
+              return typeof val === 'string' ? replaceOklchInCss(val) : val;
+            };
+          }
+          const val = Reflect.get(target, prop, receiver);
+          if (typeof val === 'string') {
+            return replaceOklchInCss(val);
+          }
+          if (typeof val === 'function') {
+            return val.bind(target);
+          }
+          return val;
+        }
+      }) as any;
+    };
+    
+    const sheets = Array.from(document.styleSheets);
+    let concatenatedCss = "";
+    const disabledSheets: { sheet: CSSStyleSheet; wasDisabled: boolean }[] = [];
+
+    for (const sheet of sheets) {
+      try {
+        const rules = Array.from(sheet.cssRules || []);
+        const sheetCss = rules.map(rule => rule.cssText).join("\n");
+        concatenatedCss += sheetCss + "\n";
+        
+        disabledSheets.push({ sheet, wasDisabled: sheet.disabled });
+        sheet.disabled = true;
+      } catch (e) {
+        console.warn("Could not read stylesheet rules (possibly cross-origin):", e);
+      }
+    }
+
+    const translatedCss = replaceOklchInCss(concatenatedCss);
+    const tempStyle = document.createElement("style");
+    tempStyle.id = "temp-pdf-colors";
+    tempStyle.textContent = translatedCss;
+    document.head.appendChild(tempStyle);
+
+    const elementsWithInlineStyle = element.querySelectorAll("[style]");
+    const inlineStylesBackup = new Map<HTMLElement, string>();
+    
+    const rootStyle = element.getAttribute("style");
+    if (rootStyle && rootStyle.includes("oklch")) {
+      inlineStylesBackup.set(element, rootStyle);
+      element.setAttribute("style", replaceOklchInCss(rootStyle));
+    }
+    
+    elementsWithInlineStyle.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      const styleAttr = htmlEl.getAttribute("style");
+      if (styleAttr && styleAttr.includes("oklch")) {
+        inlineStylesBackup.set(htmlEl, styleAttr);
+        htmlEl.setAttribute("style", replaceOklchInCss(styleAttr));
+      }
+    });
+
+    const filePrefix = docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation";
+    const identifier = docType === "challan" ? (challanNo || "NEW") : docType === "invoice" ? (invoiceNo || "NEW") : (requisitionNo || "NEW");
+    const filename = `${filePrefix}_${identifier.replace(/[\/\\?%*:|"<>\s]/g, "_")}.pdf`;
+    
+    const opt = {
+      margin:       [4, 4, 4, 4] as [number, number, number, number],
+      filename:     filename,
+      image:        { type: "jpeg" as const, quality: 0.98 },
+      html2canvas:  { 
+        scale: 2.5,
+        useCORS: true,
+        logging: false,
+        scrollY: 0,
+        scrollX: 0
+      },
+      jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" as const }
+    };
+    
+    const cleanUpAfterPdf = () => {
+      window.getComputedStyle = originalGetComputedStyle;
+
+      disabledSheets.forEach(({ sheet, wasDisabled }) => {
+        sheet.disabled = wasDisabled;
+      });
+      
+      const addedStyle = document.getElementById("temp-pdf-colors");
+      if (addedStyle) {
+        addedStyle.remove();
+      }
+      
+      inlineStylesBackup.forEach((originalStyle, htmlEl) => {
+        htmlEl.setAttribute("style", originalStyle);
+      });
+      
+      container.classList.remove("is-generating-pdf");
+      document.body.classList.remove("is-generating-pdf");
+      setIsSharingPDF(false);
+    };
+
+    try {
+      // @ts-ignore
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf: any = (html2pdfModule as any).default || html2pdfModule;
+      
+      const pdfBlob: Blob = await html2pdf()
+        .from(element)
+        .set(opt)
+        .output('blob');
+
+      cleanUpAfterPdf();
+
+      if (!pdfBlob) {
+        showToast("Failed to generate PDF for share.", "info");
+        return;
+      }
+
+      const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
+
+      // User instruction: "in this i want to share pdf of the current page only,no text or anything."
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.share === "function" &&
+        navigator.canShare &&
+        navigator.canShare({ files: [pdfFile] })
+      ) {
+        try {
+          await navigator.share({
+            files: [pdfFile]
+          });
+          showToast("PDF shared successfully!", "success");
+        } catch (shareErr: any) {
+          if (shareErr.name === "AbortError") {
+            return;
+          }
+          console.warn("navigator.share encountered an error, falling back to download:", shareErr);
+          downloadBlobFile(pdfBlob, filename);
+          showToast("PDF downloaded to your device for sharing.", "info");
+        }
+      } else {
+        downloadBlobFile(pdfBlob, filename);
+        showToast("Web Share not supported in this browser. PDF downloaded.", "info");
+      }
+    } catch (err: any) {
+      console.error("PDF module share error:", err);
+      cleanUpAfterPdf();
+      showToast("Error preparing PDF for sharing.", "info");
+    }
+  };
+
   const handleDownloadExcel = async () => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
@@ -2845,6 +3026,8 @@ export default function QuotationBuilder() {
             lastSavedTime={lastSavedTime}
             onSaveDoc={() => saveCurrentDocToApp()}
             onPrint={handlePrint}
+            onSharePDF={handleShareCurrentPagePDF}
+            isSharingPDF={isSharingPDF}
             onDownloadPDF={handleDownloadPDF}
             isGeneratingPDF={isGeneratingPDF}
             onDownloadExcel={handleDownloadExcel}
@@ -4267,6 +4450,41 @@ export default function QuotationBuilder() {
             <CheckCheck className="h-3.5 w-3.5" />
           </div>
           <span>{toastMessage.text}</span>
+        </div>
+      )}
+
+      {/* Floating Share Button at the Bottom Left of the Page */}
+      {activeView === "editor" && (
+        <div 
+          id="floating-share-pdf-container"
+          className={`fixed bottom-6 z-40 no-print print:hidden transition-all duration-300 ${
+            isSidebarCollapsed ? "left-6 lg:left-24" : "left-6 lg:left-72"
+          }`}
+        >
+          <button
+            type="button"
+            id="btn-share-pdf-bottom-left"
+            onClick={handleShareCurrentPagePDF}
+            disabled={isSharingPDF || isGeneratingPDF}
+            className="group relative flex items-center gap-3 px-4 py-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl shadow-[0_12px_30px_-6px_rgba(15,23,42,0.4)] hover:shadow-[0_16px_36px_-6px_rgba(15,23,42,0.5)] border border-slate-700/80 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:pointer-events-none select-none"
+            title="Share PDF of current page only"
+          >
+            <div className="h-8 w-8 rounded-xl bg-blue-600 group-hover:bg-blue-500 flex items-center justify-center text-white shrink-0 shadow-xs transition-colors">
+              {isSharingPDF ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Share2 className="h-4 w-4" />
+              )}
+            </div>
+            <div className="flex flex-col text-left pr-1">
+              <span className="text-xs font-black tracking-wide leading-tight text-white flex items-center gap-1.5">
+                <span>{isSharingPDF ? "Preparing PDF..." : "Share PDF"}</span>
+              </span>
+              <span className="text-[10.5px] text-slate-400 font-medium leading-none mt-1">
+                Current page only
+              </span>
+            </div>
+          </button>
         </div>
       )}
     </div>
