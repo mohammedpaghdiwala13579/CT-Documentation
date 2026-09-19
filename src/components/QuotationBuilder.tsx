@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor, Share2 } from "lucide-react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor, Share2, ExternalLink, MessageCircle, Mail } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
@@ -216,6 +216,13 @@ export default function QuotationBuilder() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isSharingPDF, setIsSharingPDF] = useState(false);
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
+  const [shareModalData, setShareModalData] = useState<{
+    isOpen: boolean;
+    blob: Blob | null;
+    file: File | null;
+    filename: string;
+    blobUrl: string | null;
+  } | null>(null);
 
   // In-app storage & Auto-Save states
   const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
@@ -2808,48 +2815,140 @@ export default function QuotationBuilder() {
       const html2pdfModule = await import("html2pdf.js");
       const html2pdf: any = (html2pdfModule as any).default || html2pdfModule;
       
-      const pdfBlob: Blob = await html2pdf()
-        .from(element)
-        .set(opt)
-        .output('blob');
+      const worker = html2pdf().from(element).set(opt);
 
-      cleanUpAfterPdf();
+      worker
+        .toPdf()
+        .get("pdf")
+        .then(async (pdf: any) => {
+          try {
+            // Prune to strictly 1 page (the current page only, as requested)
+            while (pdf.internal.getNumberOfPages() > 1) {
+              pdf.deletePage(2);
+            }
+          } catch (pruneErr) {
+            console.warn("Could not prune pages:", pruneErr);
+          }
 
-      if (!pdfBlob) {
-        showToast("Failed to generate PDF for share.", "info");
-        return;
-      }
+          let pdfBlob: Blob | null = null;
+          try {
+            pdfBlob = pdf.output("blob");
+          } catch (e1) {
+            try {
+              const buffer = pdf.output("arraybuffer");
+              pdfBlob = new Blob([buffer], { type: "application/pdf" });
+            } catch (e2) {
+              console.error("Error creating blob from pdf:", e2);
+            }
+          }
 
-      const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
+          cleanUpAfterPdf();
 
-      // User instruction: "in this i want to share pdf of the current page only,no text or anything."
-      if (
-        typeof navigator !== "undefined" &&
-        typeof navigator.share === "function" &&
-        navigator.canShare &&
-        navigator.canShare({ files: [pdfFile] })
-      ) {
-        try {
-          await navigator.share({
-            files: [pdfFile]
-          });
-          showToast("PDF shared successfully!", "success");
-        } catch (shareErr: any) {
-          if (shareErr.name === "AbortError") {
+          if (!pdfBlob || pdfBlob.size === 0) {
+            showToast("Failed to generate PDF for share.", "info");
             return;
           }
-          console.warn("navigator.share encountered an error, falling back to download:", shareErr);
+
+          const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
+          const blobUrl = URL.createObjectURL(pdfBlob);
+
+          // User instruction: "in this i want to share pdf of the current page only,no text or anything."
+          if (
+            typeof navigator !== "undefined" &&
+            typeof navigator.share === "function" &&
+            typeof navigator.canShare === "function" &&
+            navigator.canShare({ files: [pdfFile] })
+          ) {
+            try {
+              await navigator.share({
+                files: [pdfFile]
+              });
+              showToast("PDF shared successfully!", "success");
+              return;
+            } catch (shareErr: any) {
+              if (shareErr.name === "AbortError") {
+                // User intentionally cancelled the native share sheet
+                return;
+              }
+              console.warn("navigator.share encountered an error, falling back to download & share modal:", shareErr);
+            }
+          }
+
+          // Fallback when Web Share is unsupported, rejected, or running in restricted iframe:
+          // 1. Immediately download the single-page PDF to guarantee the user gets their file
           downloadBlobFile(pdfBlob, filename);
-          showToast("PDF downloaded to your device for sharing.", "info");
-        }
-      } else {
-        downloadBlobFile(pdfBlob, filename);
-        showToast("Web Share not supported in this browser. PDF downloaded.", "info");
-      }
+
+          // 2. Open the dedicated Share Dialog with one-click sharing options
+          setShareModalData({
+            isOpen: true,
+            blob: pdfBlob,
+            file: pdfFile,
+            filename: filename,
+            blobUrl: blobUrl
+          });
+
+          showToast("Single-page PDF downloaded & ready to share.", "success");
+        })
+        .catch((err: any) => {
+          console.error("PDF generation worker error:", err);
+          cleanUpAfterPdf();
+          showToast("Error generating PDF for sharing.", "info");
+        });
     } catch (err: any) {
       console.error("PDF module share error:", err);
       cleanUpAfterPdf();
       showToast("Error preparing PDF for sharing.", "info");
+    }
+  };
+
+  const handleNativeShareFromModal = async () => {
+    if (!shareModalData?.file) return;
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [shareModalData.file] })
+    ) {
+      try {
+        await navigator.share({
+          files: [shareModalData.file]
+        });
+        showToast("PDF shared successfully!", "success");
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          showToast("System share not allowed in this context.", "info");
+        }
+      }
+    } else {
+      showToast("Web Share API is not supported by your browser.", "info");
+    }
+  };
+
+  const handleOpenPdfInBrowser = () => {
+    if (shareModalData?.blobUrl) {
+      window.open(shareModalData.blobUrl, "_blank");
+    }
+  };
+
+  const handleShareOnWhatsApp = () => {
+    const filePrefix = docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation";
+    const identifier = docType === "challan" ? (challanNo || "NEW") : docType === "invoice" ? (invoiceNo || "NEW") : (requisitionNo || "NEW");
+    const text = encodeURIComponent(`Please find attached ${filePrefix} ${identifier} (single-page PDF document).`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+  };
+
+  const handleShareViaEmail = () => {
+    const filePrefix = docType === "challan" ? "Challan" : docType === "invoice" ? "Invoice" : "Quotation";
+    const identifier = docType === "challan" ? (challanNo || "NEW") : docType === "invoice" ? (invoiceNo || "NEW") : (requisitionNo || "NEW");
+    const subject = encodeURIComponent(`${filePrefix} ${identifier} - Comilla Traders`);
+    const body = encodeURIComponent(`Please find attached ${filePrefix} ${identifier} (${shareModalData?.filename || "document.pdf"}).`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+  };
+
+  const handleDownloadFromModal = () => {
+    if (shareModalData?.blob && shareModalData?.filename) {
+      downloadBlobFile(shareModalData.blob, shareModalData.filename);
+      showToast("PDF downloaded to your device.", "success");
     }
   };
 
@@ -3117,6 +3216,8 @@ export default function QuotationBuilder() {
               saveStatus={saveStatus}
               onOpenExcelModal={() => setIsExcelModalOpen(true)}
               onPrint={handlePrint}
+              onSharePDF={handleShareCurrentPagePDF}
+              isSharingPDF={isSharingPDF}
               onDownloadPDF={handleDownloadPDF}
               isGeneratingPDF={isGeneratingPDF}
               onDownloadExcel={handleDownloadExcel}
@@ -4450,6 +4551,149 @@ export default function QuotationBuilder() {
             <CheckCheck className="h-3.5 w-3.5" />
           </div>
           <span>{toastMessage.text}</span>
+        </div>
+      )}
+
+      {/* Share Document Modal */}
+      {shareModalData && shareModalData.isOpen && (
+        <div 
+          id="share-pdf-modal-backdrop"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setShareModalData(null)}
+        >
+          <div 
+            id="share-pdf-modal-container"
+            className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs">
+                  <Share2 className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
+                    Share Document PDF
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Current page only (Single-sheet A4)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="btn-close-share-modal"
+                onClick={() => setShareModalData(null)}
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Document Details Card */}
+            <div className="p-5 space-y-4">
+              <div className="flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <div className="h-10 w-10 rounded-lg bg-red-100 border border-red-200/80 flex items-center justify-center text-red-600 shrink-0">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-semibold text-slate-900 truncate">
+                    {shareModalData.filename}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200/60">
+                      ✓ 1 Page Only
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      Print-Optimized
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 gap-2.5">
+                {/* 1. System / Device Share */}
+                <button
+                  type="button"
+                  id="btn-modal-native-share"
+                  onClick={handleNativeShareFromModal}
+                  className="w-full h-11 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span>Share via Apps / System Share</span>
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {/* 2. Open / View in Browser */}
+                  <button
+                    type="button"
+                    id="btn-modal-open-pdf"
+                    onClick={handleOpenPdfInBrowser}
+                    className="h-10 px-3 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 border border-slate-300/90 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 text-slate-600" />
+                    <span>View PDF</span>
+                  </button>
+
+                  {/* 3. Re-download PDF */}
+                  <button
+                    type="button"
+                    id="btn-modal-download-pdf"
+                    onClick={handleDownloadFromModal}
+                    className="h-10 px-3 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 border border-slate-300/90 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="h-3.5 w-3.5 text-slate-600" />
+                    <span>Download</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {/* 4. WhatsApp */}
+                  <button
+                    type="button"
+                    id="btn-modal-whatsapp"
+                    onClick={handleShareOnWhatsApp}
+                    className="h-10 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>WhatsApp</span>
+                  </button>
+
+                  {/* 5. Email */}
+                  <button
+                    type="button"
+                    id="btn-modal-email"
+                    onClick={handleShareViaEmail}
+                    className="h-10 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200/80 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Mail className="h-3.5 w-3.5 text-indigo-600" />
+                    <span>Email</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 text-center">
+                <p className="text-[11px] text-slate-400">
+                  The PDF has also been saved to your device's downloads folder.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                id="btn-close-share-modal-footer"
+                onClick={() => setShareModalData(null)}
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
