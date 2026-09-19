@@ -5,8 +5,7 @@ import {
   Printer, 
   FolderKanban,
   Laptop,
-  FileSpreadsheet,
-  Share2
+  FileSpreadsheet
 } from "lucide-react";
 import { CompanyId } from "../types";
 
@@ -19,8 +18,6 @@ export interface ErpTopNavProps {
   lastSavedTime?: string | null;
   onSaveDoc: () => void;
   onPrint: () => void;
-  onSharePDF?: () => void;
-  isSharingPDF?: boolean;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
   onDownloadExcel?: () => void;
@@ -44,8 +41,6 @@ export default function ErpTopNav({
   lastSavedTime,
   onSaveDoc,
   onPrint,
-  onSharePDF,
-  isSharingPDF = false,
   onDownloadPDF,
   isGeneratingPDF = false,
   onDownloadExcel,
@@ -107,21 +102,6 @@ export default function ErpTopNav({
               >
                 <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
                 <span>{isGeneratingExcel ? "Exporting..." : "Excel"}</span>
-              </button>
-            )}
-
-            {/* Share PDF of Current Page */}
-            {onSharePDF && (
-              <button
-                type="button"
-                id="topnav-btn-share"
-                onClick={onSharePDF}
-                disabled={isSharingPDF}
-                className="h-8 px-2.5 bg-blue-50 hover:bg-blue-100 text-blue-800 hover:text-blue-900 border border-blue-300 rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
-                title="Share PDF of current page only"
-              >
-                <Share2 className="h-3.5 w-3.5 text-blue-700" />
-                <span>{isSharingPDF ? "Sharing..." : "Share"}</span>
               </button>
             )}
 

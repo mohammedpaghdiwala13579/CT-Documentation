@@ -6,9 +6,7 @@ import {
   Palette,
   X,
   Undo2,
-  Redo2,
-  Share2,
-  RefreshCw
+  Redo2
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
@@ -105,8 +103,6 @@ export interface ExcelRibbonToolbarProps {
   // Actions
   onOpenExcelModal: () => void;
   onPrint: () => void;
-  onSharePDF?: () => void;
-  isSharingPDF?: boolean;
   onDownloadPDF?: () => void;
   isGeneratingPDF?: boolean;
   onDownloadExcel?: () => void;
@@ -148,8 +144,6 @@ export default function ExcelRibbonToolbar({
   saveStatus,
   onOpenExcelModal,
   onPrint,
-  onSharePDF,
-  isSharingPDF,
   onDownloadPDF,
   isGeneratingPDF,
   onDownloadExcel,
@@ -339,25 +333,6 @@ export default function ExcelRibbonToolbar({
 
         {/* Right: Document Actions */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {/* Share PDF of Current Page */}
-          {onSharePDF && (
-            <button
-              type="button"
-              id="ribbon-btn-share-pdf"
-              onClick={onSharePDF}
-              disabled={isSharingPDF}
-              className="h-7 px-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-900 rounded-md border border-blue-200/90 shadow-2xs transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold disabled:opacity-50"
-              title="Share PDF of current page only"
-            >
-              {isSharingPDF ? (
-                <RefreshCw className="h-3.5 w-3.5 text-blue-600 animate-spin" />
-              ) : (
-                <Share2 className="h-3.5 w-3.5 text-blue-600" />
-              )}
-              <span>{isSharingPDF ? "Sharing..." : "Share PDF"}</span>
-            </button>
-          )}
-
           {/* New Sheet */}
           <button
             type="button"
