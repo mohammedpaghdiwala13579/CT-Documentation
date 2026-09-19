@@ -3055,10 +3055,10 @@ export default function QuotationBuilder() {
                       <div className={`meta-info-container w-full border border-slate-300 print:border-black rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden' : ''}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
-                        <div className={`meta-left-col col-span-7 space-y-3 sm:space-y-4 print:space-y-2 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
+                        <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-black ${!hasLeftMeta ? 'print:hidden' : ''} ${!hasRightMeta ? 'print:border-r-0 print:col-span-12 print:pr-0' : ''}`}>
                           {/* Messers */}
-                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasMessers ? 'print:hidden' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasMessers ? 'print:hidden' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                               <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Messers:</span>
                             </label>
@@ -3067,70 +3067,60 @@ export default function QuotationBuilder() {
                               syncId="messers"
                               onChange={(val) => setMessers(val)}
                               placeholder=""
-                              className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors break-words overflow-visible shrink-0"
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
                             />
                             <div
                               id="print-messers"
-                              className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-bold text-[6.8pt] text-black leading-tight break-words"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                             />
                           </div>
 
-                          {/* Vessel Name: Single row, full width */}
-                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasVessel ? 'print:hidden' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                          {/* Vessel Name: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasVessel ? 'print:hidden' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                               <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Vessel Name:</span>
                             </label>
-                            <textarea
-                              rows={1}
+                            <input
+                              type="text"
                               value={vesselName}
                               onChange={(e) => setVesselName(e.target.value)}
-                              onInput={(e) => {
-                                const target = e.currentTarget;
-                                target.style.height = 'auto';
-                                target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                              }}
                               placeholder=""
-                              className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                             />
                             <div
                               id="print-vessel"
-                              className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {vesselName.trim() || '\u00A0'}
                             </div>
                           </div>
 
-                          {/* Port / Berth: Single row, full width */}
-                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasPort ? 'print:hidden' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                          {/* Port / Berth: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPort ? 'print:hidden' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                               <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Port / Berth:</span>
                             </label>
-                            <textarea
-                              rows={1}
+                            <input
+                              type="text"
                               value={portBerth}
                               onChange={(e) => setPortBerth(e.target.value)}
-                              onInput={(e) => {
-                                const target = e.currentTarget;
-                                target.style.height = 'auto';
-                                target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                              }}
                               placeholder=""
-                              className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                             />
                             <div
                               id="print-port"
-                              className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {portBerth.trim() || '\u00A0'}
                             </div>
                           </div>
 
-                          {/* Address: Single row, full width */}
-                          <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasAddress ? 'print:hidden' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                          {/* Address: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasAddress ? 'print:hidden' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                               <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                               <span>Address:</span>
                             </label>
@@ -3139,63 +3129,58 @@ export default function QuotationBuilder() {
                               syncId="address"
                               onChange={(val) => setAddress(val)}
                               placeholder=""
-                              className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors break-words overflow-visible shrink-0"
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
                             />
                             <div
                               id="print-address"
-                              className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 text-[6.8pt] text-black leading-tight break-words"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                             />
                           </div>
                         </div>
 
                         {/* Right Column: References & Date */}
-                        <div className={`meta-right-col col-span-5 space-y-3 sm:space-y-4 print:space-y-2 pl-4 sm:pl-6 print:pl-4 ${!hasRightMeta ? 'print:hidden' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
+                        <div className={`meta-right-col col-span-5 space-y-2 sm:space-y-2.5 print:space-y-1.5 pl-4 sm:pl-6 print:pl-4 ${!hasRightMeta ? 'print:hidden' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
                           {/* Quotation format: ONLY Requisition No. with Date */}
                           {docType === "quotation" && (
-                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center gap-1.5 h-[18px] w-full min-w-0 print:hidden">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-[18px] min-h-[18px] max-h-[18px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors"
+                                    className="flex-1 min-w-0 h-full box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                   />
                                   <button
                                     type="button"
                                     onClick={triggerDatePicker}
-                                    className="h-[18px] w-[18px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
+                                    className="h-[22px] w-[22px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                                     title="Open Date Picker"
                                   >
                                     <Calendar className="h-2.5 w-2.5 text-indigo-600" />
@@ -3203,7 +3188,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3219,74 +3204,64 @@ export default function QuotationBuilder() {
 
                           {/* Invoice format: All single lines, no side-by-side fields */}
                           {docType === "invoice" && (
-                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasInvoiceNo ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasInvoiceNo ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Invoice No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={invoiceNo}
                                   onChange={(e) => setInvoiceNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-invoice-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {invoiceNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={challanNo}
                                   onChange={(e) => setChallanNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center gap-1.5 h-[18px] w-full min-w-0 print:hidden">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-[18px] min-h-[18px] max-h-[18px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors"
+                                    className="flex-1 min-w-0 h-full box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                   />
                                   <button
                                     type="button"
                                     onClick={triggerDatePicker}
-                                    className="h-[18px] w-[18px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
+                                    className="h-[22px] w-[22px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                                     title="Open Date Picker"
                                   >
                                     <Calendar className="h-2.5 w-2.5 text-indigo-600" />
@@ -3294,7 +3269,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3306,51 +3281,41 @@ export default function QuotationBuilder() {
                                 />
                               </div>
 
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasPoNumber ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPoNumber ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>PO Number:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={poNumber}
                                   onChange={(e) => setPoNumber(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-po-number"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {poNumber.trim() || '\u00A0'}
                                 </div>
@@ -3360,74 +3325,64 @@ export default function QuotationBuilder() {
 
                           {/* Challan format: All single lines, no side-by-side fields */}
                           {docType === "challan" && (
-                            <div className="space-y-3 sm:space-y-4 print:space-y-2">
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasChallanNo ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={challanNo}
                                   onChange={(e) => setChallanNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 ${!hasRequisition ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
-                                <textarea
-                                  rows={1}
+                                <input
+                                  type="text"
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
-                                  onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = 'auto';
-                                    target.style.height = `${Math.max(18, target.scrollHeight)}px`;
-                                  }}
                                   placeholder=""
-                                  className="print:hidden w-full min-h-[18px] h-auto box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors resize-none break-words overflow-hidden shrink-0"
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words whitespace-pre-wrap"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`min-h-[38px] sm:min-h-[42px] print:min-h-0 h-auto flex flex-col justify-between py-1 print:py-0.5 gap-1 print:gap-0.5 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
                                   <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center gap-1.5 h-[18px] w-full min-w-0 print:hidden">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-[18px] min-h-[18px] max-h-[18px] box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent py-0 leading-tight transition-colors"
+                                    className="flex-1 min-w-0 h-full box-border border-b border-dotted border-slate-300 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
                                   />
                                   <button
                                     type="button"
                                     onClick={triggerDatePicker}
-                                    className="h-[18px] w-[18px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
+                                    className="h-[22px] w-[22px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-700 transition-colors cursor-pointer flex items-center justify-center border border-slate-300 shadow-2xs"
                                     title="Open Date Picker"
                                   >
                                     <Calendar className="h-2.5 w-2.5 text-indigo-600" />
@@ -3435,7 +3390,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:block w-full min-h-0 border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>

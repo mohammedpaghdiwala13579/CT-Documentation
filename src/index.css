@@ -115,6 +115,13 @@ input[type="number"] {
   padding-left: 14px;
 }
 
+.meta-info-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
 /* Print Styling Configuration */
 @media print {
   /* Set standard A4 page size with consistent page margins so every page has identical bottom spacing */
@@ -423,8 +430,20 @@ input[type="number"] {
     color: #000000 !important;
   }
 
+  .meta-info-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
   .meta-info-container [id^="print-"] {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
     border-bottom: 1px dotted #000000 !important;
+    min-height: 22px !important;
   }
 
   .meta-info-container label {
@@ -826,6 +845,10 @@ input[type="number"] {
   display: block !important;
 }
 
+.is-generating-pdf .hidden.print\:flex {
+  display: flex !important;
+}
+
 .is-generating-pdf .hidden.print\:grid {
   display: grid !important;
 }
@@ -929,8 +952,20 @@ input[type="number"] {
   color: #000000 !important;
 }
 
+.is-generating-pdf .meta-info-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
 .is-generating-pdf .meta-info-container [id^="print-"] {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
   border-bottom: 1px dotted #000000 !important;
+  min-height: 22px !important;
 }
 
 .is-generating-pdf .meta-info-container label {
