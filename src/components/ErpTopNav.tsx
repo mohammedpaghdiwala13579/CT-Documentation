@@ -57,7 +57,7 @@ export default function ErpTopNav({
   return (
     <header
       id="erp-top-nav"
-      className="sticky top-0 z-30 h-14 min-h-[56px] bg-white border-b border-slate-200 px-4 flex items-center justify-between no-print print:hidden shadow-2xs"
+      className="sticky top-0 z-30 h-14 min-h-[56px] bg-white border-b border-slate-300 px-4 flex items-center justify-between no-print print:hidden shadow-2xs"
     >
       {/* Left: Mobile Menu Button + Breadcrumb + Business Switcher */}
       <div className="flex items-center gap-3 min-w-0">

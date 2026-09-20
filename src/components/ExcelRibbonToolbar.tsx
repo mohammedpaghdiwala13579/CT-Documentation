@@ -282,17 +282,17 @@ export default function ExcelRibbonToolbar({
     <div
       ref={toolbarRef}
       id="excel-ribbon-toolbar"
-      className="no-print w-full max-w-[210mm] bg-white text-slate-800 border border-slate-200 shadow-xs rounded-lg select-none font-sans text-xs px-2.5 py-1.5 mb-2 z-30 transition-all mx-auto"
+      className="no-print w-full max-w-[210mm] bg-white text-slate-800 border border-slate-300 shadow-xs rounded-lg select-none font-sans text-xs px-2.5 py-1.5 mb-2 z-30 transition-all mx-auto"
     >
       {/* ========================================================================= */}
       {/* ROW 1: DOCUMENT TYPE & ACTION BUTTONS                                     */}
       {/* ========================================================================= */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 mb-1.5 border-b border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1.5 mb-1.5 border-b border-slate-300">
         
         {/* Left: Document Types & Status */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Document Type Tabs */}
-          <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200">
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-300">
             {(["quotation", "challan", "invoice"] as const).map((type) => (
               <button
                 key={type}
