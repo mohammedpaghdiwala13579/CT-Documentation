@@ -2971,14 +2971,14 @@ export default function QuotationBuilder() {
                     </span>
                   </div>
 
-                  {/* Enlarged Business Header with Larger Logo and Lower Bottom Line */}
-                  <div className="business-header border-b border-slate-400 print:border-slate-600 pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
+                  {/* Enlarged Business Header without bottom border and with borderless logo */}
+                  <div className="business-header border-b-0 print:border-b-0 pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 rounded-full border border-slate-300 overflow-hidden bg-white flex items-center justify-center shadow-xs">
+                      <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 border-none rounded-none shadow-none bg-transparent flex items-center justify-center">
                         <img
                           src={currentCompany.logoUrl}
                           alt={`${currentCompany.name} Logo`}
-                          className="w-full h-full object-contain p-1"
+                          className="w-full h-full object-contain"
                         />
                       </div>
                       <div className="min-w-0 flex-1">

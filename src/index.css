@@ -287,8 +287,7 @@ input[type="number"] {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    border-bottom-width: 1.5px !important;
-    border-bottom-color: #475569 !important;
+    border-bottom: none !important;
     padding-bottom: 12px !important;
     margin-bottom: 16px !important;
     clear: both !important;
@@ -329,6 +328,10 @@ input[type="number"] {
     width: 82px !important;
     min-width: 82px !important;
     max-width: 82px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
