@@ -659,15 +659,13 @@ async function fetchImageBuffer(url: string): Promise<ArrayBuffer | null> {
   }
 }
 
-const THIN_BORDER: Partial<ExcelJS.Borders> = {
-  top: { style: "thin", color: { argb: "FF94A3B8" } },
-  bottom: { style: "thin", color: { argb: "FF94A3B8" } },
-  left: { style: "thin", color: { argb: "FF94A3B8" } },
-  right: { style: "thin", color: { argb: "FF94A3B8" } },
-};
+const BORDER_COLOR = "FF475569"; // Slate-600 crisp dark border matching web and print styles
 
-const DOTTED_BOTTOM_BORDER: Partial<ExcelJS.Borders> = {
-  bottom: { style: "dotted", color: { argb: "FF64748B" } },
+const THIN_BORDER: Partial<ExcelJS.Borders> = {
+  top: { style: "thin", color: { argb: BORDER_COLOR } },
+  bottom: { style: "thin", color: { argb: BORDER_COLOR } },
+  left: { style: "thin", color: { argb: BORDER_COLOR } },
+  right: { style: "thin", color: { argb: BORDER_COLOR } },
 };
 
 interface PreparedItem {
@@ -828,13 +826,15 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     if (challanNo && challanNo.trim()) rightLines.push({ label: "Challan No.:", value: challanNo.trim(), bold: true });
     rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
+    if (poNumber && poNumber.trim()) rightLines.push({ label: "PO Number:", value: poNumber.trim(), bold: true });
   } else {
-    // Quotation format: ONLY Requisition No. with Date
+    // Quotation format
+    if (quotationNo && quotationNo.trim()) rightLines.push({ label: "Quotation No.:", value: quotationNo.trim(), bold: true });
     if (requisitionNo && requisitionNo.trim()) rightLines.push({ label: "Requisition No.:", value: requisitionNo.trim(), bold: true });
     rightLines.push({ label: "Date:", value: dateVal || new Date().toLocaleDateString("en-GB"), bold: true });
   }
 
-  const maxMetaRows = Math.max(leftLines.length, rightLines.length, 3);
+  const maxMetaRows = Math.max(leftLines.length, rightLines.length, 1);
   const leftColEnd = isChallan ? 2 : 3;
   const rightColStart = leftColEnd + 1;
 
@@ -1102,53 +1102,22 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
       }
       ws.mergeCells(currentRow, rightColStart, currentRow, colCount);
 
-      // Apply dotted bottom underlines and box/compartment borders
-      const isTopRow = currentRow === metaStartRow;
-      const isBottomRow = currentRow === metaEndRow;
+      // Ensure Left and Right compartments across all rows are completely, solidly bordered
+      // In ExcelJS, assigning border & fill directly to the master cell applies the full border
+      // (top, bottom, left, right) to the entire merged block without slave cells clearing the left border.
+      leftCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF8FAFC" },
+      };
+      leftCell.border = THIN_BORDER;
 
-      for (let c = 1; c <= colCount; c++) {
-        const cell = ws.getCell(currentRow, c);
-        
-        // Subtle clean background matching PDF/web metadata table
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFF8FAFC" },
-        };
-
-        const borderDef: Partial<ExcelJS.Borders> = {};
-
-        // Outer Top & Bottom Borders of the Metadata Table
-        if (isTopRow) {
-          borderDef.top = { style: "thin", color: { argb: "FF94A3B8" } };
-        }
-        if (isBottomRow) {
-          borderDef.bottom = { style: "thin", color: { argb: "FF94A3B8" } };
-        } else {
-          // Inner rows keep dotted bottom divider if content exists
-          const hasDotted = c <= leftColEnd ? !!lItem : !!rItem;
-          if (hasDotted) {
-            borderDef.bottom = { style: "dotted", color: { argb: "FF94A3B8" } };
-          }
-        }
-
-        // Outer Left Border
-        if (c === 1) {
-          borderDef.left = { style: "thin", color: { argb: "FF94A3B8" } };
-        }
-
-        // Middle Divider Border between Left and Right compartments
-        if (c === leftColEnd) {
-          borderDef.right = { style: "thin", color: { argb: "FF94A3B8" } };
-        }
-
-        // Outer Right Border
-        if (c === colCount) {
-          borderDef.right = { style: "thin", color: { argb: "FF94A3B8" } };
-        }
-
-        cell.border = borderDef;
-      }
+      rightCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF8FAFC" },
+      };
+      rightCell.border = THIN_BORDER;
 
       currentRow++;
     }
@@ -1174,18 +1143,20 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
     const headerRow = ws.addRow(headerValues);
     headerRow.height = Math.max(TABLE_HEADER_HEIGHT, 18);
-    headerRow.eachCell((cell, colNumber) => {
-      cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF000000" } };
+    for (let c = 1; c <= colCount; c++) {
+      const cell = headerRow.getCell(c);
+      cell.font = { name: "Arial", size: 8.5, bold: true, color: { argb: "FF0F172A" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
       cell.border = THIN_BORDER;
 
-      if (colNumber === 1 || colNumber === 3 || colNumber === 4) {
+      if (c === 1 || c === 3 || (!isChallan && c === 4)) {
         cell.alignment = { horizontal: "center", vertical: "middle" };
-      } else if (colNumber === 2) {
+      } else if (c === 2 || (isChallan && c === 4)) {
         cell.alignment = { horizontal: "left", vertical: "middle" };
       } else {
         cell.alignment = { horizontal: "right", vertical: "middle" };
       }
-    });
+    }
     currentRow++;
 
     // =========================================================================
@@ -1242,7 +1213,8 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
 
       const vAlign = "middle";
 
-      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      for (let colNumber = 1; colNumber <= colCount; colNumber++) {
+        const cell = row.getCell(colNumber);
         cell.border = THIN_BORDER;
 
         if (colNumber === 1) {
@@ -1272,7 +1244,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
             cell.numFmt = "#,##0.00";
           }
         }
-      });
+      }
 
       currentRow++;
     });
@@ -1366,16 +1338,16 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
           labelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
           valCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
           labelCell.border = {
-            top: { style: "thin", color: { argb: "FF94A3B8" } },
-            bottom: { style: "double", color: { argb: "FF94A3B8" } },
-            left: { style: "thin", color: { argb: "FF94A3B8" } },
-            right: { style: "thin", color: { argb: "FF94A3B8" } },
+            top: { style: "thin", color: { argb: BORDER_COLOR } },
+            bottom: { style: "double", color: { argb: BORDER_COLOR } },
+            left: { style: "thin", color: { argb: BORDER_COLOR } },
+            right: { style: "thin", color: { argb: BORDER_COLOR } },
           };
           valCell.border = {
-            top: { style: "thin", color: { argb: "FF94A3B8" } },
-            bottom: { style: "double", color: { argb: "FF94A3B8" } },
-            left: { style: "thin", color: { argb: "FF94A3B8" } },
-            right: { style: "thin", color: { argb: "FF94A3B8" } },
+            top: { style: "thin", color: { argb: BORDER_COLOR } },
+            bottom: { style: "double", color: { argb: BORDER_COLOR } },
+            left: { style: "thin", color: { argb: BORDER_COLOR } },
+            right: { style: "thin", color: { argb: BORDER_COLOR } },
           };
         } else {
           labelCell.border = THIN_BORDER;
@@ -1395,14 +1367,12 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     // Row 1: "For [Company Name]" above Authorized Signature on the right
     const forCompRow = ws.addRow([]);
     forCompRow.height = 12.5;
-    if (!isChallan) {
-      const rightSigColStart = isChallan ? "C" : "E";
-      ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
-      const forCompCell = ws.getCell(`${rightSigColStart}${currentRow}`);
-      forCompCell.value = `For ${currentCompany.name}`;
-      forCompCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-      forCompCell.alignment = { horizontal: "center", vertical: "middle" };
-    }
+    const rightSigColStart = isChallan ? "C" : "E";
+    ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
+    const forCompCell = ws.getCell(`${rightSigColStart}${currentRow}`);
+    forCompCell.value = `For ${currentCompany.name}`;
+    forCompCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
+    forCompCell.alignment = { horizontal: "center", vertical: "middle" };
     currentRow++;
 
     // Rows 2, 3, 4: Clear Stamp and Pen Signature Space (3 rows of 13pt = 39pt)
@@ -1414,7 +1384,7 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     }
 
     // Embed Stamp Image for Comilla Traders centered perfectly between "For [Company]" and "Authorized Signature"
-    if (isComilla && stampImageId !== null && !isChallan) {
+    if (isComilla && stampImageId !== null) {
       // NOTE: ExcelJS has an internal bug when passing fractional `col` in `tl: { col, row }`:
       // it calculates `nativeColOff = (col - Math.floor(col)) * (width * 10000)`, under-scaling EMUs by ~10x
       // (which leaves the image stuck on the far left).
@@ -1461,22 +1431,19 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     recCell.value = "Receiver's Signature";
     recCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
     recCell.alignment = { horizontal: "center", vertical: "middle" };
-    ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
-    ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
+    ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
+    ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
 
     // Right Box: Authorized Signature (Cols E-F, or C-D for challan)
-    if (!isChallan) {
-      const rightSigColStart = isChallan ? "C" : "E";
-      ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
-      const authCell = ws.getCell(`${rightSigColStart}${currentRow}`);
-      authCell.value = "Authorized Signature";
-      authCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-      authCell.alignment = { horizontal: "center", vertical: "middle" };
+    ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
+    const authCell = ws.getCell(`${rightSigColStart}${currentRow}`);
+    authCell.value = "Authorized Signature";
+    authCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
+    authCell.alignment = { horizontal: "center", vertical: "middle" };
 
-      const startColNum = isChallan ? 3 : 5;
-      for (let c = startColNum; c <= colCount; c++) {
-        ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: "FF94A3B8" } } };
-      }
+    const startColNum = isChallan ? 3 : 5;
+    for (let c = startColNum; c <= colCount; c++) {
+      ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
     }
     currentRow++;
 
