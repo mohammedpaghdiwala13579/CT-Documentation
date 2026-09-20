@@ -3071,7 +3071,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-messers"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                             />
                           </div>
@@ -3091,7 +3091,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-vessel"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {vesselName.trim() || '\u00A0'}
                             </div>
@@ -3112,7 +3112,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-port"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                             >
                               {portBerth.trim() || '\u00A0'}
                             </div>
@@ -3133,7 +3133,7 @@ export default function QuotationBuilder() {
                             />
                             <div
                               id="print-address"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                               dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                             />
                           </div>
@@ -3158,7 +3158,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3188,7 +3188,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3219,7 +3219,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-invoice-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {invoiceNo.trim() || '\u00A0'}
                                 </div>
@@ -3239,7 +3239,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
@@ -3269,7 +3269,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3295,7 +3295,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3315,7 +3315,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-po-number"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {poNumber.trim() || '\u00A0'}
                                 </div>
@@ -3340,7 +3340,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
@@ -3360,7 +3360,7 @@ export default function QuotationBuilder() {
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
@@ -3390,7 +3390,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3941,7 +3941,7 @@ export default function QuotationBuilder() {
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
-                                      <span>TRANS.</span>
+                                      <span>Transportation</span>
                                       <div className="flex items-center no-print print:hidden shrink-0">
                                         <input
                                           type="text"
@@ -3969,7 +3969,7 @@ export default function QuotationBuilder() {
                               <td className="w-1/2 p-0 align-stretch">
                                 <div className="flex flex-row items-stretch h-full min-h-[22px] w-full">
                                   <div className="total-lbl bg-indigo-50/40 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[8pt] font-black uppercase flex items-center justify-end gap-1 tracking-wider text-indigo-950">
-                                    <span>GRAND TOTAL</span>
+                                    <span>Net Payable</span>
                                     <span className="font-black text-[8.5pt] shrink-0">=</span>
                                   </div>
                                   <div className="total-val flex-grow text-right pr-2.5 text-[9.5pt] font-mono font-black flex items-center justify-end px-1.5 py-0.5 leading-tight text-indigo-950">

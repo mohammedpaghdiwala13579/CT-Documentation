@@ -452,7 +452,7 @@ input[type="number"] {
     align-items: center !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
-    border-bottom: 1px dotted #475569 !important;
+    border-bottom: none !important;
     min-height: 22px !important;
   }
 
@@ -508,7 +508,7 @@ input[type="number"] {
     padding-top: 2px !important;
     padding-bottom: 2px !important;
     margin-bottom: 0 !important;
-    border-bottom: 1px dotted #475569 !important;
+    border-bottom: none !important;
     font-size: 6.8pt !important;
     line-height: 1.25 !important;
     word-break: break-word !important;
@@ -981,7 +981,7 @@ input[type="number"] {
   align-items: center !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
-  border-bottom: 1px dotted #475569 !important;
+  border-bottom: none !important;
   min-height: 22px !important;
 }
 
@@ -1034,7 +1034,7 @@ input[type="number"] {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
   margin-bottom: 0 !important;
-  border-bottom: 1px dotted #475569 !important;
+  border-bottom: none !important;
   font-size: 6.8pt !important;
   line-height: 1.25 !important;
   word-break: break-word !important;
