@@ -1364,61 +1364,52 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     sigGap.height = 16;
     currentRow++;
 
-    // Row 1: "For [Company Name]" above Authorized Signature on the right
-    const forCompRow = ws.addRow([]);
-    forCompRow.height = 12.5;
-    const rightSigColStart = isChallan ? "C" : "E";
-    ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
-    const forCompCell = ws.getCell(`${rightSigColStart}${currentRow}`);
-    forCompCell.value = `For ${currentCompany.name}`;
-    forCompCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-    forCompCell.alignment = { horizontal: "center", vertical: "middle" };
-    currentRow++;
-
-    // Rows 2, 3, 4: Clear Stamp and Pen Signature Space (3 rows of 13pt = 39pt)
-    const stampStartRowIndex = currentRow;
-    for (let s = 0; s < 3; s++) {
-      const spacer = ws.addRow([]);
-      spacer.height = 13;
+    // Row 1: "For [Company Name]" above Authorized Signature on the right (quotation & invoice only)
+    if (!isChallan) {
+      const forCompRow = ws.addRow([]);
+      forCompRow.height = 12.5;
+      const rightSigColStart = "E";
+      ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
+      const forCompCell = ws.getCell(`${rightSigColStart}${currentRow}`);
+      forCompCell.value = `For ${currentCompany.name}`;
+      forCompCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
+      forCompCell.alignment = { horizontal: "center", vertical: "middle" };
       currentRow++;
-    }
 
-    // Embed Stamp Image for Comilla Traders centered perfectly between "For [Company]" and "Authorized Signature"
-    if (isComilla && stampImageId !== null) {
-      // NOTE: ExcelJS has an internal bug when passing fractional `col` in `tl: { col, row }`:
-      // it calculates `nativeColOff = (col - Math.floor(col)) * (width * 10000)`, under-scaling EMUs by ~10x
-      // (which leaves the image stuck on the far left).
-      // By supplying OpenXML EMUs directly via nativeCol and nativeColOff (1 px = 9525 EMUs):
-      //
-      // In invoice/quotation:
-      // Signature box spans Column E (width 14, 110px = 1,047,750 EMUs) and Column F (width 16.5, 129px = 1,228,725 EMUs).
-      // Total box width = 2,276,475 EMUs (239px). Center = 1,138,238 EMUs.
-      // Stamp size = 76px x 76px (723,900 EMUs). Half width = 361,950 EMUs.
-      // Left offset from left edge of Col E = 1,138,238 - 361,950 = 776,288 EMUs (81.5px).
-      // Left margin in Col E = 776,288 EMUs; Right margin in Col F = 776,287 EMUs. Perfectly centered!
-      //
-      // For Challan (Cols C+D, total 2,238,375 EMUs, center 1,119,188 EMUs):
-      // Left offset = 1,119,188 - 361,950 = 757,238 EMUs from left edge of Col C (index 2).
-      const stampWidth = 88;
-      const stampHeight = 88;
-      const nativeCol = isChallan ? 2 : 4;
-      // Position slightly to the left from center
-      const nativeColOff = isChallan ? 600000 : 620000;
+      // Rows 2, 3, 4: Clear Stamp and Pen Signature Space (3 rows of 13pt = 39pt)
+      const stampStartRowIndex = currentRow;
+      for (let s = 0; s < 3; s++) {
+        const spacer = ws.addRow([]);
+        spacer.height = 13;
+        currentRow++;
+      }
 
-      // Vertical placement: positioned higher up into the signature gap
-      // Row `stampStartRowIndex - 2` is `forCompRow`, offset by 47,625 EMUs (~5px)
-      const nativeRow = stampStartRowIndex - 2;
-      const nativeRowOff = 47625;
+      // Embed Stamp Image for Comilla Traders centered perfectly between "For [Company]" and "Authorized Signature"
+      if (isComilla && stampImageId !== null) {
+        const stampWidth = 88;
+        const stampHeight = 88;
+        const nativeCol = 4;
+        const nativeColOff = 620000;
+        const nativeRow = stampStartRowIndex - 2;
+        const nativeRowOff = 47625;
 
-      ws.addImage(stampImageId, {
-        tl: {
-          nativeCol,
-          nativeColOff,
-          nativeRow,
-          nativeRowOff,
-        } as any,
-        ext: { width: stampWidth, height: stampHeight },
-      });
+        ws.addImage(stampImageId, {
+          tl: {
+            nativeCol,
+            nativeColOff,
+            nativeRow,
+            nativeRowOff,
+          } as any,
+          ext: { width: stampWidth, height: stampHeight },
+        });
+      }
+    } else {
+      // Challan format: Only receiving signature space (4 empty spacer rows for signing space)
+      for (let s = 0; s < 4; s++) {
+        const spacer = ws.addRow([]);
+        spacer.height = 13;
+        currentRow++;
+      }
     }
 
     // Row 5: Signature Lines & Headings
@@ -1434,16 +1425,19 @@ export async function generateExcelDocument(options: ExcelGeneratorOptions): Pro
     ws.getCell(`A${currentRow}`).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
     ws.getCell(`B${currentRow}`).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
 
-    // Right Box: Authorized Signature (Cols E-F, or C-D for challan)
-    ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
-    const authCell = ws.getCell(`${rightSigColStart}${currentRow}`);
-    authCell.value = "Authorized Signature";
-    authCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
-    authCell.alignment = { horizontal: "center", vertical: "middle" };
+    // Right Box: Authorized Signature (Cols E-F, only for Quotation and Invoice)
+    if (!isChallan) {
+      const rightSigColStart = "E";
+      ws.mergeCells(`${rightSigColStart}${currentRow}:${lastColLetter}${currentRow}`);
+      const authCell = ws.getCell(`${rightSigColStart}${currentRow}`);
+      authCell.value = "Authorized Signature";
+      authCell.font = { name: "Arial", size: 8, bold: true, color: { argb: "FF000000" } };
+      authCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    const startColNum = isChallan ? 3 : 5;
-    for (let c = startColNum; c <= colCount; c++) {
-      ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
+      const startColNum = 5;
+      for (let c = startColNum; c <= colCount; c++) {
+        ws.getCell(currentRow, c).border = { top: { style: "medium", color: { argb: BORDER_COLOR } } };
+      }
     }
     currentRow++;
 
