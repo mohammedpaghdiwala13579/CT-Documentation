@@ -3947,7 +3947,13 @@ export default function QuotationBuilder() {
                                 <div className="flex flex-row items-stretch h-full min-h-[20px] w-full">
                                   <div className="total-lbl bg-slate-50 w-[145px] sm:w-[155px] shrink-0 pr-1.5 text-right text-[7.5pt] font-bold uppercase flex items-center justify-end tracking-wider">
                                     <div className="flex items-center justify-end gap-1 w-full pl-1">
-                                      <span>Transportation</span>
+                                      <span
+                                        id="invoice-transportation-label"
+                                        style={{ fontSize: "8px", width: "80px" }}
+                                        className="inline-block"
+                                      >
+                                        Transportation
+                                      </span>
                                       <div className="flex items-center no-print print:hidden shrink-0">
                                         <input
                                           type="text"
