@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor, ShieldCheck } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { numberToWords } from "../utils/numberToWords";
@@ -653,7 +653,6 @@ export default function QuotationBuilder() {
       includeQuotationNo: Boolean(includeQuotationNo),
       includeRequisitionNo: Boolean(includeRequisitionNo),
       includePoNumber: Boolean(includePoNumber),
-      includeQrCode: Boolean(includeQrCode),
       rows: sanitizedRows,
       mergedRegions: sanitizedMergedRegions,
       cellFormats: { ...cellFormats },
@@ -707,7 +706,6 @@ export default function QuotationBuilder() {
     setIncludeQuotationNo(true);
     setIncludeRequisitionNo(true);
     setIncludePoNumber(true);
-    setIncludeQrCode(true);
     setVatPercent("0");
     setTransportationFee("0");
     
@@ -760,7 +758,6 @@ export default function QuotationBuilder() {
     setIncludeQuotationNo(doc.includeQuotationNo !== undefined ? Boolean(doc.includeQuotationNo) : true);
     setIncludeRequisitionNo(doc.includeRequisitionNo !== undefined ? Boolean(doc.includeRequisitionNo) : true);
     setIncludePoNumber(doc.includePoNumber !== undefined ? Boolean(doc.includePoNumber) : true);
-    setIncludeQrCode(doc.includeQrCode !== undefined ? Boolean(doc.includeQrCode) : true);
     setRows(doc.rows.map(r => ({ ...r })));
     setMergedRegions((doc.mergedRegions || []).map(m => ({ ...m })));
     setCellFormats(doc.cellFormats ? { ...doc.cellFormats } : {});
@@ -863,7 +860,6 @@ export default function QuotationBuilder() {
         includeQuotationNo: Boolean(includeQuotationNo),
         includeRequisitionNo: Boolean(includeRequisitionNo),
         includePoNumber: Boolean(includePoNumber),
-        includeQrCode: Boolean(includeQrCode),
         rows: rows.map(r => ({ ...r })),
         mergedRegions: mergedRegions.map(m => ({ ...m })),
         cellFormats: { ...cellFormats },
@@ -963,7 +959,6 @@ export default function QuotationBuilder() {
         includeQuotationNo: Boolean(includeQuotationNo),
         includeRequisitionNo: Boolean(includeRequisitionNo),
         includePoNumber: Boolean(includePoNumber),
-        includeQrCode: Boolean(includeQrCode),
         rows: sanitizedRows,
         mergedRegions: sanitizedMergedRegions,
         cellFormats: { ...cellFormats },
@@ -1015,7 +1010,6 @@ export default function QuotationBuilder() {
     includeQuotationNo,
     includeRequisitionNo,
     includePoNumber,
-    includeQrCode,
     rows,
     mergedRegions,
     cellFormats,
@@ -1053,7 +1047,6 @@ export default function QuotationBuilder() {
         includeQuotationNo,
         includeRequisitionNo,
         includePoNumber,
-        includeQrCode,
         vatPercent,
         transportationFee,
         currentDocId: currentDocId || null,
@@ -1089,7 +1082,6 @@ export default function QuotationBuilder() {
     includeQuotationNo,
     includeRequisitionNo,
     includePoNumber,
-    includeQrCode,
     rows,
     mergedRegions,
     cellFormats,
@@ -2115,45 +2107,6 @@ export default function QuotationBuilder() {
     : rowsTotal;
   const calculatedGrandTotal = docType === "challan" ? 0 : grandTotal;
 
-  const documentRefNo =
-    (docType === "invoice" ? invoiceNo : docType === "challan" ? challanNo : quotationNo || requisitionNo) ||
-    (currentDocId ? `CT-${currentDocId.slice(0, 8).toUpperCase()}` : `CT-${docType.toUpperCase()}-${dateVal ? dateVal.replace(/\D/g, "") : "DRAFT"}`);
-
-  const qrVerificationPayload = useMemo(() => {
-    const cleanDocType = docType.toUpperCase();
-    const cleanRef = documentRefNo;
-    const cleanMessers = cleanCellText(messers.replace(/<[^>]*>?/gm, "")).trim() || "N/A";
-    const cleanVessel = vesselName.trim() || "N/A";
-    const cleanTotal =
-      docType === "challan"
-        ? "N/A (Challan)"
-        : `${currency || "Taka"} ${calculatedGrandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
-
-    const filledCount = rows.filter((r) => r.desc && r.desc.trim()).length || rows.length;
-
-    // Seed hash for verification integrity
-    const seed = `${cleanRef}|${cleanDocType}|${dateVal}|${cleanTotal}|${filledCount}`;
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = (hash << 5) - hash + seed.charCodeAt(i);
-      hash |= 0;
-    }
-    const hashStr = `CT-${Math.abs(hash).toString(16).toUpperCase().padStart(8, "0")}`;
-
-    return [
-      `=== ${currentCompany.name.toUpperCase()} ===`,
-      `VERIFIED ${cleanDocType}`,
-      `Ref: ${cleanRef}`,
-      `Date: ${dateVal || "N/A"}`,
-      `Client: ${cleanMessers}`,
-      `Vessel: ${cleanVessel}`,
-      ...(docType !== "challan" ? [`Net Payable: ${cleanTotal}`] : []),
-      `Line Items: ${filledCount}`,
-      `Hash: ${hashStr}`,
-      `Status: AUTHENTICATED`,
-    ].join("\n");
-  }, [currentCompany.name, docType, documentRefNo, dateVal, messers, vesselName, currency, calculatedGrandTotal, rows]);
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, rowIndex: number, colIndex: number) => {
     const { key } = e;
     let targetRow = rowIndex;
@@ -2906,8 +2859,6 @@ export default function QuotationBuilder() {
             onDownloadExcel={handleDownloadExcel}
             isGeneratingExcel={isGeneratingExcel}
             onOpenExcelModal={() => setIsExcelModalOpen(true)}
-            onOpenQrModal={() => setIsQrModalOpen(true)}
-            includeQrCode={includeQrCode}
             onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             onNavigateToArchive={() => setActiveView(activeView === "saved-docs" ? "editor" : "saved-docs")}
             savedDocsCount={savedDocs.length}
@@ -2998,8 +2949,6 @@ export default function QuotationBuilder() {
               isGeneratingExcel={isGeneratingExcel}
               includeDiscount={includeDiscount}
               onToggleDiscount={(val) => setIncludeDiscount(val)}
-              includeQrCode={includeQrCode}
-              onOpenQrModal={() => setIsQrModalOpen(true)}
             />
           </div>
 
@@ -3088,7 +3037,6 @@ export default function QuotationBuilder() {
                   const hasAddress = !!cleanHtmlText(address);
                   const hasLeftMeta = hasMessers || hasVessel || hasPort || hasAddress;
 
-                  const hasQuotationNo = !!quotationNo.trim();
                   const hasRequisition = !!requisitionNo.trim();
                   const hasDate = !!dateVal.trim();
                   const hasInvoiceNo = !!invoiceNo.trim();
@@ -3097,10 +3045,10 @@ export default function QuotationBuilder() {
 
                   const hasRightMeta =
                     docType === "quotation"
-                      ? (hasQuotationNo || hasRequisition || hasDate || hasPoNumber || includeQrCode)
+                      ? (hasRequisition || hasDate)
                       : docType === "challan"
-                      ? (hasChallanNo || hasRequisition || hasDate || hasPoNumber || includeQrCode)
-                      : (hasInvoiceNo || hasChallanNo || hasDate || hasRequisition || hasPoNumber || includeQrCode);
+                      ? (hasChallanNo || hasRequisition || hasDate)
+                      : (hasInvoiceNo || hasChallanNo || hasDate || hasRequisition || hasPoNumber);
 
                   const hasAnyMeta = hasLeftMeta || hasRightMeta;
 
@@ -3113,547 +3061,354 @@ export default function QuotationBuilder() {
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border-[1.5px] border-slate-700 print:border-[1.5px] print:border-slate-800 rounded-lg print:rounded-none bg-white print:bg-white shadow-2xs print:shadow-none box-border overflow-hidden ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
-                        <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full items-stretch">
+                      <div className={`meta-info-container w-full border border-slate-600 print:border-slate-600 rounded-lg print:rounded-none bg-slate-50/60 print:bg-slate-50/70 p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                        <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
-                        <div className={`meta-left-col col-span-7 border-r-[1.5px] border-slate-400 print:border-r-[1.5px] print:border-slate-700 flex flex-col justify-start bg-slate-50/30 print:bg-transparent ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:border-r-0' : ''}`}>
+                        <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:pr-0' : ''}`}>
                           {/* Messers */}
-                          <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasMessers ? 'print:hidden meta-row-empty' : ''}`}>
-                            <div className="meta-label-wrapper w-[94px] sm:w-[104px] print:w-[84px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                              <span className="flex items-center gap-1.5">
-                                <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                <span>Messers</span>
-                              </span>
-                              <span className="text-slate-400 print:text-black font-black">:</span>
-                            </div>
-                            <div className="meta-value-wrapper flex-1 min-w-0">
-                              <RichTextCell
-                                value={messers}
-                                syncId="messers"
-                                onChange={(val) => setMessers(val)}
-                                placeholder=""
-                                className="print:hidden w-full h-[28px] min-h-[28px] font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
-                              />
-                              <div
-                                id="print-messers"
-                                className="hidden print:flex w-full items-center font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
-                              />
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasMessers ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <span>Messers:</span>
+                            </label>
+                            <RichTextCell
+                              value={messers}
+                              syncId="messers"
+                              onChange={(val) => setMessers(val)}
+                              placeholder=""
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
+                            />
+                            <div
+                              id="print-messers"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
+                            />
+                          </div>
+
+                          {/* Vessel Name: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasVessel ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                              <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <span>Vessel Name:</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={vesselName}
+                              onChange={(e) => setVesselName(e.target.value)}
+                              placeholder=""
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                            />
+                            <div
+                              id="print-vessel"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                            >
+                              {vesselName.trim() || '\u00A0'}
                             </div>
                           </div>
 
-                          {/* Vessel Name */}
-                          <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasVessel ? 'print:hidden meta-row-empty' : ''}`}>
-                            <div className="meta-label-wrapper w-[94px] sm:w-[104px] print:w-[84px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                              <span className="flex items-center gap-1.5">
-                                <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                <span>Vessel</span>
-                              </span>
-                              <span className="text-slate-400 print:text-black font-black">:</span>
-                            </div>
-                            <div className="meta-value-wrapper flex-1 min-w-0">
-                              <input
-                                type="text"
-                                value={vesselName}
-                                onChange={(e) => setVesselName(e.target.value)}
-                                placeholder=""
-                                className="print:hidden w-full h-[28px] min-h-[28px] font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                              />
-                              <div
-                                id="print-vessel"
-                                className="hidden print:flex w-full items-center font-semibold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                              >
-                                {vesselName.trim() || '\u00A0'}
-                              </div>
+                          {/* Port / Berth: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPort ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                              <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <span>Port / Berth:</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={portBerth}
+                              onChange={(e) => setPortBerth(e.target.value)}
+                              placeholder=""
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                            />
+                            <div
+                              id="print-port"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                            >
+                              {portBerth.trim() || '\u00A0'}
                             </div>
                           </div>
 
-                          {/* Port / Berth */}
-                          <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasPort ? 'print:hidden meta-row-empty' : ''}`}>
-                            <div className="meta-label-wrapper w-[94px] sm:w-[104px] print:w-[84px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                              <span className="flex items-center gap-1.5">
-                                <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                <span>Port / Berth</span>
-                              </span>
-                              <span className="text-slate-400 print:text-black font-black">:</span>
-                            </div>
-                            <div className="meta-value-wrapper flex-1 min-w-0">
-                              <input
-                                type="text"
-                                value={portBerth}
-                                onChange={(e) => setPortBerth(e.target.value)}
-                                placeholder=""
-                                className="print:hidden w-full h-[28px] min-h-[28px] font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                              />
-                              <div
-                                id="print-port"
-                                className="hidden print:flex w-full items-center font-semibold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                              >
-                                {portBerth.trim() || '\u00A0'}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Address */}
-                          <div className={`meta-info-row px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full flex-1 ${!hasAddress ? 'print:hidden meta-row-empty' : ''}`}>
-                            <div className="meta-label-wrapper w-[94px] sm:w-[104px] print:w-[84px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                              <span className="flex items-center gap-1.5">
-                                <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                <span>Address</span>
-                              </span>
-                              <span className="text-slate-400 print:text-black font-black">:</span>
-                            </div>
-                            <div className="meta-value-wrapper flex-1 min-w-0">
-                              <RichTextCell
-                                value={address}
-                                syncId="address"
-                                onChange={(val) => setAddress(val)}
-                                placeholder=""
-                                className="print:hidden w-full h-[28px] min-h-[28px] font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
-                              />
-                              <div
-                                id="print-address"
-                                className="hidden print:flex w-full items-center text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
-                              />
-                            </div>
+                          {/* Address: Single row, text directly after colon */}
+                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasAddress ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <span>Address:</span>
+                            </label>
+                            <RichTextCell
+                              value={address}
+                              syncId="address"
+                              onChange={(val) => setAddress(val)}
+                              placeholder=""
+                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
+                            />
+                            <div
+                              id="print-address"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
+                            />
                           </div>
                         </div>
 
                         {/* Right Column: References & Date */}
-                        <div className={`meta-right-col col-span-5 flex flex-col justify-between bg-slate-50/10 print:bg-transparent ${!hasRightMeta ? 'print:hidden meta-col-empty' : ''} ${!hasLeftMeta ? 'print:col-span-12' : ''}`}>
-                          {/* Quotation format: Quotation No., Requisition No., Date, and PO Number */}
+                        <div className={`meta-right-col col-span-5 space-y-2 sm:space-y-2.5 print:space-y-1.5 pl-4 sm:pl-6 print:pl-4 ${!hasRightMeta ? 'print:hidden meta-col-empty' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
+                          {/* Quotation format: ONLY Requisition No. with Date */}
                           {docType === "quotation" && (
-                            <div className="w-full flex-1 flex flex-col justify-start">
-                              {/* Quotation No. */}
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasQuotationNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Quotation No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={quotationNo}
-                                    onChange={(e) => setQuotationNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[28px] min-h-[28px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-quotation-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {quotationNo.trim() || '\u00A0'}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Requisition No. */}
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Requisition No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[28px] min-h-[28px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-requisition-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {requisitionNo.trim() || '\u00A0'}
-                                  </div>
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Requisition No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={requisitionNo}
+                                  onChange={(e) => setRequisitionNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-requisition-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row ${hasPoNumber || includeQrCode ? 'border-b border-slate-200/90 print:border-slate-300' : ''} px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 relative w-full ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Date</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0 flex items-center">
-                                  <div className="flex items-center flex-1 min-w-0 h-[28px] rounded hover:bg-blue-50/40 focus-within:bg-blue-50/60 transition-colors print:hidden px-1">
-                                    <input
-                                      type="text"
-                                      value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent py-0.5 leading-normal"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={triggerDatePicker}
-                                      className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                      title="Open Date Picker"
-                                    >
-                                      <Calendar className="h-3 w-3 text-indigo-600" />
-                                    </button>
-                                  </div>
-                                  <div
-                                    id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[6.8pt] text-black leading-tight px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {dateVal.trim() || '\u00A0'}
-                                  </div>
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Date:</span>
+                                </label>
+                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
                                   <input
-                                    ref={dateRef}
-                                    type="date"
-                                    onChange={handleDatePickerChange}
-                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
+                                    type="text"
+                                    value={dateVal}
+                                    onChange={(e) => setDateVal(e.target.value)}
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
                                   />
+                                  <button
+                                    type="button"
+                                    onClick={triggerDatePicker}
+                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
+                                    title="Open Date Picker"
+                                  >
+                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
+                                  </button>
                                 </div>
+                                <div
+                                  id="print-date"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {dateVal.trim() || '\u00A0'}
+                                </div>
+                                <input
+                                  ref={dateRef}
+                                  type="date"
+                                  onChange={handleDatePickerChange}
+                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
+                                />
                               </div>
-
-                              {/* PO Number (if present or toggled) */}
-                              {(includePoNumber || hasPoNumber) && (
-                                <div className={`meta-info-row ${includeQrCode ? 'border-b border-slate-200/90 print:border-slate-300' : ''} px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[32px] sm:min-h-[34px] print:min-h-[22px] flex items-center gap-1 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
-                                  <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                    <span className="flex items-center gap-1.5">
-                                      <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                      <span>PO Number</span>
-                                    </span>
-                                    <span className="text-slate-400 print:text-black font-black">:</span>
-                                  </div>
-                                  <div className="meta-value-wrapper flex-1 min-w-0">
-                                    <input
-                                      type="text"
-                                      value={poNumber}
-                                      onChange={(e) => setPoNumber(e.target.value)}
-                                      placeholder=""
-                                      className="print:hidden w-full h-[28px] min-h-[28px] font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                    />
-                                    <div
-                                      id="print-po-number"
-                                      className="hidden print:flex w-full items-center font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                    >
-                                      {poNumber.trim() || '\u00A0'}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           )}
 
-                          {/* Invoice format */}
+                          {/* Invoice format: All single lines, no side-by-side fields */}
                           {docType === "invoice" && (
-                            <div className="w-full flex-1 flex flex-col justify-start">
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasInvoiceNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Invoice No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={invoiceNo}
-                                    onChange={(e) => setInvoiceNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-invoice-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {invoiceNo.trim() || '\u00A0'}
-                                  </div>
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasInvoiceNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Invoice No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={invoiceNo}
+                                  onChange={(e) => setInvoiceNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-invoice-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {invoiceNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Challan No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={challanNo}
-                                    onChange={(e) => setChallanNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-challan-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {challanNo.trim() || '\u00A0'}
-                                  </div>
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Challan No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={challanNo}
+                                  onChange={(e) => setChallanNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-challan-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 relative w-full ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Date</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0 flex items-center">
-                                  <div className="flex items-center flex-1 min-w-0 h-[26px] rounded hover:bg-blue-50/40 focus-within:bg-blue-50/60 transition-colors print:hidden px-1">
-                                    <input
-                                      type="text"
-                                      value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent py-0.5 leading-normal"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={triggerDatePicker}
-                                      className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                      title="Open Date Picker"
-                                    >
-                                      <Calendar className="h-3 w-3 text-indigo-600" />
-                                    </button>
-                                  </div>
-                                  <div
-                                    id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[6.8pt] text-black leading-tight px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {dateVal.trim() || '\u00A0'}
-                                  </div>
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Date:</span>
+                                </label>
+                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
                                   <input
-                                    ref={dateRef}
-                                    type="date"
-                                    onChange={handleDatePickerChange}
-                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
+                                    type="text"
+                                    value={dateVal}
+                                    onChange={(e) => setDateVal(e.target.value)}
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
                                   />
+                                  <button
+                                    type="button"
+                                    onClick={triggerDatePicker}
+                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
+                                    title="Open Date Picker"
+                                  >
+                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
+                                  </button>
+                                </div>
+                                <div
+                                  id="print-date"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {dateVal.trim() || '\u00A0'}
+                                </div>
+                                <input
+                                  ref={dateRef}
+                                  type="date"
+                                  onChange={handleDatePickerChange}
+                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
+                                />
+                              </div>
+
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Requisition No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={requisitionNo}
+                                  onChange={(e) => setRequisitionNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-requisition-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Requisition No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-requisition-no"
-                                    className="hidden print:flex w-full items-center font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {requisitionNo.trim() || '\u00A0'}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className={`meta-info-row ${includeQrCode ? 'border-b border-slate-200/90 print:border-slate-300' : ''} px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>PO Number</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={poNumber}
-                                    onChange={(e) => setPoNumber(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-po-number"
-                                    className="hidden print:flex w-full items-center font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {poNumber.trim() || '\u00A0'}
-                                  </div>
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>PO Number:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={poNumber}
+                                  onChange={(e) => setPoNumber(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-po-number"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {poNumber.trim() || '\u00A0'}
                                 </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Challan format */}
+                          {/* Challan format: All single lines, no side-by-side fields */}
                           {docType === "challan" && (
-                            <div className="w-full flex-1 flex flex-col justify-start">
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Challan No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={challanNo}
-                                    onChange={(e) => setChallanNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-challan-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {challanNo.trim() || '\u00A0'}
-                                  </div>
+                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Challan No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={challanNo}
+                                  onChange={(e) => setChallanNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-challan-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Requisition No.</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
-                                  <input
-                                    type="text"
-                                    value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
-                                  />
-                                  <div
-                                    id="print-requisition-no"
-                                    className="hidden print:flex w-full items-center font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {requisitionNo.trim() || '\u00A0'}
-                                  </div>
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Requisition No.:</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={requisitionNo}
+                                  onChange={(e) => setRequisitionNo(e.target.value)}
+                                  placeholder=""
+                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                />
+                                <div
+                                  id="print-requisition-no"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row border-b border-slate-200/90 print:border-slate-300 px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 relative w-full ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>Date</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0 flex items-center">
-                                  <div className="flex items-center flex-1 min-w-0 h-[26px] rounded hover:bg-blue-50/40 focus-within:bg-blue-50/60 transition-colors print:hidden px-1">
-                                    <input
-                                      type="text"
-                                      value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent py-0.5 leading-normal"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={triggerDatePicker}
-                                      className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                      title="Open Date Picker"
-                                    >
-                                      <Calendar className="h-3 w-3 text-indigo-600" />
-                                    </button>
-                                  </div>
-                                  <div
-                                    id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[6.8pt] text-black leading-tight px-1 min-h-[18px] print:min-h-[18px]"
-                                  >
-                                    {dateVal.trim() || '\u00A0'}
-                                  </div>
-                                  <input
-                                    ref={dateRef}
-                                    type="date"
-                                    onChange={handleDatePickerChange}
-                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className={`meta-info-row ${includeQrCode ? 'border-b border-slate-200/90 print:border-slate-300' : ''} px-3 py-1.5 sm:px-3.5 print:px-2.5 print:py-1 min-h-[30px] print:min-h-[20px] flex items-center gap-1 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
-                                <div className="meta-label-wrapper w-[102px] sm:w-[112px] print:w-[92px] shrink-0 font-extrabold text-[6.5pt] sm:text-[7pt] print:text-[6.2pt] text-slate-800 print:text-black uppercase tracking-wider flex items-center justify-between pr-2 select-none">
-                                  <span className="flex items-center gap-1.5">
-                                    <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                    <span>PO Number</span>
-                                  </span>
-                                  <span className="text-slate-400 print:text-black font-black">:</span>
-                                </div>
-                                <div className="meta-value-wrapper flex-1 min-w-0">
+                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                                  <span>Date:</span>
+                                </label>
+                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
                                   <input
                                     type="text"
-                                    value={poNumber}
-                                    onChange={(e) => setPoNumber(e.target.value)}
-                                    placeholder=""
-                                    className="print:hidden w-full h-[26px] min-h-[26px] font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 outline-none bg-transparent hover:bg-blue-50/40 focus:bg-blue-50/60 rounded px-1.5 py-0.5 leading-normal transition-colors"
+                                    value={dateVal}
+                                    onChange={(e) => setDateVal(e.target.value)}
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
                                   />
-                                  <div
-                                    id="print-po-number"
-                                    className="hidden print:flex w-full items-center font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1 min-h-[18px] print:min-h-[18px]"
+                                  <button
+                                    type="button"
+                                    onClick={triggerDatePicker}
+                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
+                                    title="Open Date Picker"
                                   >
-                                    {poNumber.trim() || '\u00A0'}
-                                  </div>
+                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
+                                  </button>
                                 </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Document Verification QR Code Tile */}
-                          {includeQrCode && (
-                            <div
-                              onClick={() => setIsQrModalOpen(true)}
-                              className="qr-verification-tile w-full border-t border-slate-300 print:border-slate-400 px-3 py-2 sm:px-3.5 print:px-2.5 print:py-1.5 flex items-center justify-between gap-2.5 cursor-pointer group bg-slate-50/80 hover:bg-blue-50/50 print:bg-transparent transition-colors"
-                              title="Click to view & inspect verification QR code"
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="bg-white p-1 rounded border border-slate-300 print:border-slate-500 shadow-2xs group-hover:border-blue-500 transition-colors shrink-0">
-                                  <QRCodeSVG
-                                    value={qrVerificationPayload}
-                                    size={38}
-                                    level="M"
-                                    includeMargin={false}
-                                    className="h-9 w-9 print:h-9 print:w-9 block"
-                                  />
+                                <div
+                                  id="print-date"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                >
+                                  {dateVal.trim() || '\u00A0'}
                                 </div>
-                                <div className="leading-tight min-w-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-black uppercase tracking-wider text-slate-900 print:text-black flex items-center gap-1">
-                                      <ShieldCheck className="h-3 w-3 text-emerald-600 print:text-black shrink-0" />
-                                      <span>Document Verification</span>
-                                    </span>
-                                    <span className="no-print print:hidden text-[8px] text-blue-600 font-extrabold group-hover:underline">
-                                      • View
-                                    </span>
-                                  </div>
-                                  <p className="text-[5.8pt] sm:text-[6.2pt] print:text-[5.8pt] font-mono font-bold text-slate-600 print:text-black truncate mt-0.5">
-                                    Ref: {documentRefNo}
-                                  </p>
-                                  {docType !== "challan" && grandTotal > 0 && (
-                                    <p className="text-[5.8pt] sm:text-[6.2pt] print:text-[5.8pt] font-mono font-black text-emerald-700 print:text-black mt-0.5">
-                                      Payable: {currency} {grandTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="no-print print:hidden text-slate-400 group-hover:text-blue-600 transition-colors shrink-0 pr-1">
-                                <QrCode className="h-4 w-4" />
+                                <input
+                                  ref={dateRef}
+                                  type="date"
+                                  onChange={handleDatePickerChange}
+                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
+                                />
                               </div>
                             </div>
                           )}
@@ -4468,32 +4223,6 @@ export default function QuotationBuilder() {
             selectedRowIndex={safeSelectedRowIndex}
             totalCurrentRows={rows.length}
             docType={docType}
-          />
-        </React.Suspense>
-      )}
-
-      {/* Document Verification QR Code Modal */}
-      {isQrModalOpen && (
-        <React.Suspense fallback={null}>
-          <DocumentQrModal
-            isOpen={isQrModalOpen}
-            onClose={() => setIsQrModalOpen(false)}
-            docType={docType}
-            documentRefNo={documentRefNo}
-            dateVal={dateVal}
-            messers={messers}
-            vesselName={vesselName}
-            portBerth={portBerth}
-            itemsCount={rows.filter((r) => r.desc && r.desc.trim()).length || rows.length}
-            grandTotal={calculatedGrandTotal}
-            currency={currency || "Taka"}
-            companyName={currentCompany.name}
-            companyAddress={currentCompany.officeAddress}
-            includeQrCode={includeQrCode}
-            onToggleIncludeQrCode={(val) => {
-              recordChange();
-              setIncludeQrCode(val);
-            }}
           />
         </React.Suspense>
       )}

@@ -102,15 +102,13 @@ input[type="number"] {
   display: block;
   width: 100%;
   max-width: 100%;
-  border: 1.5px solid #334155;
+  border: 1.5px solid #475569;
   border-radius: 8px;
   background-color: #ffffff;
-  padding: 0 !important;
+  padding: 16px 20px;
   margin-top: 0;
   margin-bottom: 0;
   box-sizing: border-box;
-  overflow: hidden;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .meta-grid-inner {
@@ -118,20 +116,15 @@ input[type="number"] {
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
   gap: 0 !important;
   width: 100%;
-  align-items: stretch !important;
 }
 
 .meta-left-col {
-  border-right: 1.5px solid #64748b !important;
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  border-right: none !important;
+  padding-right: 14px;
 }
 
 .meta-right-col {
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  padding-left: 14px;
 }
 
 .meta-info-row {
@@ -139,14 +132,6 @@ input[type="number"] {
   flex-direction: row;
   align-items: center;
   width: 100%;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 4px 12px;
-  min-height: 32px;
-  box-sizing: border-box;
-}
-
-.meta-info-row:last-child {
-  border-bottom: none !important;
 }
 
 /* Print Styling Configuration */
@@ -457,20 +442,17 @@ input[type="number"] {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    border: 1.5px solid #1e293b !important;
-    border-radius: 0 !important;
-    background-color: #ffffff !important;
+    border: 1px solid #475569 !important;
+    border-radius: 4px !important;
+    background-color: #f8fafc !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
-    padding: 0 !important;
+    padding: 12px 16px !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     box-sizing: border-box !important;
     clear: both !important;
-    overflow: hidden !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
   }
 
   .meta-grid-inner {
@@ -478,20 +460,15 @@ input[type="number"] {
     grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     gap: 0 !important;
     width: 100% !important;
-    align-items: stretch !important;
   }
 
   .meta-left-col {
-    border-right: 1.5px solid #334155 !important;
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    border-right: none !important;
+    padding-right: 16px !important;
   }
 
   .meta-right-col {
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    padding-left: 16px !important;
   }
 
   .meta-info-container * {
@@ -510,14 +487,6 @@ input[type="number"] {
     flex-direction: row !important;
     align-items: center !important;
     width: 100% !important;
-    border-bottom: 1px solid #cbd5e1 !important;
-    padding: 3px 8px !important;
-    min-height: 22px !important;
-    box-sizing: border-box !important;
-  }
-
-  .meta-info-row:last-child {
-    border-bottom: none !important;
   }
 
   .meta-info-container [id^="print-"] {
@@ -616,22 +585,6 @@ input[type="number"] {
     grid-column: span 2 / span 2 !important;
     width: 100% !important;
     display: block !important;
-  }
-
-  /* Document Verification QR Code in Print */
-  .qr-verification-tile {
-    display: flex !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    margin-top: 4px !important;
-    padding-top: 3px !important;
-    border-top: 1px solid #475569 !important;
-    background: transparent !important;
-  }
-
-  .qr-verification-tile svg {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 
   /* Force outer layout table to behave as display: table and repeat thead on every page */
@@ -1063,15 +1016,14 @@ input[type="number"] {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  border: 1.5px solid #1e293b !important;
-  border-radius: 0 !important;
-  background-color: #ffffff !important;
-  padding: 0 !important;
+  border: 1px solid #475569 !important;
+  border-radius: 4px !important;
+  background-color: #f8fafc !important;
+  padding: 12px 16px !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   box-sizing: border-box !important;
   clear: both !important;
-  overflow: hidden !important;
 }
 
 .is-generating-pdf .meta-grid-inner {
@@ -1079,20 +1031,15 @@ input[type="number"] {
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
   gap: 0 !important;
   width: 100% !important;
-  align-items: stretch !important;
 }
 
 .is-generating-pdf .meta-left-col {
-  border-right: 1.5px solid #334155 !important;
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  border-right: none !important;
+  padding-right: 16px !important;
 }
 
 .is-generating-pdf .meta-right-col {
-  padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  padding-left: 16px !important;
 }
 
 .is-generating-pdf .meta-info-container * {
@@ -1111,14 +1058,6 @@ input[type="number"] {
   flex-direction: row !important;
   align-items: center !important;
   width: 100% !important;
-  border-bottom: 1px solid #cbd5e1 !important;
-  padding: 3px 8px !important;
-  min-height: 22px !important;
-  box-sizing: border-box !important;
-}
-
-.is-generating-pdf .meta-info-row:last-child {
-  border-bottom: none !important;
 }
 
 .is-generating-pdf .meta-info-container [id^="print-"] {
