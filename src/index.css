@@ -207,12 +207,29 @@ input[type="number"] {
 
   /* When printing the quotation/challan, hide non-printing elements */
   .no-print,
+  .print\:hidden,
+  #pwa-install-banner,
+  #erp-status-toast,
+  [id*="toast"],
+  [class*="toast"],
+  .floating-status-toast,
   .excel-editor-container,
   .top-toolbar,
   .saved-docs-panel,
   header.no-print,
   footer {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
   }
 
   .quotation-container {
@@ -874,12 +891,23 @@ input[type="number"] {
 
 /* PDF Generation temporary styling overrides */
 .is-generating-pdf .no-print,
+.is-generating-pdf .print\:hidden,
+.is-generating-pdf #pwa-install-banner,
+.is-generating-pdf #erp-status-toast,
+.is-generating-pdf [id*="toast"],
+.is-generating-pdf [class*="toast"],
+.is-generating-pdf .floating-status-toast,
 .is-generating-pdf .excel-editor-container,
 .is-generating-pdf .top-toolbar,
 .is-generating-pdf .saved-docs-panel,
 .is-generating-pdf footer,
 .is-generating-pdf header {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
 }
 
 .is-generating-pdf .sheet,

@@ -2506,6 +2506,7 @@ export default function QuotationBuilder() {
 
   useEffect(() => {
     const handleBeforePrint = () => {
+      setToastMessage(null);
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -2519,6 +2520,7 @@ export default function QuotationBuilder() {
   }, []);
 
   const handlePrint = () => {
+    setToastMessage(null);
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -2526,8 +2528,8 @@ export default function QuotationBuilder() {
     setSelectedCell(null);
     setSelectionStart(null);
     setSelectionEnd(null);
-    showToast("Opening print dialog — ensure 'Background graphics' is enabled in browser print options", "info");
     setTimeout(() => {
+      setToastMessage(null);
       syncAllEditableFields();
       window.print();
     }, 120);
@@ -4077,7 +4079,7 @@ export default function QuotationBuilder() {
       {/* Cell right-click Menu context */}
       {contextMenu && contextMenu.visible && (
         <div 
-          className="fixed bg-white border border-slate-200 rounded-lg shadow-xl py-1.5 w-64 z-[9999] text-xs text-slate-700"
+          className="no-print print:hidden fixed bg-white border border-slate-200 rounded-lg shadow-xl py-1.5 w-64 z-[9999] text-xs text-slate-700"
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -4230,7 +4232,10 @@ export default function QuotationBuilder() {
 
       {/* Floating Status Toast */}
       {toastMessage && (
-        <div className="fixed bottom-20 right-6 z-[999999] bg-slate-900/95 backdrop-blur-xs text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl border border-slate-700/80 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-250">
+        <div 
+          id="erp-status-toast"
+          className="no-print print:hidden fixed bottom-20 right-6 z-[999999] bg-slate-900/95 backdrop-blur-xs text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl border border-slate-700/80 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-250"
+        >
           <div className="bg-emerald-500 text-white rounded-full p-1">
             <CheckCheck className="h-3.5 w-3.5" />
           </div>

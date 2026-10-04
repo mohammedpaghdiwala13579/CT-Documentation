@@ -153,7 +153,7 @@ export default function App() {
 
       {/* 2. iOS / Safari / Manual Install Guidance Modal */}
       {showGuidance && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="no-print print:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-md w-full p-6 relative animate-in zoom-in-95 duration-200">
             <button
               id="btn-modal-close"
