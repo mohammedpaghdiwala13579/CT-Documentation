@@ -3061,14 +3061,14 @@ export default function QuotationBuilder() {
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border border-slate-600 print:border-slate-600 rounded-lg print:rounded-none bg-slate-50/60 print:bg-slate-50/70 p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
-                        <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
+                      <div className={`meta-info-container w-full border border-slate-500/90 print:border-slate-700 rounded-md print:rounded-none bg-white print:bg-white p-3.5 sm:p-4 print:p-2.5 shadow-xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                        <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full items-stretch">
                         {/* Left Column: Client & Vessel Information */}
-                        <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:pr-0' : ''}`}>
+                        <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-slate-600 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:pr-0 border-r-0 print:border-r-0 meta-col-single' : ''}`}>
                           {/* Messers */}
-                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasMessers ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasMessers ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
+                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                               <span>Messers:</span>
                             </label>
                             <RichTextCell
@@ -3076,19 +3076,19 @@ export default function QuotationBuilder() {
                               syncId="messers"
                               onChange={(val) => setMessers(val)}
                               placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
+                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
                             />
                             <div
                               id="print-messers"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                               dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                             />
                           </div>
 
                           {/* Vessel Name: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasVessel ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                              <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasVessel ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
+                              <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                               <span>Vessel Name:</span>
                             </label>
                             <input
@@ -3096,20 +3096,20 @@ export default function QuotationBuilder() {
                               value={vesselName}
                               onChange={(e) => setVesselName(e.target.value)}
                               placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                             />
                             <div
                               id="print-vessel"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                             >
                               {vesselName.trim() || '\u00A0'}
                             </div>
                           </div>
 
                           {/* Port / Berth: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPort ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                              <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPort ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
+                              <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                               <span>Port / Berth:</span>
                             </label>
                             <input
@@ -3117,20 +3117,20 @@ export default function QuotationBuilder() {
                               value={portBerth}
                               onChange={(e) => setPortBerth(e.target.value)}
                               placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                             />
                             <div
                               id="print-port"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                             >
                               {portBerth.trim() || '\u00A0'}
                             </div>
                           </div>
 
                           {/* Address: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasAddress ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasAddress ? 'print:hidden meta-row-empty' : ''}`}>
+                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
+                              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                               <span>Address:</span>
                             </label>
                             <RichTextCell
@@ -3138,11 +3138,11 @@ export default function QuotationBuilder() {
                               syncId="address"
                               onChange={(val) => setAddress(val)}
                               placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors break-words flex items-center"
+                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
                             />
                             <div
                               id="print-address"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                               dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                             />
                           </div>
@@ -3153,9 +3153,9 @@ export default function QuotationBuilder() {
                           {/* Quotation format: ONLY Requisition No. with Date */}
                           {docType === "quotation" && (
                             <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
                                 <input
@@ -3163,28 +3163,28 @@ export default function QuotationBuilder() {
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
+                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
                                   />
                                   <button
                                     type="button"
@@ -3197,7 +3197,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3214,9 +3214,9 @@ export default function QuotationBuilder() {
                           {/* Invoice format: All single lines, no side-by-side fields */}
                           {docType === "invoice" && (
                             <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasInvoiceNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasInvoiceNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Invoice No.:</span>
                                 </label>
                                 <input
@@ -3224,19 +3224,19 @@ export default function QuotationBuilder() {
                                   value={invoiceNo}
                                   onChange={(e) => setInvoiceNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-invoice-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {invoiceNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
                                 </label>
                                 <input
@@ -3244,28 +3244,28 @@ export default function QuotationBuilder() {
                                   value={challanNo}
                                   onChange={(e) => setChallanNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
+                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
                                   />
                                   <button
                                     type="button"
@@ -3278,7 +3278,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
@@ -3290,9 +3290,9 @@ export default function QuotationBuilder() {
                                 />
                               </div>
 
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
                                 <input
@@ -3300,19 +3300,19 @@ export default function QuotationBuilder() {
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>PO Number:</span>
                                 </label>
                                 <input
@@ -3320,11 +3320,11 @@ export default function QuotationBuilder() {
                                   value={poNumber}
                                   onChange={(e) => setPoNumber(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-po-number"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {poNumber.trim() || '\u00A0'}
                                 </div>
@@ -3335,9 +3335,9 @@ export default function QuotationBuilder() {
                           {/* Challan format: All single lines, no side-by-side fields */}
                           {docType === "challan" && (
                             <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Challan No.:</span>
                                 </label>
                                 <input
@@ -3345,19 +3345,19 @@ export default function QuotationBuilder() {
                                   value={challanNo}
                                   onChange={(e) => setChallanNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {challanNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Requisition No.:</span>
                                 </label>
                                 <input
@@ -3365,28 +3365,28 @@ export default function QuotationBuilder() {
                                   value={requisitionNo}
                                   onChange={(e) => setRequisitionNo(e.target.value)}
                                   placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus:border-indigo-600 focus:border-solid font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal transition-colors"
+                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
                                 />
                                 <div
                                   id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {requisitionNo.trim() || '\u00A0'}
                                 </div>
                               </div>
 
                               {/* Date field */}
-                              <div className={`meta-info-row min-h-[34px] sm:min-h-[38px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-extrabold text-slate-800 print:text-black uppercase tracking-wider flex items-center gap-1 shrink-0 whitespace-nowrap">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-600 print:text-black shrink-0" />
+                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
+                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
+                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
                                   <span>Date:</span>
                                 </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[30px] min-h-[30px] sm:h-[34px] sm:min-h-[34px] box-border border-b border-dotted border-slate-400 focus-within:border-indigo-600 focus-within:border-solid transition-colors print:hidden">
+                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
                                   <input
                                     type="text"
                                     value={dateVal}
                                     onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-1 leading-normal"
+                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
                                   />
                                   <button
                                     type="button"
@@ -3399,7 +3399,7 @@ export default function QuotationBuilder() {
                                 </div>
                                 <div
                                   id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-dotted border-slate-400 print:border-none font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px]"
+                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
                                 >
                                   {dateVal.trim() || '\u00A0'}
                                 </div>
