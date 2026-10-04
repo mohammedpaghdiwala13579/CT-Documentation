@@ -2526,6 +2526,7 @@ export default function QuotationBuilder() {
     setSelectedCell(null);
     setSelectionStart(null);
     setSelectionEnd(null);
+    showToast("Opening print dialog — ensure 'Background graphics' is enabled in browser print options", "info");
     setTimeout(() => {
       syncAllEditableFields();
       window.print();
@@ -2960,8 +2961,8 @@ export default function QuotationBuilder() {
               src="https://i.ibb.co.com/3mNycQXx/1.png" 
               alt="Watermark background" 
               referrerPolicy="no-referrer"
-              className="object-contain select-none max-w-[500px] w-[70%] opacity-[0.045]"
-              style={{ printColorAdjust: "exact" }}
+              className="object-contain select-none max-w-[480px] w-[65%] opacity-[0.09] print:opacity-[0.12]"
+              style={{ printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}
             />
           </div>
 
@@ -3058,7 +3059,7 @@ export default function QuotationBuilder() {
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border border-slate-600 print:border-slate-600 rounded-lg print:rounded-none bg-slate-50/60 print:bg-white p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                      <div className={`meta-info-container w-full border border-slate-600 print:border-slate-600 rounded-lg print:rounded-none bg-slate-50/60 print:bg-slate-50/70 p-4 sm:p-5 print:p-3 shadow-2xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full">
                         {/* Left Column: Client & Vessel Information */}
                         <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:pr-0' : ''}`}>
@@ -3435,15 +3436,15 @@ export default function QuotationBuilder() {
                 <div className="items-table-wrapper w-full overflow-x-auto no-scrollbar">
                   <table className="main-table w-full min-w-full border-collapse border border-slate-600 print:border-slate-600 table-fixed text-[8pt]">
                     <thead>
-                      <tr className="bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt]">
-                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
-                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-600 print:border-slate-600 py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
-                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
+                      <tr className="bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt]">
+                        <th className={`${docType === 'challan' ? 'w-[7%]' : 'w-[6%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>SL</th>
+                        <th className={`${docType === 'challan' ? 'w-[75%]' : 'w-[56%]'} border border-slate-600 print:border-slate-600 py-1.5 px-2 text-left font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Description of Marine Items / Spare Parts</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[7%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Qty</th>
+                        <th className={`${docType === 'challan' ? 'w-[9%]' : 'w-[8%]'} border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider`}>Unit</th>
                         {docType !== "challan" && (
                           <>
-                            <th className="w-[11%] border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
-                            <th className="w-[12%] border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-transparent text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
+                            <th className="w-[11%] border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Price</th>
+                            <th className="w-[12%] border border-slate-600 print:border-slate-600 py-1.5 px-1 text-center font-bold bg-slate-100/90 print:bg-slate-100 text-black text-[8.5pt] sm:text-[9pt] uppercase tracking-wider">Amount</th>
                           </>
                         )}
                       </tr>
