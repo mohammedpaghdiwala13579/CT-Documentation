@@ -3118,10 +3118,10 @@ export default function QuotationBuilder() {
                               : "col-span-7 print:col-span-7 pr-3.5 sm:pr-4 print:pr-2.5 border-r-[1.5px] border-[#0f2744] print:border-r-[1.5px] print:border-[#0f2744]"
                           }`}>
                             {/* Messers */}
-                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">MESSERS:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">MESSERS:</span>
                               </label>
                               <RichTextCell
                                 value={messers}
@@ -3132,16 +3132,16 @@ export default function QuotationBuilder() {
                               />
                               <div
                                 id="print-messers"
-                                className="hidden print:block flex-1 min-w-0 font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                className="hidden print:flex print:items-center flex-1 min-w-0 font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                               />
                             </div>
 
                             {/* Vessel Name */}
-                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                <Ship className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">VESSEL NAME:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                <Ship className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">VESSEL NAME:</span>
                               </label>
                               <AutoExpandingTextarea
                                 value={vesselName}
@@ -3151,17 +3151,17 @@ export default function QuotationBuilder() {
                               />
                               <div
                                 id="print-vessel"
-                                className="hidden print:block flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                className="hidden print:flex print:items-center flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                               >
                                 {vesselName.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Port / Berth */}
-                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasPort ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                <Anchor className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PORT / BERTH:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasPort ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                <Anchor className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">PORT / BERTH:</span>
                               </label>
                               <AutoExpandingTextarea
                                 value={portBerth}
@@ -3171,17 +3171,17 @@ export default function QuotationBuilder() {
                               />
                               <div
                                 id="print-port"
-                                className="hidden print:block flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                className="hidden print:flex print:items-center flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                               >
                                 {portBerth.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Address */}
-                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">ADDRESS:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">ADDRESS:</span>
                               </label>
                               <RichTextCell
                                 value={address}
@@ -3192,7 +3192,7 @@ export default function QuotationBuilder() {
                               />
                               <div
                                 id="print-address"
-                                className="hidden print:block flex-1 min-w-0 text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                className="hidden print:flex print:items-center flex-1 min-w-0 text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                               />
                             </div>
@@ -3210,10 +3210,10 @@ export default function QuotationBuilder() {
                             {docType === "quotation" && (
                               <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">REQUISITION NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={requisitionNo}
@@ -3223,17 +3223,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">DATE:</span>
                                   </label>
                                   <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
                                     <AutoExpandingTextarea
@@ -3252,7 +3252,7 @@ export default function QuotationBuilder() {
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
@@ -3270,10 +3270,10 @@ export default function QuotationBuilder() {
                             {docType === "invoice" && (
                               <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Invoice No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">INVOICE NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">INVOICE NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={invoiceNo}
@@ -3283,17 +3283,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-invoice-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {invoiceNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">CHALLAN NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={challanNo}
@@ -3303,17 +3303,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">DATE:</span>
                                   </label>
                                   <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
                                     <AutoExpandingTextarea
@@ -3332,7 +3332,7 @@ export default function QuotationBuilder() {
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
@@ -3345,10 +3345,10 @@ export default function QuotationBuilder() {
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">REQUISITION NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={requisitionNo}
@@ -3358,17 +3358,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* PO Number */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PO NUMBER:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">PO NUMBER:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={poNumber}
@@ -3378,7 +3378,7 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-po-number"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-medium text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-medium text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {poNumber.trim() || '\u00A0'}
                                   </div>
@@ -3390,10 +3390,10 @@ export default function QuotationBuilder() {
                             {docType === "challan" && (
                               <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">CHALLAN NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={challanNo}
@@ -3403,17 +3403,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">REQUISITION NO.:</span>
                                   </label>
                                   <AutoExpandingTextarea
                                     value={requisitionNo}
@@ -3423,17 +3423,17 @@ export default function QuotationBuilder() {
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
-                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[18px] sm:min-h-[20px] print:min-h-[18px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[14px] print:w-[14px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-tight">DATE:</span>
                                   </label>
                                   <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
                                     <AutoExpandingTextarea
@@ -3452,7 +3452,7 @@ export default function QuotationBuilder() {
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
+                                    className="hidden print:flex print:items-center flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[18px] print:min-h-[18px] py-0 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
