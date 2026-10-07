@@ -3058,162 +3058,161 @@ export default function QuotationBuilder() {
                       <div
                         className={`meta-top-spacer w-full select-none ${!hasAnyMeta ? "print:hidden" : ""}`}
                         aria-hidden="true"
-                        style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
+                        style={{ height: '8px', minHeight: '8px', display: 'block', clear: 'both' }}
                       />
 
                       <div className={`meta-info-container w-full border-[1.5px] border-[#0f2744] print:border-[#0f2744] rounded-lg bg-white print:bg-white shadow-2xs print:shadow-none box-border overflow-hidden p-0 ${!hasAnyMeta ? "print:hidden" : ""}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full items-stretch">
                           {/* Left Column: Client & Vessel Information */}
-                          <div className={`meta-left-col p-3 sm:p-3.5 print:p-2.5 flex flex-col justify-start gap-2 sm:gap-2.5 print:gap-1.5 ${
+                          <div className={`meta-left-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-0.5 sm:gap-1 print:gap-0.5 ${
                             !hasLeftMeta
                               ? "col-span-7 print:hidden"
                               : !hasRightMeta
-                              ? "col-span-7 print:col-span-12 pr-4 sm:pr-5 print:pr-2.5 border-r-[1.5px] border-[#0f2744] print:border-r-0 meta-col-single"
-                              : "col-span-7 print:col-span-7 pr-4 sm:pr-5 print:pr-3.5 border-r-[1.5px] border-[#0f2744] print:border-r-[1.5px] print:border-[#0f2744]"
+                              ? "col-span-7 print:col-span-12 pr-3.5 sm:pr-4 print:pr-2 border-r-[1.5px] border-[#0f2744] print:border-r-0 meta-col-single"
+                              : "col-span-7 print:col-span-7 pr-3.5 sm:pr-4 print:pr-2.5 border-r-[1.5px] border-[#0f2744] print:border-r-[1.5px] print:border-[#0f2744]"
                           }`}>
                             {/* Messers */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
-                                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">MESSERS:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">MESSERS:</span>
                               </label>
                               <RichTextCell
                                 value={messers}
                                 syncId="messers"
                                 onChange={(val) => setMessers(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors break-words flex items-center"
+                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors break-words flex items-center"
                               />
                               <div
                                 id="print-messers"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                               />
                             </div>
 
                             {/* Vessel Name */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
-                                <Ship className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">VESSEL NAME:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                <Ship className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">VESSEL NAME:</span>
                               </label>
                               <input
                                 type="text"
                                 value={vesselName}
                                 onChange={(e) => setVesselName(e.target.value)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-semibold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-semibold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                               />
                               <div
                                 id="print-vessel"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                               >
                                 {vesselName.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Port / Berth */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasPort ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
-                                <Anchor className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">PORT / BERTH:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasPort ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                <Anchor className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PORT / BERTH:</span>
                               </label>
                               <input
                                 type="text"
                                 value={portBerth}
                                 onChange={(e) => setPortBerth(e.target.value)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                               />
                               <div
                                 id="print-port"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                               >
                                 {portBerth.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Address */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
-                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">ADDRESS:</span>
+                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">ADDRESS:</span>
                               </label>
                               <RichTextCell
                                 value={address}
                                 syncId="address"
                                 onChange={(val) => setAddress(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors break-words flex items-center"
+                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors break-words flex items-center"
                               />
                               <div
                                 id="print-address"
-                                className="hidden print:flex flex-1 min-w-0 items-center text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                className="hidden print:flex flex-1 min-w-0 items-center text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                               />
                             </div>
                           </div>
 
                           {/* Right Column: References & Date */}
-                          <div className={`meta-right-col p-3 sm:p-3.5 print:p-2.5 flex flex-col justify-start gap-2 sm:gap-2.5 print:gap-1.5 ${
+                          <div className={`meta-right-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-0.5 sm:gap-1 print:gap-0.5 ${
                             !hasRightMeta
                               ? "col-span-5 print:hidden"
                               : !hasLeftMeta
-                              ? "col-span-5 print:col-span-12 pl-4 sm:pl-5 print:pl-2.5"
-                              : "col-span-5 print:col-span-5 pl-4 sm:pl-5 print:pl-3.5"
+                              ? "col-span-5 print:col-span-12 pl-3.5 sm:pl-4 print:pl-2"
+                              : "col-span-5 print:col-span-5 pl-3.5 sm:pl-4 print:pl-2.5"
                           }`}>
                             {/* Quotation format: ONLY Requisition No. with Date */}
                             {docType === "quotation" && (
-                              <div className="flex flex-col gap-2 sm:gap-2.5 print:gap-1.5 w-full">
+                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={requisitionNo}
                                     onChange={(e) => setRequisitionNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
                                     <input
                                       type="text"
                                       value={dateVal}
                                       onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
-                                    <span>{dateVal.trim() || '\u00A0'}</span>
-                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                    {dateVal.trim() || '\u00A0'}
                                   </div>
                                   <input
                                     ref={dateRef}
@@ -3227,77 +3226,76 @@ export default function QuotationBuilder() {
 
                             {/* Invoice format: All single lines, no side-by-side fields */}
                             {docType === "invoice" && (
-                              <div className="flex flex-col gap-2 sm:gap-2.5 print:gap-1.5 w-full">
+                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
                                 {/* Invoice No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">INVOICE NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">INVOICE NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={invoiceNo}
                                     onChange={(e) => setInvoiceNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-invoice-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {invoiceNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">CHALLAN NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={challanNo}
                                     onChange={(e) => setChallanNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
                                     <input
                                       type="text"
                                       value={dateVal}
                                       onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
-                                    <span>{dateVal.trim() || '\u00A0'}</span>
-                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                    {dateVal.trim() || '\u00A0'}
                                   </div>
                                   <input
                                     ref={dateRef}
@@ -3308,42 +3306,42 @@ export default function QuotationBuilder() {
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={requisitionNo}
                                     onChange={(e) => setRequisitionNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* PO Number */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">PO NUMBER:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PO NUMBER:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={poNumber}
                                     onChange={(e) => setPoNumber(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-po-number"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-medium text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-medium text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {poNumber.trim() || '\u00A0'}
                                   </div>
@@ -3353,77 +3351,76 @@ export default function QuotationBuilder() {
 
                             {/* Challan format: All single lines, no side-by-side fields */}
                             {docType === "challan" && (
-                              <div className="flex flex-col gap-2 sm:gap-2.5 print:gap-1.5 w-full">
+                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">CHALLAN NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={challanNo}
                                     onChange={(e) => setChallanNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
                                   <input
                                     type="text"
                                     value={requisitionNo}
                                     onChange={(e) => setRequisitionNo(e.target.value)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
-                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
-                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
                                     <input
                                       type="text"
                                       value={dateVal}
                                       onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
                                   >
-                                    <span>{dateVal.trim() || '\u00A0'}</span>
-                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                    {dateVal.trim() || '\u00A0'}
                                   </div>
                                   <input
                                     ref={dateRef}
@@ -3442,7 +3439,7 @@ export default function QuotationBuilder() {
                       <div
                         className={`meta-bottom-spacer w-full select-none ${!hasAnyMeta ? "print:hidden" : ""}`}
                         aria-hidden="true"
-                        style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
+                        style={{ height: '8px', minHeight: '8px', display: 'block', clear: 'both' }}
                       />
                     </>
                   );
