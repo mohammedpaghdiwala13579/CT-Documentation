@@ -525,8 +525,34 @@ input[type="number"] {
     color: #0f2744 !important;
   }
 
+  .meta-info-container.print\:hidden,
+  .meta-top-spacer.print\:hidden,
+  .meta-bottom-spacer.print\:hidden,
+  .meta-left-col.print\:hidden,
+  .meta-right-col.print\:hidden,
   .meta-info-row.print\:hidden {
     display: none !important;
+  }
+
+  .meta-info-container input.print\:hidden,
+  .meta-info-container textarea.print\:hidden,
+  .meta-info-container [contenteditable].print\:hidden,
+  .meta-info-row input.print\:hidden,
+  .meta-info-row textarea.print\:hidden,
+  .meta-info-row [contenteditable].print\:hidden {
+    display: none !important;
+  }
+
+  .meta-left-col.print\:col-span-12 {
+    grid-column: span 12 / span 12 !important;
+    border-right: none !important;
+    padding-right: 12px !important;
+  }
+
+  .meta-right-col.print\:col-span-12 {
+    grid-column: span 12 / span 12 !important;
+    border-left: none !important;
+    padding-left: 12px !important;
   }
 
   .meta-info-row:not(.print\:hidden) {
@@ -539,13 +565,13 @@ input[type="number"] {
     padding-bottom: 1px !important;
   }
 
-  .meta-info-container input,
-  .meta-info-container input[type="text"],
-  .meta-info-container textarea,
-  .meta-info-container [contenteditable],
+  .meta-info-container input:not(.print\:hidden),
+  .meta-info-container input[type="text"]:not(.print\:hidden),
+  .meta-info-container textarea:not(.print\:hidden),
+  .meta-info-container [contenteditable]:not(.print\:hidden),
   .meta-info-container [id^="print-"],
-  .meta-info-row input,
-  .meta-info-row [contenteditable],
+  .meta-info-row input:not(.print\:hidden),
+  .meta-info-row [contenteditable]:not(.print\:hidden),
   .meta-info-row [id^="print-"] {
     display: flex !important;
     align-items: center !important;
@@ -1123,8 +1149,34 @@ input[type="number"] {
   color: #0f2744 !important;
 }
 
+.is-generating-pdf .meta-info-container.print\:hidden,
+.is-generating-pdf .meta-top-spacer.print\:hidden,
+.is-generating-pdf .meta-bottom-spacer.print\:hidden,
+.is-generating-pdf .meta-left-col.print\:hidden,
+.is-generating-pdf .meta-right-col.print\:hidden,
 .is-generating-pdf .meta-info-row.print\:hidden {
   display: none !important;
+}
+
+.is-generating-pdf .meta-info-container input.print\:hidden,
+.is-generating-pdf .meta-info-container textarea.print\:hidden,
+.is-generating-pdf .meta-info-container [contenteditable].print\:hidden,
+.is-generating-pdf .meta-info-row input.print\:hidden,
+.is-generating-pdf .meta-info-row textarea.print\:hidden,
+.is-generating-pdf .meta-info-row [contenteditable].print\:hidden {
+  display: none !important;
+}
+
+.is-generating-pdf .meta-left-col.print\:col-span-12 {
+  grid-column: span 12 / span 12 !important;
+  border-right: none !important;
+  padding-right: 12px !important;
+}
+
+.is-generating-pdf .meta-right-col.print\:col-span-12 {
+  grid-column: span 12 / span 12 !important;
+  border-left: none !important;
+  padding-left: 12px !important;
 }
 
 .is-generating-pdf .meta-info-row:not(.print\:hidden) {
@@ -1137,13 +1189,13 @@ input[type="number"] {
   padding-bottom: 1px !important;
 }
 
-.is-generating-pdf .meta-info-container input,
-.is-generating-pdf .meta-info-container input[type="text"],
-.is-generating-pdf .meta-info-container textarea,
-.is-generating-pdf .meta-info-container [contenteditable],
+.is-generating-pdf .meta-info-container input:not(.print\:hidden),
+.is-generating-pdf .meta-info-container input[type="text"]:not(.print\:hidden),
+.is-generating-pdf .meta-info-container textarea:not(.print\:hidden),
+.is-generating-pdf .meta-info-container [contenteditable]:not(.print\:hidden),
 .is-generating-pdf .meta-info-container [id^="print-"],
-.is-generating-pdf .meta-info-row input,
-.is-generating-pdf .meta-info-row [contenteditable],
+.is-generating-pdf .meta-info-row input:not(.print\:hidden),
+.is-generating-pdf .meta-info-row [contenteditable]:not(.print\:hidden),
 .is-generating-pdf .meta-info-row [id^="print-"] {
   display: flex !important;
   align-items: center !important;
