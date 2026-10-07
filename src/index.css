@@ -102,13 +102,14 @@ input[type="number"] {
   display: block;
   width: 100%;
   max-width: 100%;
-  border: 1.5px solid #475569;
-  border-radius: 6px;
+  border: 1.5px solid #0f2744;
+  border-radius: 8px;
   background-color: #ffffff;
-  padding: 14px 18px;
+  padding: 0;
   margin-top: 0;
   margin-bottom: 0;
   box-sizing: border-box;
+  overflow: hidden;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 
@@ -121,8 +122,8 @@ input[type="number"] {
 }
 
 .meta-left-col {
-  border-right: 1.5px solid #cbd5e1 !important;
-  padding-right: 18px;
+  border-right: 1.5px solid #0f2744 !important;
+  padding: 12px 16px;
 }
 
 .meta-left-col.meta-col-single {
@@ -131,7 +132,7 @@ input[type="number"] {
 }
 
 .meta-right-col {
-  padding-left: 18px;
+  padding: 12px 16px;
 }
 
 .meta-info-row {
@@ -141,6 +142,39 @@ input[type="number"] {
   width: 100%;
   padding-top: 1px;
   padding-bottom: 1px;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+/* Explicitly remove all borders, bottom lines, outlines, and underlines from information table input fields and text */
+.meta-info-container input,
+.meta-info-container input[type="text"],
+.meta-info-container textarea,
+.meta-info-container [contenteditable],
+.meta-info-container [id^="print-"],
+.meta-info-row input,
+.meta-info-row [contenteditable],
+.meta-info-row [id^="print-"] {
+  border: none !important;
+  border-width: 0 !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  background: transparent !important;
+}
+
+.meta-info-container input:focus,
+.meta-info-container textarea:focus,
+.meta-info-container [contenteditable]:focus {
+  border: none !important;
+  border-bottom: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Print Styling Configuration */
@@ -451,16 +485,17 @@ input[type="number"] {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    border: 1.2px solid #334155 !important;
-    border-radius: 0 !important;
+    border: 1.5px solid #0f2744 !important;
+    border-radius: 8px !important;
     background-color: #ffffff !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
-    padding: 10px 14px !important;
+    padding: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
     clear: both !important;
   }
 
@@ -473,8 +508,8 @@ input[type="number"] {
   }
 
   .meta-left-col {
-    border-right: 1.2px solid #475569 !important;
-    padding-right: 14px !important;
+    border-right: 1.5px solid #0f2744 !important;
+    padding: 8px 12px !important;
   }
 
   .meta-left-col.meta-col-single {
@@ -483,57 +518,73 @@ input[type="number"] {
   }
 
   .meta-right-col {
-    padding-left: 14px !important;
+    padding: 8px 12px !important;
   }
 
   .meta-info-container * {
-    color: #000000 !important;
+    color: #0f2744 !important;
   }
 
-  .meta-info-row.print\:hidden,
-  .meta-info-row.meta-row-empty,
-  .meta-col-empty,
-  .meta-box-empty {
+  .meta-info-row.print\:hidden {
     display: none !important;
   }
 
-  .meta-info-row:not(.meta-row-empty):not(.print\:hidden) {
+  .meta-info-row:not(.print\:hidden) {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     width: 100% !important;
+    min-height: 20px !important;
     padding-top: 1px !important;
     padding-bottom: 1px !important;
   }
 
-  .meta-info-container [id^="print-"] {
+  .meta-info-container input,
+  .meta-info-container input[type="text"],
+  .meta-info-container textarea,
+  .meta-info-container [contenteditable],
+  .meta-info-container [id^="print-"],
+  .meta-info-row input,
+  .meta-info-row [contenteditable],
+  .meta-info-row [id^="print-"] {
     display: flex !important;
     align-items: center !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
-    border-bottom: 1px solid #475569 !important;
-    min-height: 20px !important;
-    padding-bottom: 1.5px !important;
-    padding-left: 4px !important;
+    border: none !important;
+    border-width: 0 !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    min-height: 19px !important;
+    padding-bottom: 1px !important;
+    padding-left: 2px !important;
   }
 
   .meta-info-container label {
-    font-size: 6.5pt !important;
+    font-size: 6.8pt !important;
     font-weight: 800 !important;
-    color: #000000 !important;
+    color: #0f2744 !important;
     letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
   }
 
   .meta-info-container div,
   .meta-info-container span,
   .meta-info-container p {
-    font-size: 6.8pt !important;
+    font-size: 7pt !important;
     line-height: 1.25 !important;
   }
 
   .meta-info-container svg {
-    color: #000000 !important;
-    stroke: #000000 !important;
+    color: #0f2744 !important;
+    stroke: #0f2744 !important;
   }
 
   .meta-grid {
@@ -1035,13 +1086,14 @@ input[type="number"] {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  border: 1.2px solid #334155 !important;
-  border-radius: 0 !important;
+  border: 1.5px solid #0f2744 !important;
+  border-radius: 8px !important;
   background-color: #ffffff !important;
-  padding: 10px 14px !important;
+  padding: 0 !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
   clear: both !important;
 }
 
@@ -1054,8 +1106,8 @@ input[type="number"] {
 }
 
 .is-generating-pdf .meta-left-col {
-  border-right: 1.2px solid #475569 !important;
-  padding-right: 14px !important;
+  border-right: 1.5px solid #0f2744 !important;
+  padding: 8px 12px !important;
 }
 
 .is-generating-pdf .meta-left-col.meta-col-single {
@@ -1064,57 +1116,73 @@ input[type="number"] {
 }
 
 .is-generating-pdf .meta-right-col {
-  padding-left: 14px !important;
+  padding: 8px 12px !important;
 }
 
 .is-generating-pdf .meta-info-container * {
-  color: #000000 !important;
+  color: #0f2744 !important;
 }
 
-.is-generating-pdf .meta-info-row.print\:hidden,
-.is-generating-pdf .meta-info-row.meta-row-empty,
-.is-generating-pdf .meta-col-empty,
-.is-generating-pdf .meta-box-empty {
+.is-generating-pdf .meta-info-row.print\:hidden {
   display: none !important;
 }
 
-.is-generating-pdf .meta-info-row:not(.meta-row-empty):not(.print\:hidden) {
+.is-generating-pdf .meta-info-row:not(.print\:hidden) {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   width: 100% !important;
+  min-height: 20px !important;
   padding-top: 1px !important;
   padding-bottom: 1px !important;
 }
 
-.is-generating-pdf .meta-info-container [id^="print-"] {
+.is-generating-pdf .meta-info-container input,
+.is-generating-pdf .meta-info-container input[type="text"],
+.is-generating-pdf .meta-info-container textarea,
+.is-generating-pdf .meta-info-container [contenteditable],
+.is-generating-pdf .meta-info-container [id^="print-"],
+.is-generating-pdf .meta-info-row input,
+.is-generating-pdf .meta-info-row [contenteditable],
+.is-generating-pdf .meta-info-row [id^="print-"] {
   display: flex !important;
   align-items: center !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
-  border-bottom: 1px solid #475569 !important;
-  min-height: 20px !important;
-  padding-bottom: 1.5px !important;
-  padding-left: 4px !important;
+  border: none !important;
+  border-width: 0 !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  min-height: 19px !important;
+  padding-bottom: 1px !important;
+  padding-left: 2px !important;
 }
 
 .is-generating-pdf .meta-info-container label {
-  font-size: 6.5pt !important;
+  font-size: 6.8pt !important;
   font-weight: 800 !important;
-  color: #000000 !important;
+  color: #0f2744 !important;
   letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
 }
 
 .is-generating-pdf .meta-info-container div,
 .is-generating-pdf .meta-info-container span,
 .is-generating-pdf .meta-info-container p {
-  font-size: 6.8pt !important;
+  font-size: 7pt !important;
   line-height: 1.25 !important;
 }
 
 .is-generating-pdf .meta-info-container svg {
-  color: #000000 !important;
-  stroke: #000000 !important;
+  color: #0f2744 !important;
+  stroke: #0f2744 !important;
 }
 
 .is-generating-pdf .meta-grid {

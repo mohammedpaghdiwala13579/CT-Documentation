@@ -3056,364 +3056,374 @@ export default function QuotationBuilder() {
                     <>
                       {/* Physical spacer between Business Header and Information Table to ensure clear breathing room */}
                       <div
-                        className={`meta-top-spacer w-full select-none ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}
+                        className="meta-top-spacer w-full select-none"
                         aria-hidden="true"
                         style={{ height: '12px', minHeight: '12px', display: 'block', clear: 'both' }}
                       />
 
-                      <div className={`meta-info-container w-full border border-slate-500/90 print:border-slate-700 rounded-md print:rounded-none bg-white print:bg-white p-3.5 sm:p-4 print:p-2.5 shadow-xs print:shadow-none box-border ${!hasAnyMeta ? 'print:hidden meta-box-empty' : ''}`}>
+                      <div className="meta-info-container w-full border-[1.5px] border-[#0f2744] print:border-[#0f2744] rounded-lg bg-white print:bg-white shadow-2xs print:shadow-none box-border overflow-hidden p-0">
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full items-stretch">
-                        {/* Left Column: Client & Vessel Information */}
-                        <div className={`meta-left-col col-span-7 space-y-2 sm:space-y-2.5 print:space-y-1.5 pr-4 sm:pr-6 print:pr-4 border-r border-slate-300 print:border-slate-600 ${!hasLeftMeta ? 'print:hidden meta-col-empty' : ''} ${!hasRightMeta ? 'print:col-span-12 print:pr-0 border-r-0 print:border-r-0 meta-col-single' : ''}`}>
-                          {/* Messers */}
-                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasMessers ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
-                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                              <span>Messers:</span>
-                            </label>
-                            <RichTextCell
-                              value={messers}
-                              syncId="messers"
-                              onChange={(val) => setMessers(val)}
-                              placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-bold text-[6.8pt] sm:text-[7.2pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
-                            />
-                            <div
-                              id="print-messers"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                              dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
-                            />
-                          </div>
+                          {/* Left Column: Client & Vessel Information */}
+                          <div className="meta-left-col col-span-7 p-3 sm:p-3.5 print:p-2.5 pr-4 sm:pr-5 print:pr-3.5 border-r-[1.5px] border-[#0f2744] print:border-r-[1.5px] print:border-[#0f2744] flex flex-col justify-start space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                            {/* Messers */}
+                            <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
+                                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">MESSERS:</span>
+                              </label>
+                              <RichTextCell
+                                value={messers}
+                                syncId="messers"
+                                onChange={(val) => setMessers(val)}
+                                placeholder=""
+                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors break-words flex items-center"
+                              />
+                              <div
+                                id="print-messers"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
+                              />
+                            </div>
 
-                          {/* Vessel Name: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasVessel ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
-                              <Ship className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                              <span>Vessel Name:</span>
-                            </label>
-                            <input
-                              type="text"
-                              value={vesselName}
-                              onChange={(e) => setVesselName(e.target.value)}
-                              placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-semibold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                            />
-                            <div
-                              id="print-vessel"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                            >
-                              {vesselName.trim() || '\u00A0'}
+                            {/* Vessel Name */}
+                            <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
+                                <Ship className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">VESSEL NAME:</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={vesselName}
+                                onChange={(e) => setVesselName(e.target.value)}
+                                placeholder=""
+                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-semibold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                              />
+                              <div
+                                id="print-vessel"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                              >
+                                {vesselName.trim() || '\u00A0'}
+                              </div>
+                            </div>
+
+                            {/* Port / Berth */}
+                            <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
+                                <Anchor className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">PORT / BERTH:</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={portBerth}
+                                onChange={(e) => setPortBerth(e.target.value)}
+                                placeholder=""
+                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                              />
+                              <div
+                                id="print-port"
+                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                              >
+                                {portBerth.trim() || '\u00A0'}
+                              </div>
+                            </div>
+
+                            {/* Address */}
+                            <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[115px] sm:w-[125px] print:w-[110px] select-none">
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">ADDRESS:</span>
+                              </label>
+                              <RichTextCell
+                                value={address}
+                                syncId="address"
+                                onChange={(val) => setAddress(val)}
+                                placeholder=""
+                                className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors break-words flex items-center"
+                              />
+                              <div
+                                id="print-address"
+                                className="hidden print:flex flex-1 min-w-0 items-center text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
+                              />
                             </div>
                           </div>
 
-                          {/* Port / Berth: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPort ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
-                              <Anchor className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                              <span>Port / Berth:</span>
-                            </label>
-                            <input
-                              type="text"
-                              value={portBerth}
-                              onChange={(e) => setPortBerth(e.target.value)}
-                              placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                            />
-                            <div
-                              id="print-port"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-semibold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                            >
-                              {portBerth.trim() || '\u00A0'}
-                            </div>
-                          </div>
+                          {/* Right Column: References & Date */}
+                          <div className="meta-right-col col-span-5 p-3 sm:p-3.5 print:p-2.5 pl-4 sm:pl-5 print:pl-3.5 flex flex-col justify-start space-y-2 sm:space-y-2.5 print:space-y-1.5">
+                            {/* Quotation format: ONLY Requisition No. with Date */}
+                            {docType === "quotation" && (
+                              <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5 w-full">
+                                {/* Requisition No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={requisitionNo}
+                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-requisition-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {requisitionNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
 
-                          {/* Address: Single row, text directly after colon */}
-                          <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasAddress ? 'print:hidden meta-row-empty' : ''}`}>
-                            <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[88px] sm:w-[98px] print:w-[80px]">
-                              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                              <span>Address:</span>
-                            </label>
-                            <RichTextCell
-                              value={address}
-                              syncId="address"
-                              onChange={(val) => setAddress(val)}
-                              placeholder=""
-                              className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors break-words flex items-center"
-                            />
-                            <div
-                              id="print-address"
-                              className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                              dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
-                            />
+                                {/* Date field */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                  </label>
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                    <input
+                                      type="text"
+                                      value={dateVal}
+                                      onChange={(e) => setDateVal(e.target.value)}
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={triggerDatePicker}
+                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      title="Open Date Picker"
+                                    >
+                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                    </button>
+                                  </div>
+                                  <div
+                                    id="print-date"
+                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    <span>{dateVal.trim() || '\u00A0'}</span>
+                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                  </div>
+                                  <input
+                                    ref={dateRef}
+                                    type="date"
+                                    onChange={handleDatePickerChange}
+                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none border-none"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Invoice format: All single lines, no side-by-side fields */}
+                            {docType === "invoice" && (
+                              <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5 w-full">
+                                {/* Invoice No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">INVOICE NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={invoiceNo}
+                                    onChange={(e) => setInvoiceNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-invoice-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {invoiceNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+
+                                {/* Challan No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">CHALLAN NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={challanNo}
+                                    onChange={(e) => setChallanNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-challan-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {challanNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+
+                                {/* Date field */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                  </label>
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                    <input
+                                      type="text"
+                                      value={dateVal}
+                                      onChange={(e) => setDateVal(e.target.value)}
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={triggerDatePicker}
+                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      title="Open Date Picker"
+                                    >
+                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                    </button>
+                                  </div>
+                                  <div
+                                    id="print-date"
+                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    <span>{dateVal.trim() || '\u00A0'}</span>
+                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                  </div>
+                                  <input
+                                    ref={dateRef}
+                                    type="date"
+                                    onChange={handleDatePickerChange}
+                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none border-none"
+                                  />
+                                </div>
+
+                                {/* Requisition No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={requisitionNo}
+                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-requisition-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {requisitionNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+
+                                {/* PO Number */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">PO NUMBER:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={poNumber}
+                                    onChange={(e) => setPoNumber(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-po-number"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-medium text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {poNumber.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Challan format: All single lines, no side-by-side fields */}
+                            {docType === "challan" && (
+                              <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5 w-full">
+                                {/* Challan No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">CHALLAN NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={challanNo}
+                                    onChange={(e) => setChallanNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-challan-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {challanNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+
+                                {/* Requisition No */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">REQUISITION NO.:</span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={requisitionNo}
+                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    placeholder=""
+                                    className="print:hidden flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal transition-colors"
+                                  />
+                                  <div
+                                    id="print-requisition-no"
+                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    {requisitionNo.trim() || '\u00A0'}
+                                  </div>
+                                </div>
+
+                                {/* Date field */}
+                                <div className="meta-info-row flex items-center w-full min-h-[26px] sm:min-h-[28px] print:min-h-[20px] relative min-w-0 border-none">
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[130px] sm:w-[140px] print:w-[125px] select-none">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-3.5 print:w-3.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                    <span className="text-[7.2pt] sm:text-[7.8pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider">DATE:</span>
+                                  </label>
+                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[26px] min-h-[26px] sm:h-[28px] sm:min-h-[28px] box-border border-none transition-colors print:hidden">
+                                    <input
+                                      type="text"
+                                      value={dateVal}
+                                      onChange={(e) => setDateVal(e.target.value)}
+                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent px-1 py-0.5 leading-normal"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={triggerDatePicker}
+                                      className="h-5 w-5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none"
+                                      title="Open Date Picker"
+                                    >
+                                      <Calendar className="h-3.5 w-3.5 text-indigo-800" strokeWidth={1.8} />
+                                    </button>
+                                  </div>
+                                  <div
+                                    id="print-date"
+                                    className="hidden print:flex flex-1 min-w-0 items-center justify-between font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight px-1 min-h-[19px] pb-0.5 border-none border-b-0"
+                                  >
+                                    <span>{dateVal.trim() || '\u00A0'}</span>
+                                    <Calendar className="h-3 w-3 text-indigo-800 print:text-black shrink-0 opacity-80" strokeWidth={1.8} />
+                                  </div>
+                                  <input
+                                    ref={dateRef}
+                                    type="date"
+                                    onChange={handleDatePickerChange}
+                                    className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none border-none"
+                                  />
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-
-                        {/* Right Column: References & Date */}
-                        <div className={`meta-right-col col-span-5 space-y-2 sm:space-y-2.5 print:space-y-1.5 pl-4 sm:pl-6 print:pl-4 ${!hasRightMeta ? 'print:hidden meta-col-empty' : ''} ${!hasLeftMeta ? 'print:col-span-12 print:pl-0' : ''}`}>
-                          {/* Quotation format: ONLY Requisition No. with Date */}
-                          {docType === "quotation" && (
-                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Requisition No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={requisitionNo}
-                                  onChange={(e) => setRequisitionNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {requisitionNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              {/* Date field */}
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Date:</span>
-                                </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
-                                  <input
-                                    type="text"
-                                    value={dateVal}
-                                    onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={triggerDatePicker}
-                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                    title="Open Date Picker"
-                                  >
-                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
-                                  </button>
-                                </div>
-                                <div
-                                  id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {dateVal.trim() || '\u00A0'}
-                                </div>
-                                <input
-                                  ref={dateRef}
-                                  type="date"
-                                  onChange={handleDatePickerChange}
-                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Invoice format: All single lines, no side-by-side fields */}
-                          {docType === "invoice" && (
-                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasInvoiceNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Invoice No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={invoiceNo}
-                                  onChange={(e) => setInvoiceNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-invoice-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {invoiceNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Challan No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={challanNo}
-                                  onChange={(e) => setChallanNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {challanNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              {/* Date field */}
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Date:</span>
-                                </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
-                                  <input
-                                    type="text"
-                                    value={dateVal}
-                                    onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={triggerDatePicker}
-                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                    title="Open Date Picker"
-                                  >
-                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
-                                  </button>
-                                </div>
-                                <div
-                                  id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {dateVal.trim() || '\u00A0'}
-                                </div>
-                                <input
-                                  ref={dateRef}
-                                  type="date"
-                                  onChange={handleDatePickerChange}
-                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
-                                />
-                              </div>
-
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Requisition No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={requisitionNo}
-                                  onChange={(e) => setRequisitionNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {requisitionNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasPoNumber ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>PO Number:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={poNumber}
-                                  onChange={(e) => setPoNumber(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-medium text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-po-number"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-medium text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {poNumber.trim() || '\u00A0'}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Challan format: All single lines, no side-by-side fields */}
-                          {docType === "challan" && (
-                            <div className="space-y-2 sm:space-y-2.5 print:space-y-1.5">
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasChallanNo ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Challan No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={challanNo}
-                                  onChange={(e) => setChallanNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-challan-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {challanNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 w-full ${!hasRequisition ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Hash className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Requisition No.:</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={requisitionNo}
-                                  onChange={(e) => setRequisitionNo(e.target.value)}
-                                  placeholder=""
-                                  className="print:hidden flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus:border-indigo-600 font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal transition-colors"
-                                />
-                                <div
-                                  id="print-requisition-no"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight break-words px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {requisitionNo.trim() || '\u00A0'}
-                                </div>
-                              </div>
-
-                              {/* Date field */}
-                              <div className={`meta-info-row min-h-[32px] sm:min-h-[36px] print:min-h-[22px] flex items-center gap-1.5 py-0.5 print:py-0 relative w-full min-w-0 ${!hasDate ? 'print:hidden meta-row-empty' : ''}`}>
-                                <label className="text-[6.2pt] sm:text-[6.8pt] print:text-[6.2pt] font-bold text-slate-700 print:text-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 whitespace-nowrap w-[98px] sm:w-[108px] print:w-[90px]">
-                                  <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 print:h-2.5 print:w-2.5 text-slate-500 print:text-black shrink-0" />
-                                  <span>Date:</span>
-                                </label>
-                                <div className="flex items-center flex-1 min-w-0 h-[28px] min-h-[28px] sm:h-[32px] sm:min-h-[32px] box-border border-b border-slate-300 hover:border-slate-400 focus-within:border-indigo-600 transition-colors print:hidden">
-                                  <input
-                                    type="text"
-                                    value={dateVal}
-                                    onChange={(e) => setDateVal(e.target.value)}
-                                    className="flex-1 min-w-0 h-full font-mono font-bold text-[6.5pt] sm:text-[7pt] text-slate-900 outline-none bg-transparent px-1.5 py-0.5 leading-normal"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={triggerDatePicker}
-                                    className="h-[20px] w-[20px] p-0 shrink-0 hover:bg-slate-200/80 rounded text-slate-600 transition-colors cursor-pointer flex items-center justify-center mr-0.5"
-                                    title="Open Date Picker"
-                                  >
-                                    <Calendar className="h-2.5 w-2.5 text-indigo-600" />
-                                  </button>
-                                </div>
-                                <div
-                                  id="print-date"
-                                  className="hidden print:flex flex-1 min-w-0 items-center border-b border-slate-400 print:border-b print:border-slate-600 font-mono font-bold text-[6.8pt] text-black leading-tight px-1.5 min-h-[20px] print:min-h-[20px] pb-0.5"
-                                >
-                                  {dateVal.trim() || '\u00A0'}
-                                </div>
-                                <input
-                                  ref={dateRef}
-                                  type="date"
-                                  onChange={handleDatePickerChange}
-                                  className="absolute right-0 bottom-0 w-[18px] h-[18px] opacity-0 pointer-events-none"
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
                       </div>
 
                       {/* Physical spacer between Information Table and Items Table ensuring they are NEVER connected */}
