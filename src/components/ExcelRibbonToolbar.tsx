@@ -6,7 +6,8 @@ import {
   Palette,
   X,
   Undo2,
-  Redo2
+  Redo2,
+  Scissors
 } from "lucide-react";
 import { CellFormat, CellBorders } from "../types";
 import { applyInlineFormatting } from "../utils/textFormatter";
@@ -107,6 +108,9 @@ export interface ExcelRibbonToolbarProps {
   isGeneratingPDF?: boolean;
   onDownloadExcel?: () => void;
   isGeneratingExcel?: boolean;
+  hasPageBreakAtSelectedRow?: boolean;
+  onTogglePageBreakAtSelectedRow?: () => void;
+  pageBreaksCount?: number;
 }
 
 export default function ExcelRibbonToolbar({
@@ -123,6 +127,9 @@ export default function ExcelRibbonToolbar({
   onRedo,
   canUndo = false,
   canRedo = false,
+  hasPageBreakAtSelectedRow,
+  onTogglePageBreakAtSelectedRow,
+  pageBreaksCount,
   docType,
   onSelectDocType,
   includeVesselName = true,
@@ -1026,6 +1033,35 @@ export default function ExcelRibbonToolbar({
               >
                 <span>Clear</span>
               </button>
+            )}
+
+            {/* GROUP 5: PAGE BREAK FOR PRINTING */}
+            {onTogglePageBreakAtSelectedRow && (
+              <div className="flex items-center gap-0.5 border-l border-slate-200 pl-1 ml-0.5">
+                <button
+                  type="button"
+                  id="btn-page-break"
+                  onClick={onTogglePageBreakAtSelectedRow}
+                  className={`h-6 px-2 rounded flex items-center gap-1 transition-colors cursor-pointer text-[9.5px] font-semibold ${
+                    hasPageBreakAtSelectedRow
+                      ? "bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                  }`}
+                  title={
+                    hasPageBreakAtSelectedRow
+                      ? "Remove Page Break at selected row"
+                      : "Insert Page Break before selected row for printing"
+                  }
+                >
+                  <Scissors className="h-2.5 w-2.5 text-rose-600 rotate-90" />
+                  <span>{hasPageBreakAtSelectedRow ? "Remove Break" : "Page Break"}</span>
+                  {pageBreaksCount !== undefined && pageBreaksCount > 0 && (
+                    <span className="ml-0.5 px-1 py-0.2 bg-rose-100 text-rose-800 rounded-full text-[8.5px] font-mono">
+                      {pageBreaksCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </div>

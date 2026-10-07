@@ -97,6 +97,15 @@ input[type="number"] {
   width: 100%;
 }
 
+/* Business Header with crisp horizontal divider */
+.business-header {
+  border-bottom: 1.5px solid #0f2744 !important;
+  padding-bottom: 14px !important;
+  margin-bottom: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
 /* Information Table container */
 .meta-info-container {
   display: block;
@@ -136,19 +145,45 @@ input[type="number"] {
 }
 
 .meta-info-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-  padding-top: 0;
-  padding-bottom: 0;
-  min-height: 15px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  padding-top: 1.5px !important;
+  padding-bottom: 1.5px !important;
+  min-height: 20px !important;
+  height: auto !important;
   border: none !important;
   border-bottom: none !important;
 }
 
 .meta-info-container label {
-  margin-right: 2px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-top: 2px !important;
+  font-size: 8pt !important;
+  line-height: 1.25 !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+.meta-info-container label span {
+  font-size: 8pt !important;
+  line-height: 1.25 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.meta-info-container svg,
+.meta-info-row svg {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  flex-shrink: 0;
 }
 
 /* Explicitly remove all borders, bottom lines, outlines, and underlines from information table input fields and text */
@@ -158,6 +193,7 @@ input[type="number"] {
 .meta-info-container [contenteditable],
 .meta-info-container [id^="print-"],
 .meta-info-row input,
+.meta-info-row textarea,
 .meta-info-row [contenteditable],
 .meta-info-row [id^="print-"] {
   border: none !important;
@@ -171,10 +207,20 @@ input[type="number"] {
   box-shadow: none !important;
   text-decoration: none !important;
   background: transparent !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  padding-left: 1px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  padding-left: 3px !important;
   padding-right: 2px !important;
+  margin: 0 !important;
+  height: auto !important;
+  min-height: 18px !important;
+  font-size: 8pt !important;
+  line-height: 1.25 !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  white-space: pre-wrap !important;
+  vertical-align: top !important;
+  box-sizing: border-box !important;
 }
 
 .meta-info-container input:focus,
@@ -378,9 +424,9 @@ input[type="number"] {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    border-bottom: none !important;
-    padding-bottom: 12px !important;
-    margin-bottom: 16px !important;
+    border-bottom: 1.5px solid #0f2744 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 8px !important;
     clear: both !important;
     overflow: hidden !important;
   }
@@ -567,14 +613,35 @@ input[type="number"] {
     padding-left: 12px !important;
   }
 
+  /* Page Break styling for clean multi-page printing */
+  .print-page-break,
+  tr.print-page-break,
+  .html2pdf__page-break {
+    display: table-row !important;
+    page-break-before: always !important;
+    break-before: page !important;
+    height: 0 !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  .print-break-before {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
   .meta-info-row:not(.print\:hidden) {
     display: flex !important;
     flex-direction: row !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     width: 100% !important;
-    min-height: 12px !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    min-height: 16px !important;
+    height: auto !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
   }
 
   .meta-info-container input:not(.print\:hidden),
@@ -583,10 +650,10 @@ input[type="number"] {
   .meta-info-container [contenteditable]:not(.print\:hidden),
   .meta-info-container [id^="print-"],
   .meta-info-row input:not(.print\:hidden),
+  .meta-info-row textarea:not(.print\:hidden),
   .meta-info-row [contenteditable]:not(.print\:hidden),
   .meta-info-row [id^="print-"] {
-    display: flex !important;
-    align-items: center !important;
+    display: block !important;
     flex: 1 1 0% !important;
     min-width: 0 !important;
     border: none !important;
@@ -600,35 +667,62 @@ input[type="number"] {
     box-shadow: none !important;
     text-decoration: none !important;
     background: transparent !important;
-    min-height: 12px !important;
+    min-height: 14px !important;
     height: auto !important;
-    line-height: 1.15 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    padding-left: 1px !important;
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
+    padding-top: 1.5px !important;
+    padding-bottom: 1.5px !important;
+    padding-left: 3px !important;
     padding-right: 2px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .meta-info-container label {
-    font-size: 6.8pt !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    padding-top: 1.5px !important;
+    margin: 0 !important;
+    font-size: 8pt !important;
     font-weight: 800 !important;
     color: #0f2744 !important;
     letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
-    margin-right: 2px !important;
-    line-height: 1.15 !important;
+    line-height: 1.25 !important;
+    flex-shrink: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  .meta-info-container label span {
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
   }
 
   .meta-info-container div,
   .meta-info-container span,
   .meta-info-container p {
-    font-size: 7pt !important;
+    font-size: 8pt !important;
     line-height: 1.25 !important;
   }
 
-  .meta-info-container svg {
+  .meta-info-container svg,
+  .meta-info-row svg {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
     color: #0f2744 !important;
     stroke: #0f2744 !important;
+    stroke-width: 2 !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
   }
 
   .meta-grid {
@@ -1200,14 +1294,21 @@ input[type="number"] {
   padding-left: 12px !important;
 }
 
+.is-generating-pdf .business-header {
+  border-bottom: 1.5px solid #0f2744 !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 8px !important;
+}
+
 .is-generating-pdf .meta-info-row:not(.print\:hidden) {
   display: flex !important;
   flex-direction: row !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   width: 100% !important;
-  min-height: 12px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  min-height: 14px !important;
+  height: auto !important;
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
 }
 
 .is-generating-pdf .meta-info-container input:not(.print\:hidden),
@@ -1216,10 +1317,10 @@ input[type="number"] {
 .is-generating-pdf .meta-info-container [contenteditable]:not(.print\:hidden),
 .is-generating-pdf .meta-info-container [id^="print-"],
 .is-generating-pdf .meta-info-row input:not(.print\:hidden),
+.is-generating-pdf .meta-info-row textarea:not(.print\:hidden),
 .is-generating-pdf .meta-info-row [contenteditable]:not(.print\:hidden),
 .is-generating-pdf .meta-info-row [id^="print-"] {
-  display: flex !important;
-  align-items: center !important;
+  display: block !important;
   flex: 1 1 0% !important;
   min-width: 0 !important;
   border: none !important;
@@ -1233,35 +1334,61 @@ input[type="number"] {
   box-shadow: none !important;
   text-decoration: none !important;
   background: transparent !important;
-  min-height: 12px !important;
+  min-height: 14px !important;
   height: auto !important;
-  line-height: 1.15 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  padding-left: 1px !important;
+  font-size: 8pt !important;
+  line-height: 1.25 !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  white-space: pre-wrap !important;
+  padding-top: 1.5px !important;
+  padding-bottom: 1.5px !important;
+  padding-left: 3px !important;
   padding-right: 2px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .is-generating-pdf .meta-info-container label {
-  font-size: 6.8pt !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  padding-top: 1.5px !important;
+  margin: 0 !important;
+  font-size: 8pt !important;
   font-weight: 800 !important;
   color: #0f2744 !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
-  margin-right: 2px !important;
-  line-height: 1.15 !important;
+  line-height: 1.25 !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+.is-generating-pdf .meta-info-container label span {
+  font-size: 8pt !important;
+  line-height: 1.25 !important;
 }
 
 .is-generating-pdf .meta-info-container div,
 .is-generating-pdf .meta-info-container span,
 .is-generating-pdf .meta-info-container p {
-  font-size: 7pt !important;
+  font-size: 8pt !important;
   line-height: 1.25 !important;
 }
 
-.is-generating-pdf .meta-info-container svg {
+.is-generating-pdf .meta-info-container svg,
+.is-generating-pdf .meta-info-row svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
   color: #0f2744 !important;
   stroke: #0f2744 !important;
+  stroke-width: 2 !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
 }
 
 .is-generating-pdf .meta-grid {

@@ -95,6 +95,8 @@ export interface SavedDocument {
   includeQuotationNo?: boolean;
   includeRequisitionNo?: boolean;
   includePoNumber?: boolean;
+  pageBreaks?: number[];
+  breakBeforeSummary?: boolean;
   notes?: string;
 }
 

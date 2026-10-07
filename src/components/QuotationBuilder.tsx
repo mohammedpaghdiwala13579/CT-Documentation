@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Download, Printer, Calendar, Save, Trash2, Plus, Minus, Check, RefreshCw, Copy, X, FileSpreadsheet, Layers, ListPlus, ArrowDownToLine, CheckCheck, Scissors, WrapText, Ship, Percent, FolderOpen, FileEdit, Building2, ArrowLeftRight, User, MapPin, Hash, FileText, Anchor } from "lucide-react";
 import { db } from "../lib/firebase";
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "firebase/firestore";
@@ -138,6 +138,52 @@ const loadInitialDraft = (company: CompanyId = "comilla") => {
   } catch (e) {
     return null;
   }
+};
+
+interface AutoExpandingTextareaProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  className?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+}
+
+const AutoExpandingTextarea: React.FC<AutoExpandingTextareaProps> = ({
+  value,
+  onChange,
+  placeholder = "",
+  className = "",
+  onKeyDown,
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.max(18, el.scrollHeight)}px`;
+  }, []);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [value, adjustHeight]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      rows={1}
+      value={value}
+      onChange={(e) => {
+        onChange(e.target.value);
+        adjustHeight();
+      }}
+      onInput={adjustHeight}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
+      className={`resize-none overflow-hidden break-words whitespace-pre-wrap ${className}`}
+      style={{ minHeight: "18px", height: "auto" }}
+    />
+  );
 };
 
 export default function QuotationBuilder() {
@@ -2980,8 +3026,8 @@ export default function QuotationBuilder() {
                     </span>
                   </div>
 
-                  {/* Enlarged Business Header without bottom border and with borderless logo */}
-                  <div className="business-header border-b-0 print:border-b-0 pb-3.5 sm:pb-4 mb-4 sm:mb-5 print:pb-2.5 print:mb-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
+                  {/* Business Header with crisp horizontal divider under header */}
+                  <div className="business-header border-b-[1.5px] border-[#0f2744] print:border-b-[1.5px] print:border-[#0f2744] pb-3.5 sm:pb-4 mb-3.5 sm:mb-4 print:pb-2.5 print:mb-2.5 flex flex-row items-center justify-between gap-3 sm:gap-4 text-black text-left w-full max-w-full overflow-hidden box-border">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <div className="logo-container h-20 w-20 sm:h-24 sm:w-24 print:h-[82px] print:w-[82px] shrink-0 border-none rounded-none shadow-none bg-transparent flex items-center justify-center">
                         <img
@@ -3064,7 +3110,7 @@ export default function QuotationBuilder() {
                       <div className={`meta-info-container w-full border-[1.5px] border-[#0f2744] print:border-[#0f2744] rounded-lg bg-white print:bg-white shadow-2xs print:shadow-none box-border overflow-hidden p-0 ${!hasAnyMeta ? "print:hidden" : ""}`}>
                         <div className="meta-grid-inner grid grid-cols-12 gap-0 text-left w-full items-stretch">
                           {/* Left Column: Client & Vessel Information */}
-                          <div className={`meta-left-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-0.5 sm:gap-1 print:gap-0.5 ${
+                          <div className={`meta-left-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-1 sm:gap-1.5 print:gap-1 ${
                             !hasLeftMeta
                               ? "col-span-7 print:hidden"
                               : !hasRightMeta
@@ -3072,9 +3118,9 @@ export default function QuotationBuilder() {
                               : "col-span-7 print:col-span-7 pr-3.5 sm:pr-4 print:pr-2.5 border-r-[1.5px] border-[#0f2744] print:border-r-[1.5px] print:border-[#0f2744]"
                           }`}>
                             {/* Messers */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasMessers ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                 <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">MESSERS:</span>
                               </label>
                               <RichTextCell
@@ -3082,61 +3128,59 @@ export default function QuotationBuilder() {
                                 syncId="messers"
                                 onChange={(val) => setMessers(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors break-words flex items-center"
+                                className="print:hidden flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] h-auto box-border font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors break-words whitespace-pre-wrap block"
                               />
                               <div
                                 id="print-messers"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                className="hidden print:block flex-1 min-w-0 font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: messers.trim() || '&nbsp;' }}
                               />
                             </div>
 
                             {/* Vessel Name */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                <Ship className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasVessel ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                <Ship className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                 <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">VESSEL NAME:</span>
                               </label>
-                              <input
-                                type="text"
+                              <AutoExpandingTextarea
                                 value={vesselName}
-                                onChange={(e) => setVesselName(e.target.value)}
+                                onChange={(val) => setVesselName(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-semibold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                className="print:hidden flex-1 min-w-0 font-semibold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                               />
                               <div
                                 id="print-vessel"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                className="hidden print:block flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                               >
                                 {vesselName.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Port / Berth */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasPort ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                <Anchor className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasPort ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                <Anchor className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                 <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PORT / BERTH:</span>
                               </label>
-                              <input
-                                type="text"
+                              <AutoExpandingTextarea
                                 value={portBerth}
-                                onChange={(e) => setPortBerth(e.target.value)}
+                                onChange={(val) => setPortBerth(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                className="print:hidden flex-1 min-w-0 font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                               />
                               <div
                                 id="print-port"
-                                className="hidden print:flex flex-1 min-w-0 items-center font-semibold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                className="hidden print:block flex-1 min-w-0 font-semibold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                               >
                                 {portBerth.trim() || '\u00A0'}
                               </div>
                             </div>
 
                             {/* Address */}
-                            <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
-                              <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                            <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasAddress ? "print:hidden" : ""}`}>
+                              <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                 <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">ADDRESS:</span>
                               </label>
                               <RichTextCell
@@ -3144,18 +3188,18 @@ export default function QuotationBuilder() {
                                 syncId="address"
                                 onChange={(val) => setAddress(val)}
                                 placeholder=""
-                                className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors break-words flex items-center"
+                                className="print:hidden flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] h-auto box-border text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors break-words whitespace-pre-wrap block"
                               />
                               <div
                                 id="print-address"
-                                className="hidden print:flex flex-1 min-w-0 items-center text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                className="hidden print:block flex-1 min-w-0 text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                 dangerouslySetInnerHTML={{ __html: address.trim() || '&nbsp;' }}
                               />
                             </div>
                           </div>
 
                           {/* Right Column: References & Date */}
-                          <div className={`meta-right-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-0.5 sm:gap-1 print:gap-0.5 ${
+                          <div className={`meta-right-col p-2 sm:p-2.5 print:p-1 flex flex-col justify-start gap-1 sm:gap-1.5 print:gap-1 ${
                             !hasRightMeta
                               ? "col-span-5 print:hidden"
                               : !hasLeftMeta
@@ -3164,53 +3208,51 @@ export default function QuotationBuilder() {
                           }`}>
                             {/* Quotation format: ONLY Requisition No. with Date */}
                             {docType === "quotation" && (
-                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
+                              <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    onChange={(val) => setRequisitionNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
-                                    <input
-                                      type="text"
+                                  <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
+                                    <AutoExpandingTextarea
                                       value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
+                                      onChange={(val) => setDateVal(val)}
+                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
+                                      className="h-4 w-4 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-3 w-3 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
@@ -3226,74 +3268,71 @@ export default function QuotationBuilder() {
 
                             {/* Invoice format: All single lines, no side-by-side fields */}
                             {docType === "invoice" && (
-                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
+                              <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Invoice No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasInvoiceNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">INVOICE NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={invoiceNo}
-                                    onChange={(e) => setInvoiceNo(e.target.value)}
+                                    onChange={(val) => setInvoiceNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-invoice-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {invoiceNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={challanNo}
-                                    onChange={(e) => setChallanNo(e.target.value)}
+                                    onChange={(val) => setChallanNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
-                                    <input
-                                      type="text"
+                                  <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
+                                    <AutoExpandingTextarea
                                       value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
+                                      onChange={(val) => setDateVal(val)}
+                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
+                                      className="h-4 w-4 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-3 w-3 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
@@ -3306,42 +3345,40 @@ export default function QuotationBuilder() {
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    onChange={(val) => setRequisitionNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* PO Number */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasPoNumber ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">PO NUMBER:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={poNumber}
-                                    onChange={(e) => setPoNumber(e.target.value)}
+                                    onChange={(val) => setPoNumber(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-medium text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-po-number"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-medium text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-medium text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {poNumber.trim() || '\u00A0'}
                                   </div>
@@ -3351,74 +3388,71 @@ export default function QuotationBuilder() {
 
                             {/* Challan format: All single lines, no side-by-side fields */}
                             {docType === "challan" && (
-                              <div className="flex flex-col gap-0.5 sm:gap-1 print:gap-0.5 w-full">
+                              <div className="flex flex-col gap-1 sm:gap-1.5 print:gap-1 w-full">
                                 {/* Challan No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasChallanNo ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">CHALLAN NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={challanNo}
-                                    onChange={(e) => setChallanNo(e.target.value)}
+                                    onChange={(val) => setChallanNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-challan-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {challanNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Requisition No */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Hash className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] border-none ${!hasRequisition ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">REQUISITION NO.:</span>
                                   </label>
-                                  <input
-                                    type="text"
+                                  <AutoExpandingTextarea
                                     value={requisitionNo}
-                                    onChange={(e) => setRequisitionNo(e.target.value)}
+                                    onChange={(val) => setRequisitionNo(val)}
                                     placeholder=""
-                                    className="print:hidden flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight transition-colors"
+                                    className="print:hidden flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-slate-900 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug transition-colors"
                                   />
                                   <div
                                     id="print-requisition-no"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-black leading-tight break-words pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {requisitionNo.trim() || '\u00A0'}
                                   </div>
                                 </div>
 
                                 {/* Date field */}
-                                <div className={`meta-info-row flex items-center w-full min-h-[15px] sm:min-h-[16px] print:min-h-[12px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
-                                  <label className="flex items-center gap-1 shrink-0 whitespace-nowrap select-none mr-0.5 print:mr-0.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 print:h-2.5 print:w-2.5 text-[#0f2744] print:text-black shrink-0" strokeWidth={1.8} />
+                                <div className={`meta-info-row flex items-start w-full min-h-[18px] sm:min-h-[20px] print:min-h-[14px] relative min-w-0 border-none ${!hasDate ? "print:hidden" : ""}`}>
+                                  <label className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none mr-1 print:mr-1 pt-0.5">
+                                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 print:h-[16px] print:w-[16px] text-[#0f2744] print:text-black shrink-0" strokeWidth={2} />
                                     <span className="text-[7pt] sm:text-[7.5pt] print:text-[6.8pt] font-extrabold text-[#0f2744] print:text-black uppercase tracking-wider leading-none">DATE:</span>
                                   </label>
-                                  <div className="flex items-center justify-between flex-1 min-w-0 h-[15px] min-h-[15px] sm:h-[16px] sm:min-h-[16px] box-border border-none transition-colors print:hidden">
-                                    <input
-                                      type="text"
+                                  <div className="flex items-center justify-between flex-1 min-w-0 min-h-[18px] sm:min-h-[20px] box-border border-none transition-colors print:hidden">
+                                    <AutoExpandingTextarea
                                       value={dateVal}
-                                      onChange={(e) => setDateVal(e.target.value)}
-                                      className="flex-1 min-w-0 h-full font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0 leading-tight"
+                                      onChange={(val) => setDateVal(val)}
+                                      className="flex-1 min-w-0 font-mono font-bold text-[7pt] sm:text-[7.5pt] text-indigo-950 border-none outline-none ring-0 focus:ring-0 focus:outline-none focus:border-none bg-transparent pl-0.5 pr-1 py-0.5 leading-snug"
                                     />
                                     <button
                                       type="button"
                                       onClick={triggerDatePicker}
-                                      className="h-3.5 w-3.5 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
+                                      className="h-4 w-4 p-0 shrink-0 hover:bg-slate-100 rounded text-indigo-800 transition-colors cursor-pointer flex items-center justify-center mr-0.5 border-none outline-none print:hidden"
                                       title="Open Date Picker"
                                     >
-                                      <Calendar className="h-2.5 w-2.5 text-indigo-800" strokeWidth={1.8} />
+                                      <Calendar className="h-3 w-3 text-indigo-800" strokeWidth={1.8} />
                                     </button>
                                   </div>
                                   <div
                                     id="print-date"
-                                    className="hidden print:flex flex-1 min-w-0 items-center font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-tight pl-0.5 pr-1 min-h-[12px] print:min-h-[12px] py-0 border-none border-b-0"
+                                    className="hidden print:block flex-1 min-w-0 font-mono font-bold text-[7pt] text-indigo-950 print:text-black leading-snug break-words whitespace-pre-wrap pl-0.5 pr-1 min-h-[14px] print:min-h-[14px] py-0.5 border-none border-b-0"
                                   >
                                     {dateVal.trim() || '\u00A0'}
                                   </div>
