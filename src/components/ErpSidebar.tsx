@@ -120,11 +120,11 @@ export default function ErpSidebar({
               }`}
               title="Operations Dashboard"
             >
-              <LayoutDashboard className="h-4 w-4 shrink-0" />
+              <LayoutDashboard className="h-4 w-4 shrink-0 text-blue-400" />
               {!isCollapsed && <span>Dashboard</span>}
             </button>
 
-            {/* 2. Document Canvas / Editor */}
+            {/* 2. Document Editor */}
             <button
               type="button"
               id="nav-btn-editor"
@@ -137,23 +137,16 @@ export default function ErpSidebar({
                   ? "bg-blue-600 text-white shadow-xs"
                   : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
               }`}
-              title="Document Editor (A4 Sheet)"
+              title="Active Document Editor"
             >
-              <FileText className="h-4 w-4 shrink-0" />
-              {!isCollapsed && (
-                <div className="flex items-center justify-between w-full min-w-0">
-                  <span>Document Canvas</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">
-                    Comilla
-                  </span>
-                </div>
-              )}
+              <FileText className="h-4 w-4 shrink-0 text-emerald-400" />
+              {!isCollapsed && <span>Document Canvas</span>}
             </button>
 
             {/* 3. Records Archive */}
             <button
               type="button"
-              id="nav-btn-archive"
+              id="nav-btn-saved-docs"
               onClick={() => {
                 onSelectView("saved-docs");
                 onCloseMobile();
@@ -163,16 +156,14 @@ export default function ErpSidebar({
                   ? "bg-blue-600 text-white shadow-xs"
                   : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
               }`}
-              title="Saved Records & Archive"
+              title="Saved Records Archive"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <FolderKanban className="h-4 w-4 shrink-0" />
-                {!isCollapsed && <span className="truncate">Records Archive</span>}
+              <div className="flex items-center gap-3 truncate">
+                <FolderKanban className="h-4 w-4 shrink-0 text-amber-400" />
+                {!isCollapsed && <span>Records Archive</span>}
               </div>
               {!isCollapsed && (
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                  activeView === "saved-docs" ? "bg-blue-700 text-white" : "bg-slate-800 text-slate-400"
-                }`}>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
                   {savedDocsCount}
                 </span>
               )}

@@ -2,7 +2,7 @@
   "entities": {
     "document": {
       "title": "SavedDocument",
-      "description": "A saved quotation, invoice, or challan document",
+      "description": "A saved quotation, invoice, or challan document for Comilla Traders",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
@@ -28,7 +28,11 @@
   "firestore": {
     "documents/{documentId}": {
       "schema": "document",
-      "description": "Collection of saved quotation, invoice, and challan documents for Comilla Traders"
+      "description": "Primary collection of saved quotation, invoice, and challan documents for Comilla Traders, accessible exclusively by comillatraders@gmail.com"
+    },
+    "zainee_documents/{documentId}": {
+      "schema": "document",
+      "description": "Legacy archive documents collection, accessible exclusively by comillatraders@gmail.com"
     }
   }
 }

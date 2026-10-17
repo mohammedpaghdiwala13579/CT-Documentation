@@ -291,8 +291,8 @@ export default function QuotationBuilder() {
   const [targetTotalRowCountInput, setTargetTotalRowCountInput] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<{ text: string; type?: "info" | "success" } | null>(null);
 
-  const showToast = (text: string, type: "info" | "success" = "success") => {
-    setToastMessage({ text, type });
+  const showToast = (text: string, type: "info" | "success" | "error" = "success") => {
+    setToastMessage({ text, type: type === "error" ? "info" : type });
     setTimeout(() => {
       setToastMessage(null);
     }, 3500);
